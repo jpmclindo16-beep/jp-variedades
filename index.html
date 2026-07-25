@@ -6,108 +6,52 @@
   <title>JP Variedades</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0a0a0b;
-      color: #fff;
-      min-height: 100vh;
-      padding: 20px 16px 60px;
-    }
-    .wrap { max-width: 1100px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 32px; }
-    header h1 { font-size: 24px; font-weight: 700; color: #ff4d8d; }
-    header p { color: #999; margin-top: 6px; font-size: 14px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: #17171a;
-      border: 1px solid #2a2a2e;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    .card img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      background: #222;
-      display: block;
-    }
-    .card-body { padding: 16px; }
-    .card-body h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
-    .preco { font-size: 18px; font-weight: 700; color: #ff4d8d; margin-bottom: 14px; }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      background: #ff4d8d;
-      color: #fff;
-      text-align: center;
-      text-decoration: none;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .loading, .empty { text-align: center; color: #999; padding: 60px 20px; }
+    body { font-family: sans-serif; background: #0a0a0b; color: #fff; padding: 20px; }
+    .card { background: #17171a; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    img { max-width: 100%; border-radius: 8px; background: #333; }
+    .link { font-size: 12px; color: #ff4d8d; word-break: break-all; margin-top: 8px; }
+    .preco { color: #ff4d8d; font-weight: bold; margin: 8px 0; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>JP Variedades</h1>
-      <p>Ofertas e produtos selecionados</p>
-    </header>
-    <div id="lista" class="grid">
-      <div class="loading">Carregando produtos...</div>
-    </div>
-  </div>
+  <h1 style="color:#ff4d8d; margin-bottom:20px">JP Variedades (Debug)</h1>
+  <div id="lista">Carregando...</div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    const SUPABASE_URL = 'https://ocheynyjboagfybazcsi.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
+    const supabase = createClient(
+      'https://ocheynyjboagfybazcsi.supabase.co',
+      'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29'
+    );
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const lista = document.getElementById('lista');
-
-    async function carregarProdutos() {
-      const { data, error } = await supabase
-        .from('produtos')
-        .select('*')
-        .order('id', { ascending: false });
+    async function carregar() {
+      const { data, error } = await supabase.from('produtos').select('*').order('id', {ascending:false});
+      const lista = document.getElementById('lista');
 
       if (error) {
-        lista.innerHTML = `<div class="empty">Erro: ${error.message}</div>`;
+        lista.innerHTML = 'Erro: ' + error.message;
         return;
       }
 
-      if (!data || data.length === 0) {
-        lista.innerHTML = `<div class="empty">Nenhum produto cadastrado.</div>`;
+      if (!data.length) {
+        lista.innerHTML = 'Nenhum produto';
         return;
       }
 
       lista.innerHTML = '';
       data.forEach(p => {
-        const preco = p.preco != null ? Number(p.preco).toFixed(2).replace('.', ',') : '—';
-        const img = p.imagem_url || '';
         lista.innerHTML += `
           <div class="card">
-            <img src="\( {img}" alt=" \){p.nome || ''}" loading="lazy"
-                 onerror="this.style.background='#333'; this.alt='Imagem não carregou';">
-            <div class="card-body">
-              <h3>${p.nome || 'Sem nome'}</h3>
-              <div class="preco">R$ ${preco}</div>
-              <a class="btn" href="${p.link_afiliado || '#'}" target="_blank" rel="noopener">Ver Oferta</a>
-            </div>
+            <img src="${p.imagem_url || ''}" onerror="this.alt='FALHOU'">
+            <h3>${p.nome}</h3>
+            <div class="preco">R$ ${p.preco}</div>
+            <div class="link">Link salvo no banco:<br>${p.imagem_url || '(vazio)'}</div>
           </div>
         `;
       });
     }
-
-    carregarProdutos();
+    carregar();
   </script>
 </body>
 </html>
