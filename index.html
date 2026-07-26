@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP_variedades</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff}
+.banner{background:linear-gradient(90deg,#00c853,#00e676);color:#000;text-align:center;padding:8px;font-size:12px;font-weight:700}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#141414;border-bottom:1px solid #2a2a2a}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-circle{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#00c853,#00e676);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;font-style:italic;color:#000}
+.logo h1{font-size:16px}.logo p{font-size:12px;color:#a0a0a0}
+.actions{display:flex;gap:8px}
+.btn-icon{width:36px;height:36px;border-radius:50%;border:none;background:#242424;color:#fff;font-size:16px;cursor:pointer}
+.search{padding:12px 16px}
+.search input{width:100%;padding:12px 16px;border-radius:50px;border:1px solid #2a2a2a;background:#1a1a1a;color:#fff;font-size:14px}
+.hero{text-align:center;padding:20px 16px}
+.hero .big-logo{width:80px;height:80px;margin:0 auto 12px;border-radius:50%;background:linear-gradient(135deg,#00c853,#00e676);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000}
+.hero h2{font-size:22px;margin-bottom:6px}.hero p{color:#a0a0a0;font-size:13px;max-width:300px;margin:0 auto 16px}
+.stats{display:flex;justify-content:center;gap:12px}
+.stat{background:#1a1a1a;padding:10px 16px;border-radius:10px;border:1px solid #2a2a2a;text-align:center;min-width:80px}
+.stat b{font-size:16px;color:#00e676}.stat span{font-size:10px;color:#a0a0a0}
+.cats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto}
+.cats button{padding:8px 16px;border-radius:50px;border:1px solid #2a2a2a;background:#1a1a1a;color:#a0a0a0;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.cats button.active{background:#00e676;color:#000;border-color:#00e676}
+.sec-title{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
+.sec-title span{background:#242424;padding:4px 10px;border-radius:50px;font-size:11px;color:#a0a0a0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 20px}
+.card{background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #2a2a2a}
+.card-img{position:relative;aspect-ratio:1;background:#242424}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.badge{position:absolute;top:6px;left:6px;padding:3px 8px;border-radius:50px;font-size:9px;font-weight:700}
+.b-ml{background:#ffe600;color:#000}.b-sh{background:#ee4d2d;color:#fff}.b-disc{background:#00e676;color:#000}
+.fav{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);color:#fff;cursor:pointer}
+.fav.active{background:#ff5252}
+.card-info{padding:10px}
+.card-title{font-size:12px;font-weight:600;line-height:1.4;margin-bottom:6px}
+.card-price{font-size:16px;font-weight:800}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.ver{padding:6px 16px;border-radius:50px;border:none;background:#00e676;color:#000;font-size:11px;font-weight:700;cursor:pointer}
+.share{width:28px;height:28px;border-radius:50%;border:none;background:#242424;color:#a0a0a0;cursor:pointer}
+.empty{text-align:center;padding:40px;color:#666;grid-column:1/-1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}
+.modal.active{display:flex}
+.modal-box{background:#1a1a1a;border-radius:14px;width:100%;max-width:400px;max-height:85vh;overflow:hidden;border:1px solid #2a2a2a}
+.modal-h{padding:16px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center}
+.modal-h button{width:32px;height:32px;border-radius:50%;border:none;background:#242424;color:#fff;font-size:18px;cursor:pointer}
+.modal-body{padding:16px;overflow-y:auto}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:11px;color:#a0a0a0;margin-bottom:4px;font-weight:600}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2a2a2a;background:#0a0a0a;color:#fff;font-size:13px}
+.form-group textarea{min-height:60px;resize:vertical}
+.save{width:100%;padding:12px;border-radius:8px;border:none;background:#00e676;color:#000;font-size:13px;font-weight:700;cursor:pointer}
+.admin-item{display:flex;align-items:center;gap:10px;padding:10px;background:#242424;border-radius:8px;margin-bottom:8px}
+.admin-item img{width:44px;height:44px;border-radius:6px;object-fit:cover}
+.admin-item div{flex:1;min-width:0}
+.admin-item h4{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-item p{font-size:11px;color:#00e676;font-weight:700}
+.admin-item button{width:28px;height:28px;border-radius:6px;border:none;background:#1a1a1a;color:#fff;cursor:pointer}
+.hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#00e676;color:#000;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;display:none;z-index:200}
+.hint.show{display:block}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:50px;font-size:12px;border:1px solid #2a2a2a;z-index:3000;display:none}
+.toast.show{display:block}
+.fav-page{display:none}.fav-page.active{display:block}
+.loading{text-align:center;padding:40px;color:#666}
+</style>
+</head>
+<body>
+<div class="banner">🔥 OFERTAS ATUALIZADAS HOJE - Só na JP_variedades</div>
+<div class="header">
+  <div class="logo">
+    <div class="logo-circle" id="adminTrigger">JP</div>
+    <div>
+      <h1>JP_variedades ✓</h1>
+      <p>@jp_variedades • <span id="count">0</span> produtos</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="btn-icon" onclick="showFavorites()">❤️</button>
+    <button class="btn-icon" onclick="shareSite()">📤</button>
+  </div>
+</div>
+<div class="search"><input type="text" id="search" placeholder="Buscar achadinhos..." oninput="render()"></div>
+
+<div id="mainPage">
+  <div class="hero">
+    <div class="big-logo" id="heroLogo">JP</div>
+    <h2>JP_variedades</h2>
+    <p>Os melhores produtos do Brasil com o melhor preço 🇧🇷</p>
+    <div class="stats">
+      <div class="stat"><b>+15K</b><br><span>Clientes</span></div>
+      <div class="stat"><b>4.9/5</b><br><span>Avaliação</span></div>
+      <div class="stat"><b>100%</b><br><span>Seguro</span></div>
+    </div>
+  </div>
+  <div class="cats" id="cats">
+    <button class="active" onclick="setCat('todos',this)">Todos</button>
+    <button onclick="setCat('mercado-livre',this)">Mercado Livre</button>
+    <button onclick="setCat('shopee',this)">Shopee</button>
+    <button onclick="setCat('fav',this)">❤️ Favoritos</button>
+  </div>
+  <div class="sec-title">🔥 MAIS CLICADOS HOJE <span id="vcount">0 produtos</span></div>
+  <div class="grid" id="grid"><div class="loading">Carregando produtos...</div></div>
+</div>
+
+<div class="fav-page" id="favPage">
+  <div class="sec-title">❤️ Meus Favoritos <button class="btn-icon" onclick="backMain()" style="width:auto;padding:6px 12px;font-size:12px">← Voltar</button></div>
+  <div class="grid" id="favGrid"></div>
+</div>
+
+<div class="hint" id="hint"></div>
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="adminModal">
+  <div class="modal-box">
+    <div class="modal-h"><h3>🔐 Painel Admin</h3><button onclick="closeModal('adminModal')">×</button></div>
+    <div class="modal-body">
+      <button class="save" onclick="openForm()" style="margin-bottom:12px">➕ Adicionar Produto</button>
+      <div id="adminList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="formModal">
+  <div class="modal-box">
+    <div class="modal-h"><h3 id="ftitle">➕ Novo Produto</h3><button onclick="closeModal('formModal')">×</button></div>
+    <div class="modal-body">
+      <form onsubmit="saveProd(event)">
+        <input type="hidden" id="pid">
+        <div class="form-group"><label>Nome *</label><input id="pname" required></div>
+        <div class="form-group"><label>Link de Afiliado *</label><input id="plink" type="url" required></div>
+        <div class="form-group"><label>Preço Atual R$ *</label><input id="pprice" type="number" step="0.01" required></div>
+        <div class="form-group"><label>Preço Original R$</label><input id="pold" type="number" step="0.01"></div>
+        <div class="form-group"><label>Imagem URL *</label><input id="pimg" type="url" required></div>
+        <div class="form-group"><label>Plataforma</label>
+          <select id="pplat"><option value="mercado-livre">Mercado Livre</option><option value="shopee">Shopee</option><option value="outro">Outro</option></select>
+        </div>
+        <div class="form-group"><label>Categoria</label><input id="pcat" placeholder="Ex: Eletronicos"></div>
+        <div class="form-group"><label>Avaliação</label><input id="prate" type="number" min="0" max="5" step="0.1" value="4.8"></div>
+        <div class="form-group"><label>Nº Avaliações</label><input id="prev" type="number" value="100"></div>
+        <div class="form-group"><label>Descricao</label><textarea id="pdesc" placeholder="Descricao do produto..."></textarea></div>
+        <div class="form-group"><label><input type="checkbox" id="pbest"> ⭐ Mais Vendido</label></div>
+        <div class="form-group"><label><input type="checkbox" id="pativo" checked> ✅ Produto Ativo</label></div>
+        <button type="submit" class="save">💾 Salvar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://ochenyjboagfybazcsi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaGV5bnlqYm9hZ2Z5YmF6Y3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4ODMzODUsImV4cCI6MjEwMDQ1OTM4NX0.wE7VFVmo38_mjSnvByhxQdL3fsEQAf2LE1tMkkTrOKU';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let products = [];
+let favorites = JSON.parse(localStorage.getItem('jp_fav') || '[]');
+let cat = 'todos', editing = null;
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function fmt(p) { return 'R$ ' + p.toFixed(2).replace('.', ','); }
+function disc(o, p) { if (!o || o <= p) return ''; return '-' + (Math.round((o - p) / o * 100)) + '%'; }
+function star(r) { let s = ''; for (let i = 0; i < 5; i++) s += i < Math.floor(r) ? '★' : (i == Math.floor(r) && r % 1 >= 0.5 ? '½' : '☆'); return s; }
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+
+// ═══════════════════════════════════════════════════════════════
+// CARREGAR PRODUTOS DO SUPABASE
+// ═══════════════════════════════════════════════════════════════
+async function loadProducts() {
+  const { data, error } = await supabase
+    .from('produtos')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    document.getElementById('grid').innerHTML = '<div class="empty"><h3>Erro ao carregar: ' + error.message + '</h3></div>';
+    return;
+  }
+
+  // Converte do formato Supabase pro formato do site
+  products = (data || []).map(p => ({
+    id: p.id,
+    name: p.nome,
+    price: parseFloat(p.preco_atual || p.preco || 0),
+    oldPrice: parseFloat(p.preco_antigo || 0) || null,
+    image: p.imagem_url,
+    platform: p.loja_origem === 'Mercado Livre' ? 'mercado-livre' : (p.loja_origem === 'Shopee' ? 'shopee' : 'outro'),
+    rating: 4.8,
+    reviewCount: 100,
+    bestseller: p.destaque || false,
+    link: p.link_afiliado,
+    categoria: p.categoria,
+    descricao: p.descricao,
+    ativo: p.ativo !== false,
+    cliques: p.cliques || 0
+  }));
+
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function render() {
+  let list = products;
+  if (cat == 'mercado-livre') list = list.filter(p => p.platform == 'mercado-livre');
+  else if (cat == 'shopee') list = list.filter(p => p.platform == 'shopee');
+  else if (cat == 'fav') list = list.filter(p => favorites.includes(p.id));
+
+  const q = document.getElementById('search').value.toLowerCase();
+  if (q) list = list.filter(p => p.name.toLowerCase().includes(q));
+
+  document.getElementById('count').textContent = products.length;
+  document.getElementById('vcount').textContent = list.length + ' produtos';
+
+  const g = document.getElementById('grid');
+  if (!list.length) { g.innerHTML = '<div class="empty"><h3>🔍 Nenhum produto</h3></div>'; return; }
+
+  g.innerHTML = list.map(p => {
+    const d = disc(p.oldPrice, p.price), f = favorites.includes(p.id);
+    const badge = p.platform == 'mercado-livre' ? '<span class="badge b-ml">Mercado Livre</span>' : p.platform == 'shopee' ? '<span class="badge b-sh">Shopee</span>' : '<span class="badge b-disc">Oferta</span>';
+    return `<div class="card">
+      <div class="card-img">
+        <img src="${p.image}" alt="${p.name}" loading="lazy">
+        ${p.bestseller ? '<span class="badge b-disc" style="top:6px;left:6px">🔥 MAIS VENDIDO</span>' : ''}
+        ${d ? `<span class="badge b-disc" style="top:6px;right:36px">${d}</span>` : ''}
+        <button class="fav ${f ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${f ? '❤️' : '🤍'}</button>
+      </div>
+      <div class="card-info">
+        <div class="card-title">${p.name}</div>
+        <div style="font-size:11px;color:#00e676;margin-bottom:4px">${star(p.rating)} ${p.rating} (${p.reviewCount})</div>
+        <div class="card-price">${fmt(p.price)}</div>
+        <div class="card-foot">
+          <button class="ver" onclick="window.open('${p.link}','_blank')">VER</button>
+          <button class="share" onclick="shareProd('${p.id}')">📤</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFav() {
+  const list = products.filter(p => favorites.includes(p.id));
+  const g = document.getElementById('favGrid');
+  if (!list.length) { g.innerHTML = '<div class="empty"><h3>❤️ Sem favoritos</h3></div>'; return; }
+  g.innerHTML = list.map(p => `<div class="card">
+    <div class="card-img"><img src="${p.image}"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div>
+    <div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div>
+    <div class="card-foot"><button class="ver" onclick="window.open('${p.link}','_blank')">VER</button><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div>
+  </div>`).join('');
+}
+
+async function renderAdmin() {
+  await loadProducts();
+  document.getElementById('adminList').innerHTML = products.map(p => `
+    <div class="admin-item"><img src="${p.image}"><div><h4>${p.name}</h4><p>${fmt(p.price)}</p></div>
+    <button onclick="editProd('${p.id}')">✏️</button><button onclick="delProd('${p.id}')" style="color:#ff5252">🗑️</button></div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACOES
+// ═══════════════════════════════════════════════════════════════
+function toggleFav(id) {
+  const i = favorites.indexOf(id);
+  if (i > -1) { favorites.splice(i, 1); toast('Removido 💔'); } else { favorites.push(id); toast('Adicionado ❤️'); }
+  localStorage.setItem('jp_fav', JSON.stringify(favorites)); render(); renderFav();
+}
+function shareProd(id) { const p = products.find(x => x.id === id); navigator.clipboard.writeText(p.name + ' - ' + fmt(p.price) + ' ' + p.link); toast('Link copiado! 📋'); }
+function shareSite() { navigator.clipboard.writeText('🔥 JP_variedades - Os melhores achadinhos! ' + location.href); toast('Link do site copiado! 📋'); }
+function setCat(c, btn) { cat = c; document.querySelectorAll('.cats button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
+function showFavorites() { document.getElementById('mainPage').style.display = 'none'; document.getElementById('favPage').classList.add('active'); renderFav(); }
+function backMain() { document.getElementById('mainPage').style.display = 'block'; document.getElementById('favPage').classList.remove('active'); }
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN - SUPABASE
+// ═══════════════════════════════════════════════════════════════
+function openForm() {
+  editing = null;
+  document.getElementById('ftitle').textContent = '➕ Novo Produto';
+  document.querySelector('form').reset();
+  document.getElementById('pid').value = '';
+  openModal('formModal');
+}
+
+function editProd(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editing = p;
+  document.getElementById('ftitle').textContent = '✏️ Editar';
+  document.getElementById('pid').value = p.id;
+  document.getElementById('pname').value = p.name;
+  document.getElementById('plink').value = p.link;
+  document.getElementById('pprice').value = p.price;
+  document.getElementById('pold').value = p.oldPrice || '';
+  document.getElementById('pimg').value = p.image;
+  document.getElementById('pplat').value = p.platform;
+  document.getElementById('pcat').value = p.categoria || '';
+  document.getElementById('prate').value = p.rating;
+  document.getElementById('prev').value = p.reviewCount;
+  document.getElementById('pdesc').value = p.descricao || '';
+  document.getElementById('pbest').checked = p.bestseller;
+  document.getElementById('pativo').checked = p.ativo;
+  openModal('formModal');
+}
+
+async function delProd(id) {
+  if (!confirm('Excluir este produto?')) return;
+  const { error } = await supabase.from('produtos').delete().eq('id', id);
+  if (error) { toast('Erro: ' + error.message); return; }
+  favorites = favorites.filter(f => f !== id);
+  localStorage.setItem('jp_fav', JSON.stringify(favorites));
+  toast('Excluído 🗑️');
+  await renderAdmin();
+  render();
+}
+
+async function saveProd(e) {
+  e.preventDefault();
+  const id = document.getElementById('pid').value;
+  const dados = {
+    nome: document.getElementById('pname').value.trim(),
+    link_afiliado: document.getElementById('plink').value.trim(),
+    preco_atual: parseFloat(document.getElementById('pprice').value) || 0,
+    preco_antigo: parseFloat(document.getElementById('pold').value) || null,
+    imagem_url: document.getElementById('pimg').value.trim(),
+    loja_origem: document.getElementById('pplat').value === 'mercado-livre' ? 'Mercado Livre' : (document.getElementById('pplat').value === 'shopee' ? 'Shopee' : 'Outro'),
+    categoria: document.getElementById('pcat').value.trim(),
+    descricao: document.getElementById('pdesc').value.trim(),
+    destaque: document.getElementById('pbest').checked,
+    ativo: document.getElementById('pativo').checked,
+  };
+
+  let error;
+  if (id) {
+    const res = await supabase.from('produtos').update(dados).eq('id', id);
+    error = res.error;
+  } else {
+    const res = await supabase.from('produtos').insert([dados]);
+    error = res.error;
+  }
+
+  if (error) { toast('Erro: ' + error.message); return; }
+  toast(id ? 'Atualizado ✅' : 'Adicionado ✅');
+  closeModal('formModal');
+  await renderAdmin();
+  render();
+}
+
+// ═══════════════════════════════════════
