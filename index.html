@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JP Variedades</title>
+<style>
+:root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
+body.light{--bg:#f5f5f5;--card:#fff;--border:#ddd;--text:#1a1a1a;--muted:#666;--accent:#00c853;--accent-dark:#009624}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+
+/* BANNER */
+.banner{background:linear-gradient(90deg,var(--accent-dark),var(--accent));color:#000;text-align:center;padding:10px;font-size:13px;font-weight:700}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-circle{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dark),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;font-style:italic;color:#000;cursor:pointer;user-select:none;-webkit-user-select:none}
+.logo h1{font-size:16px}.logo p{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;align-items:center}
+.btn-icon{width:36px;height:36px;border-radius:50%;border:none;background:var(--border);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* SEARCH */
+.search{padding:12px 16px}
+.search input{width:100%;padding:12px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none}
+.search input::placeholder{color:var(--muted)}
+
+/* HERO */
+.hero{text-align:center;padding:20px 16px}
+.hero .big-logo{width:80px;height:80px;margin:0 auto 12px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dark),var(--accent));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000;cursor:pointer;user-select:none}
+.hero h2{font-size:22px;margin-bottom:6px}.hero p{color:var(--muted);font-size:13px;max-width:300px;margin:0 auto 16px}
+.stats{display:flex;justify-content:center;gap:12px}
+.stat{background:var(--card);padding:10px 16px;border-radius:10px;border:1px solid var(--border);text-align:center;min-width:80px}
+.stat b{font-size:16px;color:var(--accent)}.stat span{font-size:10px;color:var(--muted)}
+
+/* CATEGORIES */
+.cats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cats button{padding:8px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+.cats button.active{background:var(--accent);color:#000;border-color:var(--accent)}
+
+/* SECTION TITLE */
+.sec-title{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
+.sec-title span{background:var(--border);padding:4px 10px;border-radius:50px;font-size:11px;color:var(--muted)}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 100px}
+.card{background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--border);transition:transform .2s}
+.card:active{transform:scale(.98)}
+.card-img{position:relative;aspect-ratio:1;background:var(--border)}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.badge{position:absolute;top:6px;left:6px;padding:3px 8px;border-radius:50px;font-size:9px;font-weight:700}
+.b-ml{background:#ffe600;color:#000}.b-sh{background:#ee4d2d;color:#fff}.b-disc{background:var(--accent);color:#000}
+.b-best{position:absolute;top:6px;right:36px;padding:3px 8px;border-radius:50px;font-size:9px;font-weight:700;background:var(--danger);color:#fff}
+.fav{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.fav.active{background:var(--danger)}
+.card-info{padding:10px}
+.card-title{font-size:12px;font-weight:600;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-price{font-size:16px;font-weight:800;color:var(--accent)}
+.card-old{text-decoration:line-through;color:var(--muted);font-size:11px;margin-left:6px}
+.card-discount{background:var(--accent);color:#000;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;margin-left:6px}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px}
+.ver{flex:1;padding:8px 0;border-radius:50px;border:none;background:var(--accent);color:#000;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:inline-block}
+.share{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* EMPTY / LOADING */
+.empty{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1}
+.loading{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1}
+
+/* FAV PAGE */
+.fav-page{display:none}.fav-page.active{display:block}
+
+/* WHATSAPP FLOAT */
+.whatsapp-float{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 4px 12px rgba(37,211,102,0.4);z-index:500;transition:transform .2s}
+.whatsapp-float:active{transform:scale(.9)}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 18px;border-radius:50px;font-size:12px;border:1px solid var(--border);z-index:3000;display:none;white-space:nowrap}
+.toast.show{display:block}
+
+/* HINT */
+.hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;display:none;z-index:200}
+.hint.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="banner">🔥 OFERTAS ATUALIZADAS HOJE - So na JP Variedades</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-circle" id="adminTrigger">JP</div>
+    <div>
+      <h1>JP_variedades ✓</h1>
+      <p>@jp_variedades • <span id="count">0</span> produtos</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="btn-icon" onclick="showFavorites()">❤️</button>
+    <button class="btn-icon" onclick="shareSite()">📤</button>
+  </div>
+</div>
+
+<div class="search"><input type="text" id="search" placeholder="Buscar achadinhos..." oninput="render()"></div>
+
+<div id="mainPage">
+  <div class="hero">
+    <div class="big-logo" id="heroLogo">JP</div>
+    <h2>JP_variedades</h2>
+    <p>Os melhores produtos do Brasil com o melhor preco 🇧🇷</p>
+    <div class="stats">
+      <div class="stat"><b>+15K</b><br><span>Clientes</span></div>
+      <div class="stat"><b>4.9/5</b><br><span>Avaliacao</span></div>
+      <div class="stat"><b>100%</b><br><span>Seguro</span></div>
+    </div>
+  </div>
+  <div class="cats" id="cats">
+    <button class="active" onclick="setCat('todos',this)">Todos</button>
+    <button onclick="setCat('mercado-livre',this)">Mercado Livre</button>
+    <button onclick="setCat('shopee',this)">Shopee</button>
+    <button onclick="setCat('fav',this)">❤️ Favoritos</button>
+  </div>
+  <div class="sec-title">🔥 MAIS CLICADOS HOJE <span id="vcount">0 produtos</span></div>
+  <div class="grid" id="grid"><div class="loading">Carregando produtos...</div></div>
+</div>
+
+<div class="fav-page" id="favPage">
+  <div class="sec-title">❤️ Meus Favoritos <button class="btn-icon" onclick="backMain()" style="width:auto;padding:6px 12px;font-size:12px">← Voltar</button></div>
+  <div class="grid" id="favGrid"></div>
+</div>
+
+<!-- WHATSAPP FLOAT -->
+<a href="https://chat.whatsapp.com/CNv0OTwmJkO0TBJZyQTG3r?s=cl&p=a&ilr=0" target="_blank" class="whatsapp-float" title="Entrar no grupo do WhatsApp">
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<div class="hint" id="hint"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL='https://ochenyjboagfybazcsi.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaGV5bnlqYm9hZ2Z5YmF6Y3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4ODMzODUsImV4cCI6MjEwMDQ1OTM4NX0.wE7VFVmo38_mjSnvByhxQdL3fsEQAf2LE1tMkkTrOKU';
+
+let products=[];
+let favorites=JSON.parse(localStorage.getItem('jp_fav')||'[]');
+let cat='todos';
+
+function fmt(p){return'R$ '+p.toFixed(2).replace('.',',')}
+function disc(o,p){if(!o||o<=p)return'';return'-'+Math.round((o-p)/o*100)+'%'}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+async function loadProducts(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?ativo=eq.true&order=created_at.desc',{
+      method:'GET',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Accept':'application/json'}
+    });
+    if(!res.ok)throw new Error('Erro '+res.status);
+    const data=await res.json();
+    products=data.map(p=>({
+      id:p.id,
+      name:p.nome,
+      price:parseFloat(p.preco_atual||0),
+      oldPrice:parseFloat(p.preco_antigo||0)||null,
+      image:p.imagem_url||'https://via.placeholder.com/300x300?text=JP',
+      platform:p.loja_origem==='Mercado Livre'?'mercado-livre':(p.loja_origem==='Shopee'?'shopee':'outro'),
+      bestseller:p.destaque||false,
+      link:p.link_afiliado,
+      categoria:p.categoria||''
+    }));
+    render();
+  }catch(e){
+    document.getElementById('grid').innerHTML='<div class="empty">Erro ao carregar: '+e.message+'</div>';
+  }
+}
+
+function render(){
+  let list=products;
+  if(cat=='mercado-livre')list=list.filter(p=>p.platform=='mercado-livre');
+  else if(cat=='shopee')list=list.filter(p=>p.platform=='shopee');
+  else if(cat=='fav')list=list.filter(p=>favorites.includes(p.id));
+  const q=document.getElementById('search').value.toLowerCase();
+  if(q)list=list.filter(p=>p.name.toLowerCase().includes(q));
+  document.getElementById('count').textContent=products.length;
+  document.getElementById('vcount').textContent=list.length+' produtos';
+  const g=document.getElementById('grid');
+  if(!list.length){g.innerHTML='<div class="empty">Nenhum produto encontrado</div>';return}
+  g.innerHTML=list.map(p=>{
+    const d=disc(p.oldPrice,p.price),f=favorites.includes(p.id);
+    const badge=p.platform=='mercado-livre'?'<span class="badge b-ml">Mercado Livre</span>':p.platform=='shopee'?'<span class="badge b-sh">Shopee</span>':'<span class="badge b-disc">Oferta</span>';
+    const oldPrice=p.oldPrice?`<span class="card-old">${fmt(p.oldPrice)}</span>`:'';
+    const discount=d?`<span class="card-discount">${d}</span>`:'';
+    return`<div class="card"><div class="card-img"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">${p.bestseller?'<span class="b-best">🔥 MAIS VENDIDO</span>':''}${badge}<button class="fav ${f?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${f?'❤️':'🤍'}</button></div><div class="card-info"><div class="card-title">${p.name}</div><div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px"><span class="card-price">${fmt(p.price)}</span>${oldPrice}${discount}</div><div class="card-foot"><a href="${p.link}" target="_blank" class="ver" onclick="event.stopPropagation()">VER OFERTA →</a><button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button></div></div></div>`
+  }).join('');
+}
+
+function renderFav(){
+  const list=products.filter(p=>favorites.includes(p.id));
+  const g=document.getElementById('favGrid');
+  if(!list.length){g.innerHTML='<div class="empty">Voce ainda nao tem favoritos ❤️</div>';return}
+  g.innerHTML=list.map(p=>`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${p.link}" target="_blank" class="ver">VER OFERTA →</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`).join('');
+}
+
+function toggleFav(id){
+  const i=favorites.indexOf(id);
+  if(i>-1){favorites.splice(i,1);toast('Removido dos favoritos 💔');}else{favorites.push(id);toast('Adicionado aos favoritos ❤️');}
+  localStorage.setItem('jp_fav',JSON.stringify(favorites));render();renderFav();
+}
+function shareProd(id){const p=products.find(x=>x.id===id);if(p){navigator.clipboard.writeText(p.name+' - '+fmt(p.price)+' '+p.link);toast('Link copiado! 📋');}}
+function shareSite(){navigator.clipboard.writeText('🔥 JP_variedades - Os melhores achadinhos! '+location.href);toast('Link do site copiado! 📋');}
+function setCat(c,btn){cat=c;document.querySelectorAll('.cats button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
+function showFavorites(){document.getElementById('mainPage').style.display='none';document.getElementById('favPage').classList.add('active');renderFav();}
+function backMain(){document.getElementById('mainPage').style.display='block';document.getElementById('favPage').classList.remove('active');}
+
+let pressCount=0;
+function setupLP(el){
+  let timer;
+  const start=()=>{timer=setTimeout(()=>{pressCount++;if(pressCount>=7){pressCount=0;document.getElementById('hint').textContent='🔐 Admin liberado!';document.getElementById('hint').classList.add('show');setTimeout(()=>{document.getElementById('hint').classList.remove('show');window.location.href='admin.html'},500)}else{document.getElementById('hint').textContent=pressCount+'/7...';document.getElementById('hint').classList.add('show');setTimeout(()=>document.getElementById('hint').classList.remove('show'),700)}},800)};
+  const end=()=>{clearTimeout(timer)};
+  el.addEventListener('mousedown',start);el.addEventListener('touchstart',start,{passive:false});el.addEventListener('mouseup',end);el.addEventListener('mouseleave',end);el.addEventListener('touchend',end);
+}
+setupLP(document.getElementById('adminTrigger'));
+setupLP(document.getElementById('heroLogo'));
+
+let dark=true;
+function toggleTheme(){
+  dark=!dark;
+  document.body.classList.toggle('light',!dark);
+  document.getElementById('themeBtn').textContent=dark?'🌙':'☀️';
+  localStorage.setItem('jp_theme',dark?'dark':'light');
+}
+if(localStorage.getItem('jp_theme')==='light'){dark=false;document.body.classList.add('light');document.getElementById('themeBtn').textContent='☀️';}
+
+loadProducts();
+</script>
+</body>
+</html>
