@@ -10,8 +10,10 @@ body.light{--bg:#f5f5f5;--card:#fff;--border:#ddd;--text:#1a1a1a;--muted:#666;--
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
 
+
 /* BANNER */
 .banner{background:linear-gradient(90deg,var(--accent-dark),var(--accent));color:#000;text-align:center;padding:10px;font-size:13px;font-weight:700}
+
 
 /* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
@@ -21,10 +23,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .actions{display:flex;gap:8px;align-items:center}
 .btn-icon{width:36px;height:36px;border-radius:50%;border:none;background:var(--border);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
+
 /* SEARCH */
-.search{padding:12px 16px}
+.search{padding:12px 16px;position:relative}
 .search input{width:100%;padding:12px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none}
 .search input::placeholder{color:var(--muted)}
+.suggestions{position:absolute;top:100%;left:16px;right:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:4px;max-height:280px;overflow-y:auto;z-index:50;display:none}
+.suggestions.show{display:block}
+.suggestion-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer}
+.suggestion-item:hover{background:var(--border)}
+.suggestion-item img{width:36px;height:36px;border-radius:6px;object-fit:cover}
+.suggestion-item span{font-size:13px;color:var(--text)}
+
 
 /* HERO */
 .hero{text-align:center;padding:20px 16px}
@@ -34,15 +44,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .stat{background:var(--card);padding:10px 16px;border-radius:10px;border:1px solid var(--border);text-align:center;min-width:80px}
 .stat b{font-size:16px;color:var(--accent)}.stat span{font-size:10px;color:var(--muted)}
 
+
 /* CATEGORIES */
 .cats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cats button{padding:8px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
 .cats button.active{background:var(--accent);color:#000;border-color:var(--accent)}
 
+
 /* SECTION TITLE */
 .sec-title{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
 .sec-title span{background:var(--border);padding:4px 10px;border-radius:50px;font-size:11px;color:var(--muted)}
+
 
 /* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 100px}
@@ -64,20 +77,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ver{flex:1;padding:8px 0;border-radius:50px;border:none;background:var(--accent);color:#000;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:inline-block}
 .share{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
 
+
 /* EMPTY / LOADING */
 .empty{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1}
 .loading{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1}
 
+
 /* FAV PAGE */
 .fav-page{display:none}.fav-page.active{display:block}
+
 
 /* WHATSAPP FLOAT */
 .whatsapp-float{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 4px 12px rgba(37,211,102,0.4);z-index:500;transition:transform .2s}
 .whatsapp-float:active{transform:scale(.9)}
 
+
 /* TOAST */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 18px;border-radius:50px;font-size:12px;border:1px solid var(--border);z-index:3000;display:none;white-space:nowrap}
 .toast.show{display:block}
+
 
 /* HINT */
 .hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;display:none;z-index:200}
@@ -86,7 +104,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
+
 <div class="banner">🔥 OFERTAS ATUALIZADAS HOJE - So na JP Variedades</div>
+
 
 <div class="header">
   <div class="logo">
@@ -103,7 +123,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="search"><input type="text" id="search" placeholder="Buscar achadinhos..." oninput="render()"></div>
+
+<div class="search"><input type="text" id="search" placeholder="Buscar achadinhos..." oninput="renderSuggestions()" onfocus="renderSuggestions()" autocomplete="off"><div id="suggestions" class="suggestions"></div></div>
+
 
 <div id="mainPage">
   <div class="hero">
@@ -126,30 +148,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="grid" id="grid"><div class="loading">Carregando produtos...</div></div>
 </div>
 
+
 <div class="fav-page" id="favPage">
   <div class="sec-title">❤️ Meus Favoritos <button class="btn-icon" onclick="backMain()" style="width:auto;padding:6px 12px;font-size:12px">← Voltar</button></div>
   <div class="grid" id="favGrid"></div>
 </div>
+
 
 <!-- WHATSAPP FLOAT -->
 <a href="https://chat.whatsapp.com/CNv0OTwmJkO0TBJZyQTG3r?s=cl&p=a&ilr=0" target="_blank" class="whatsapp-float" title="Entrar no grupo do WhatsApp">
   <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
+
 <div class="hint" id="hint"></div>
 <div class="toast" id="toast"></div>
+
 
 <script>
 const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
+
 let products=[];
 let favorites=JSON.parse(localStorage.getItem('jp_fav')||'[]');
 let cat='todos';
 
+
 function fmt(p){return'R$ '+p.toFixed(2).replace('.',',')}
 function disc(o,p){if(!o||o<=p)return'';return'-'+Math.round((o-p)/o*100)+'%'}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
 
 async function loadProducts(){
   try{
@@ -176,6 +205,34 @@ async function loadProducts(){
   }
 }
 
+
+function renderSuggestions(){
+  const box=document.getElementById('suggestions');
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  if(!q){box.classList.remove('show');box.innerHTML='';render();return}
+  const matches=products.filter(p=>p.name.toLowerCase().includes(q)).slice(0,6);
+  if(!matches.length){box.classList.remove('show');box.innerHTML=''}
+  else{
+    box.innerHTML=matches.map(p=>`<div class="suggestion-item" onclick="pickSuggestion('${p.id}')"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/40x40?text=JP'"><span>${p.name}</span></div>`).join('');
+    box.classList.add('show');
+  }
+  render();
+}
+
+function pickSuggestion(id){
+  const p=products.find(p=>p.id==id);
+  if(!p)return;
+  document.getElementById('search').value=p.name;
+  document.getElementById('suggestions').classList.remove('show');
+  render();
+}
+
+document.addEventListener('click',function(e){
+  const box=document.getElementById('suggestions');
+  const input=document.getElementById('search');
+  if(box && input && !box.contains(e.target) && e.target!==input){box.classList.remove('show')}
+});
+
 function render(){
   let list=products;
   if(cat=='mercado-livre')list=list.filter(p=>p.platform=='mercado-livre');
@@ -196,12 +253,14 @@ function render(){
   }).join('');
 }
 
+
 function renderFav(){
   const list=products.filter(p=>favorites.includes(p.id));
   const g=document.getElementById('favGrid');
   if(!list.length){g.innerHTML='<div class="empty">Voce ainda nao tem favoritos ❤️</div>';return}
   g.innerHTML=list.map(p=>`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${p.link}" target="_blank" class="ver">VER OFERTA →</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`).join('');
 }
+
 
 function toggleFav(id){
   const i=favorites.indexOf(id);
@@ -214,6 +273,7 @@ function setCat(c,btn){cat=c;document.querySelectorAll('.cats button').forEach(b
 function showFavorites(){document.getElementById('mainPage').style.display='none';document.getElementById('favPage').classList.add('active');renderFav();}
 function backMain(){document.getElementById('mainPage').style.display='block';document.getElementById('favPage').classList.remove('active');}
 
+
 let pressCount=0;
 function setupLP(el){
   let timer;
@@ -224,6 +284,7 @@ function setupLP(el){
 setupLP(document.getElementById('adminTrigger'));
 setupLP(document.getElementById('heroLogo'));
 
+
 let dark=true;
 function toggleTheme(){
   dark=!dark;
@@ -232,6 +293,7 @@ function toggleTheme(){
   localStorage.setItem('jp_theme',dark?'dark':'light');
 }
 if(localStorage.getItem('jp_theme')==='light'){dark=false;document.body.classList.add('light');document.getElementById('themeBtn').textContent='☀️';}
+
 
 loadProducts();
 </script>
