@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" style="background:#0a0a0a">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
 <title>JP Variedades</title>
 <style>
 :root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
@@ -142,6 +143,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="active" onclick="setCat('todos',this)">Todos</button>
     <button onclick="setCat('mercado-livre',this)">Mercado Livre</button>
     <button onclick="setCat('shopee',this)">Shopee</button>
+    <button onclick="setCat('shein',this)">Shein</button>
     <button onclick="setCat('fav',this)">❤️ Favoritos</button>
   </div>
   <div class="sec-title">🔥 MAIS CLICADOS HOJE <span id="vcount">0 produtos</span></div>
@@ -194,7 +196,7 @@ async function loadProducts(){
       price:parseFloat(p.preco_atual||0),
       oldPrice:parseFloat(p.preco_antigo||0)||null,
       image:p.imagem_url||'https://via.placeholder.com/300x300?text=JP',
-      platform:p.loja_origem==='Mercado Livre'?'mercado-livre':(p.loja_origem==='Shopee'?'shopee':'outro'),
+      platform:p.loja_origem==='Mercado Livre'?'mercado-livre':(p.loja_origem==='Shopee'?'shopee':(p.loja_origem==='Shein'?'shein':'outro')),
       bestseller:p.destaque||false,
       link:p.link_afiliado,
       categoria:p.categoria||''
@@ -237,6 +239,7 @@ function render(){
   let list=products;
   if(cat=='mercado-livre')list=list.filter(p=>p.platform=='mercado-livre');
   else if(cat=='shopee')list=list.filter(p=>p.platform=='shopee');
+  else if(cat=='shein')list=list.filter(p=>p.platform=='shein');
   else if(cat=='fav')list=list.filter(p=>favorites.includes(p.id));
   const q=document.getElementById('search').value.toLowerCase();
   if(q)list=list.filter(p=>p.name.toLowerCase().includes(q));
