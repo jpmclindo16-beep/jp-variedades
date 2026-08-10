@@ -66,6 +66,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card-img img{width:100%;height:100%;object-fit:cover}
 .badge{position:absolute;top:6px;left:6px;padding:3px 8px;border-radius:50px;font-size:9px;font-weight:700}
 .b-ml{background:#ffe600;color:#000}.b-sh{background:#ee4d2d;color:#fff}.b-disc{background:var(--accent);color:#000}
+.b-ds{background:#7c4dff;color:#fff}
 .b-best{position:absolute;top:6px;right:36px;padding:3px 8px;border-radius:50px;font-size:9px;font-weight:700;background:var(--danger);color:#fff}
 .fav{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
 .fav.active{background:var(--danger)}
@@ -199,7 +200,9 @@ async function loadProducts(){
       platform:p.loja_origem==='Mercado Livre'?'mercado-livre':(p.loja_origem==='Shopee'?'shopee':(p.loja_origem==='Shein'?'shein':'outro')),
       bestseller:p.destaque||false,
       link:p.link_afiliado,
-      categoria:p.categoria||''
+      categoria:p.categoria||'',
+      tipo:p.tipo||'afiliado',
+      paymentLink:p.link_pagamento||''
     }));
     render();
   }catch(e){
@@ -249,10 +252,12 @@ function render(){
   if(!list.length){g.innerHTML='<div class="empty">Nenhum produto encontrado</div>';return}
   g.innerHTML=list.map(p=>{
     const d=disc(p.oldPrice,p.price),f=favorites.includes(p.id);
-    const badge=p.platform=='mercado-livre'?'<span class="badge b-ml">Mercado Livre</span>':p.platform=='shopee'?'<span class="badge b-sh">Shopee</span>':'<span class="badge b-disc">Oferta</span>';
+    const badge=p.tipo==='dropshipping'?'<span class="badge b-ds">Loja Propria</span>':(p.platform=='mercado-livre'?'<span class="badge b-ml">Mercado Livre</span>':p.platform=='shopee'?'<span class="badge b-sh">Shopee</span>':'<span class="badge b-disc">Oferta</span>');
     const oldPrice=p.oldPrice?`<span class="card-old">${fmt(p.oldPrice)}</span>`:'';
     const discount=d?`<span class="card-discount">${d}</span>`:'';
-    return`<div class="card"><div class="card-img"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">${p.bestseller?'<span class="b-best">🔥 MAIS VENDIDO</span>':''}${badge}<button class="fav ${f?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${f?'❤️':'🤍'}</button></div><div class="card-info"><div class="card-title">${p.name}</div><div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px"><span class="card-price">${fmt(p.price)}</span>${oldPrice}${discount}</div><div class="card-foot"><a href="${p.link}" target="_blank" class="ver" onclick="event.stopPropagation()">VER OFERTA →</a><button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button></div></div></div>`
+    const buyLink=p.tipo==='dropshipping'?p.paymentLink:p.link;
+    const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
+    return`<div class="card"><div class="card-img"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">${p.bestseller?'<span class="b-best">🔥 MAIS VENDIDO</span>':''}${badge}<button class="fav ${f?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${f?'❤️':'🤍'}</button></div><div class="card-info"><div class="card-title">${p.name}</div><div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px"><span class="card-price">${fmt(p.price)}</span>${oldPrice}${discount}</div><div class="card-foot"><a href="${buyLink}" target="_blank" class="ver" onclick="event.stopPropagation()">${buyLabel}</a><button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button></div></div></div>`
   }).join('');
 }
 
@@ -261,7 +266,11 @@ function renderFav(){
   const list=products.filter(p=>favorites.includes(p.id));
   const g=document.getElementById('favGrid');
   if(!list.length){g.innerHTML='<div class="empty">Voce ainda nao tem favoritos ❤️</div>';return}
-  g.innerHTML=list.map(p=>`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${p.link}" target="_blank" class="ver">VER OFERTA →</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`).join('');
+  g.innerHTML=list.map(p=>{
+    const buyLink=p.tipo==='dropshipping'?p.paymentLink:p.link;
+    const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
+    return`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${buyLink}" target="_blank" class="ver">${buyLabel}</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`
+  }).join('');
 }
 
 
