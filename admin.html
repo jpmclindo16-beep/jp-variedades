@@ -7,6 +7,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+
+/* ===== LOGIN ===== */
 .login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)}
 .login-logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#00c853,#00e676);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000;margin-bottom:16px}
 .login h1{font-size:22px;margin-bottom:4px}
@@ -15,33 +17,82 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .login input:focus{border-color:#00e676}
 .login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:#00e676;color:#000;font-size:16px;font-weight:700;cursor:pointer}
 .login .erro{color:#ff5252;margin-top:12px;font-size:13px;text-align:center}
-.admin{display:none}
-.topbar{position:sticky;top:0;z-index:100;background:#141414;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a2a}
-.topbar h2{font-size:16px}
-.topbar button{padding:8px 14px;border-radius:8px;border:none;background:#ff5252;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
-.stats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto}
-.stat{flex:1;min-width:80px;background:#1a1a1a;padding:12px;border-radius:10px;text-align:center;border:1px solid #2a2a2a}
-.stat b{display:block;font-size:20px;color:#00e676;margin-bottom:2px}
-.stat span{font-size:10px;color:#888}
-.list{padding:0 16px 100px}
-.item{display:flex;align-items:center;gap:10px;padding:10px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin-bottom:8px}
-.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:#242424}
+
+/* ===== LAYOUT ADMIN ===== */
+.admin{display:none;flex-direction:column;min-height:100vh}
+.sidebar{width:100%;background:#141414;border-bottom:1px solid #2a2a2a;position:sticky;top:0;z-index:100}
+.sidebar-top{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.sidebar-top h2{font-size:16px;display:flex;align-items:center;gap:8px}
+.sidebar-top h2 span{font-size:20px}
+.sidebar-top button{padding:8px 14px;border-radius:8px;border:none;background:#ff5252;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.nav{display:flex;gap:4px;padding:0 12px 8px;overflow-x:auto}
+.nav-item{flex-shrink:0;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#888;transition:all .15s;white-space:nowrap}
+.nav-item:hover{color:#fff;background:#1a1a1a}
+.nav-item.active{color:#000;background:#00e676}
+
+.main{flex:1;padding:16px;overflow-y:auto}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:18px;font-weight:700;margin-bottom:16px}
+
+/* ===== CARDS / STATS ===== */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stat{background:#1a1a1a;padding:14px;border-radius:12px;border:1px solid #2a2a2a;text-align:center}
+.stat b{display:block;font-size:22px;color:#00e676;margin-bottom:4px}
+.stat span{font-size:11px;color:#888}
+.stat small{display:block;font-size:10px;color:#666;margin-top:4px}
+
+.card{background:#1a1a1a;border-radius:12px;border:1px solid #2a2a2a;margin-bottom:16px;overflow:hidden}
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #2a2a2a}
+.card-title{font-size:14px;font-weight:700}
+.card-body{padding:12px 16px}
+
+/* ===== TABELAS ===== */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
+th{text-align:left;padding:10px 8px;color:#888;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #2a2a2a;white-space:nowrap}
+td{padding:12px 8px;border-bottom:1px solid #222;vertical-align:middle;color:#ccc}
+tr:last-child td{border-bottom:none}
+.price{color:#00e676;font-weight:700}
+.profit{color:#00e676;font-weight:700}
+.stock-low{color:#ff5252;font-weight:700}
+.stock-ok{color:#00e676}
+
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.status-pago{background:rgba(0,230,118,.15);color:#00e676}
+.status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
+.status-enviado{background:rgba(59,130,246,.15);color:#3b82f6}
+.status-entregue{background:rgba(107,114,128,.15);color:#9ca3af}
+.status-ativo{background:rgba(0,230,118,.15);color:#00e676}
+.status-inativo{background:rgba(107,114,128,.15);color:#9ca3af}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+
+.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;background:#242424;color:#888}
+
+/* ===== PRODUTOS - LISTA ANTIGA ===== */
+.item{display:flex;align-items:center;gap:10px;padding:12px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;margin-bottom:8px}
+.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:#242424;flex-shrink:0}
 .item-info{flex:1;min-width:0}
-.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;color:#fff}
 .item-info .price{font-size:14px;color:#00e676;font-weight:700}
 .item-info .loja{font-size:11px;color:#888}
 .item-actions{display:flex;gap:6px}
 .item-actions button{width:32px;height:32px;border-radius:6px;border:none;background:#242424;color:#fff;font-size:14px;cursor:pointer}
-.empty{text-align:center;padding:40px;color:#666}
-.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:#00e676;color:#000;font-size:28px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,200,100,0.3);z-index:200}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:none;flex-direction:column;z-index:300}
+.item-actions button:hover{background:#333}
+.empty{text-align:center;padding:40px;color:#666;font-size:14px}
+
+/* ===== FAB ===== */
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:#00e676;color:#000;font-size:28px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,200,100,.3);z-index:200}
+
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;z-index:300}
 .modal.active{display:flex}
-.modal-h{padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a2a;background:#141414}
+.modal-h{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2a2a;background:#141414}
 .modal-h h3{font-size:16px}
 .modal-h button{width:32px;height:32px;border-radius:50%;border:none;background:#242424;color:#fff;font-size:18px;cursor:pointer}
 .modal-body{flex:1;overflow-y:auto;padding:16px}
 .form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:12px;color:#888;margin-bottom:4px;font-weight:600}
+.form-group label{display:block;font-size:12px;color:#888;margin-bottom:5px;font-weight:600}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;color:#fff;font-size:15px;outline:none}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#00e676}
 .form-group textarea{min-height:80px;resize:vertical}
@@ -49,13 +100,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .form-check{display:flex;align-items:center;gap:8px;padding:8px 0}
 .form-check input{width:20px;height:20px;accent-color:#00e676}
 .save-btn{width:100%;padding:14px;border-radius:10px;border:none;background:#00e676;color:#000;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid #2a2a2a;z-index:400;display:none}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid #2a2a2a;overflow-x:auto}
+.tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:#888;font-weight:600;white-space:nowrap}
+.tab.active{border-bottom-color:#00e676;color:#00e676}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid #2a2a2a;z-index:400;display:none;text-align:center}
 .toast.show{display:block}
 .toast.ok{border-color:#00e676;color:#00e676}
 .toast.err{border-color:#ff5252;color:#ff5252}
+
+/* ===== RESPONSIVO ===== */
+@media(min-width:768px){
+  .admin{flex-direction:row}
+  .sidebar{width:220px;border-bottom:none;border-right:1px solid #2a2a2a;position:fixed;height:100vh;flex-direction:column;display:flex}
+  .nav{flex-direction:column;padding:8px;overflow-x:hidden}
+  .nav-item{width:100%}
+  .main{margin-left:220px;padding:24px 28px}
+  .stats{grid-template-columns:repeat(4,1fr)}
+}
 </style>
 </head>
 <body>
+
+<!-- ===== LOGIN ===== -->
 <div class="login" id="loginScreen">
   <div class="login-logo">JP</div>
   <h1>JP Variedades</h1>
@@ -64,20 +134,107 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button onclick="doLogin()">Entrar</button>
   <div class="erro" id="loginErro"></div>
 </div>
+
+<!-- ===== ADMIN ===== -->
 <div class="admin" id="adminScreen">
-  <div class="topbar">
-    <h2>Meus Produtos</h2>
-    <button onclick="logout()">Sair</button>
-  </div>
-  <div class="stats">
-    <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
-    <div class="stat"><b id="stAtivo">0</b><span>Ativos</span></div>
-    <div class="stat"><b id="stDest">0</b><span>Destaques</span></div>
-    <div class="stat"><b id="stClick">0</b><span>Cliques</span></div>
-  </div>
-  <div class="list" id="lista"></div>
-  <button class="fab" onclick="openForm()">+</button>
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <h2><span>🛒</span> JP Admin</h2>
+      <button onclick="logout()">Sair</button>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</div>
+      <div class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</div>
+      <div class="nav-item" onclick="showPage('pedidos',this)">📦 Pedidos</div>
+      <div class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</div>
+      <div class="nav-item" onclick="showPage('config',this)">⚙️ Config</div>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="stats">
+        <div class="stat"><b id="dashVendas">R$ 0</b><span>Vendas Hoje</span><small id="dashVendasChange">—</small></div>
+        <div class="stat"><b id="dashPedidos">0</b><span>Pedidos</span><small id="dashPedidosChange">—</small></div>
+        <div class="stat"><b id="dashLucro">R$ 0</b><span>Lucro</span><small id="dashLucroChange">—</small></div>
+        <div class="stat"><b id="dashTicket">R$ 0</b><span>Ticket Médio</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">📦 Pedidos Recentes</div><button class="tag" style="cursor:pointer" onclick="showPage('pedidos',document.querySelectorAll('.nav-item')[2])">Ver todos</button></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">⚠️ Estoque Baixo</div><button class="tag" style="cursor:pointer" onclick="showPage('produtos',document.querySelectorAll('.nav-item')[1])">Gerenciar</button></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Fornecedor</th><th>Estoque</th></tr></thead><tbody id="dashEstoqueBody"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- ===== PRODUTOS ===== -->
+    <div class="page" id="page-produtos">
+      <div class="page-title">Produtos</div>
+      <div class="stats">
+        <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
+        <div class="stat"><b id="stAtivo">0</b><span>Ativos</span></div>
+        <div class="stat"><b id="stDest">0</b><span>Destaques</span></div>
+        <div class="stat"><b id="stClick">0</b><span>Cliques</span></div>
+      </div>
+      <div id="lista"></div>
+      <button class="fab" onclick="openForm()">+</button>
+    </div>
+
+    <!-- ===== PEDIDOS ===== -->
+    <div class="page" id="page-pedidos">
+      <div class="page-title">Pedidos</div>
+      <div class="tabs">
+        <div class="tab active" onclick="filterOrders('todos',this)">Todos</div>
+        <div class="tab" onclick="filterOrders('pago',this)">Pagos</div>
+        <div class="tab" onclick="filterOrders('pendente',this)">Pendentes</div>
+        <div class="tab" onclick="filterOrders('enviado',this)">Enviados</div>
+      </div>
+      <div class="card">
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- ===== FORNECEDORES ===== -->
+    <div class="page" id="page-fornecedores">
+      <div class="page-title">Fornecedores</div>
+      <div class="card">
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Tipo</th><th>Pedidos</th><th>Total</th><th>Margem</th><th>Status</th></tr></thead><tbody id="suppliersBody"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- ===== CONFIG ===== -->
+    <div class="page" id="page-config">
+      <div class="page-title">Configurações</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔗 Integrações</div></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Serviço</th><th>Status</th></tr></thead><tbody>
+          <tr><td><b>💳 Mercado Pago</b><br><small style="color:#888">Pagamentos</small></td><td><span class="status status-pago"><span class="status-dot" style="background:#00e676"></span>Conectado (Teste)</span></td></tr>
+          <tr><td><b>🗄️ Supabase</b><br><small style="color:#888">Banco de Dados</small></td><td><span class="status status-ativo"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
+          <tr><td><b>📦 Melhor Envio</b><br><small style="color:#888">Frete</small></td><td><span class="status status-pendente"><span class="status-dot" style="background:#f59e0b"></span>Não conectado</span></td></tr>
+        </tbody></table></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏪 Loja</div></div>
+        <div class="card-body"><div class="table-wrap"><table><tbody>
+          <tr><td style="width:50%;color:#888">Nome da Loja</td><td><b>JP Variedades</b></td></tr>
+          <tr><td style="color:#888">URL</td><td>jp-variedades.vercel.app</td></tr>
+          <tr><td style="color:#888">Taxa de Lucro</td><td>35%</td></tr>
+          <tr><td style="color:#888">Frete Grátis acima de</td><td>R$ 99,00</td></tr>
+        </tbody></table></div></div>
+      </div>
+    </div>
+
+  </main>
 </div>
+
+<!-- ===== MODAL PRODUTO ===== -->
 <div class="modal" id="formModal">
   <div class="modal-h">
     <h3 id="formTitle">Novo Produto</h3>
@@ -95,11 +252,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Preco atual R$ *</label>
+        <label>Preço atual R$ *</label>
         <input type="number" id="pPreco" placeholder="59.90" step="0.01">
       </div>
       <div class="form-group">
-        <label>Preco de R$</label>
+        <label>Preço de R$</label>
         <input type="number" id="pOld" placeholder="239.90" step="0.01">
       </div>
     </div>
@@ -122,6 +279,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <input type="text" id="pCat" placeholder="Ex: Academia">
       </div>
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Custo R$ (seu preço no fornecedor)</label>
+        <input type="number" id="pCusto" placeholder="30.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Estoque</label>
+        <input type="number" id="pEstoque" placeholder="10" step="1">
+      </div>
+    </div>
     <div class="form-check">
       <input type="checkbox" id="pDest">
       <label for="pDest">Destacar produto</label>
@@ -133,27 +300,69 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="save-btn" onclick="saveProd()">Salvar Produto</button>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
+
 <script>
+// ===== SUPABASE =====
 const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaGV5bnlqYm9hZ2Z5YmF6Y3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4ODMzODUsImV4cCI6MjEwMDQ1OTM4NX0.wE7VFVmo38_mjSnvByhxQdL3fsEQAf2LE1tMkkTrOKU';
 const SENHA='jpvariedades2024';
+
 let produtos=[];
 let editando=null;
+let filtroPedido='todos';
+
+// ===== MOCK DADOS DROPSHIPPING =====
+// Substitua por fetch do Supabase quando criar as tabelas
+const pedidosMock=[
+  {id:1024,numero:'#1024',data:'10/08 14:32',cliente:'Maria Silva',produto:'Kit 12 Utensílios',total:43.90,lucro:15.40,status:'pago'},
+  {id:1023,numero:'#1023',data:'10/08 13:15',cliente:'João Pereira',produto:'Aspirador WAP',total:103.55,lucro:28.50,status:'pendente'},
+  {id:1022,numero:'#1022',data:'10/08 11:48',cliente:'Ana Costa',produto:'Garrafa Liquidificador',total:56.00,lucro:18.00,status:'enviado'},
+  {id:1021,numero:'#1021',data:'10/08 09:22',cliente:'Carlos Lima',produto:'Kit 5 Toalhas',total:35.50,lucro:10.20,status:'pago'},
+];
+const fornecedoresMock=[
+  {id:1,nome:'Shopee',tipo:'Dropshipping',pedidos:89,total:4250,margem:32,status:'ativo'},
+  {id:2,nome:'Mercado Livre',tipo:'Dropshipping',pedidos:67,total:3890,margem:28,status:'ativo'},
+  {id:3,nome:'AliExpress',tipo:'Importação',pedidos:0,total:0,margem:0,status:'inativo'},
+];
+
+// ===== HELPERS =====
 function getHeaders(){return{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}}
 function toast(msg,ok){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(ok?'ok':'err');setTimeout(()=>t.classList.remove('show'),3000)}
+
+// ===== LOGIN =====
 function doLogin(){if(document.getElementById('senhaInput').value===SENHA){localStorage.setItem('jp_admin','1');showAdmin()}else{document.getElementById('loginErro').textContent='Senha incorreta'}}
 function logout(){localStorage.removeItem('jp_admin');location.reload()}
-function showAdmin(){document.getElementById('loginScreen').style.display='none';document.getElementById('adminScreen').style.display='block';loadProds()}
+function showAdmin(){document.getElementById('loginScreen').style.display='none';document.getElementById('adminScreen').style.display='flex';loadProds()}
 if(localStorage.getItem('jp_admin')==='1')showAdmin();
 document.getElementById('senhaInput').addEventListener('keypress',function(e){if(e.key==='Enter')doLogin()});
-async function loadProds(){try{const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()});if(!res.ok){const errText=await res.text();throw new Error(errText||'Erro '+res.status)}produtos=await res.json();render()}catch(e){toast('Erro ao carregar: '+e.message,false);document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar. Verifique sua conexao.</div>';console.error(e)}}
-function render(){document.getElementById('stTotal').textContent=produtos.length;document.getElementById('stAtivo').textContent=produtos.filter(p=>p.ativo).length;document.getElementById('stDest').textContent=produtos.filter(p=>p.destaque).length;document.getElementById('stClick').textContent=produtos.reduce((a,p)=>a+(p.cliques||0),0);const el=document.getElementById('lista');if(!produtos.length){el.innerHTML='<div class="empty">Nenhum produto. Clique no + para adicionar!</div>';return}el.innerHTML=produtos.map(p=>{const preco=parseFloat(p.preco_atual||0).toFixed(2).replace('.',',');return`<div class="item"><img src="${p.imagem_url||'https://via.placeholder.com/56?text=JP'}" onerror="this.src='https://via.placeholder.com/56?text=JP'"><div class="item-info"><h4>${p.nome}</h4><div class="price">R$ ${preco}</div><div class="loja">${p.loja_origem||''} ${p.destaque?'⭐':''} ${p.ativo?'':'(inativo)'}</div></div><div class="item-actions"><button onclick="editProd('${p.id}')">✏️</button><button onclick="delProd('${p.id}')">🗑️</button></div></div>`}).join('')}
-function openForm(){editando=null;document.getElementById('formTitle').textContent='Novo Produto';document.getElementById('pid').value='';document.getElementById('pNome').value='';document.getElementById('pLink').value='';document.getElementById('pPreco').value='';document.getElementById('pOld').value='';document.getElementById('pImg').value='';document.getElementById('pLoja').value='Mercado Livre';document.getElementById('pCat').value='';document.getElementById('pDest').checked=false;document.getElementById('pAtivo').checked=true;document.getElementById('formModal').classList.add('active')}
-function closeForm(){document.getElementById('formModal').classList.remove('active')}
-function editProd(id){const p=produtos.find(x=>x.id===id);if(!p)return;editando=p;document.getElementById('formTitle').textContent='Editar Produto';document.getElementById('pid').value=p.id;document.getElementById('pNome').value=p.nome||'';document.getElementById('pLink').value=p.link_afiliado||'';document.getElementById('pPreco').value=p.preco_atual||'';document.getElementById('pOld').value=p.preco_antigo||'';document.getElementById('pImg').value=p.imagem_url||'';document.getElementById('pLoja').value=p.loja_origem||'Mercado Livre';document.getElementById('pCat').value=p.categoria||'';document.getElementById('pDest').checked=p.destaque||false;document.getElementById('pAtivo').checked=p.ativo!==false;document.getElementById('formModal').classList.add('active')}
-async function saveProd(){const dados={nome:document.getElementById('pNome').value.trim(),link_afiliado:document.getElementById('pLink').value.trim(),preco_atual:parseFloat(document.getElementById('pPreco').value)||0,preco_antigo:parseFloat(document.getElementById('pOld').value)||null,imagem_url:document.getElementById('pImg').value.trim(),loja_origem:document.getElementById('pLoja').value,categoria:document.getElementById('pCat').value.trim(),destaque:document.getElementById('pDest').checked,ativo:document.getElementById('pAtivo').checked};if(!dados.nome||!dados.link_afiliado||!dados.imagem_url){toast('Preencha nome, link e imagem!',false);return}try{let res;if(editando){res=await fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+editando.id,{method:'PATCH',headers:getHeaders(),body:JSON.stringify(dados)})}else{res=await fetch(SUPABASE_URL+'/rest/v1/produtos',{method:'POST',headers:getHeaders(),body:JSON.stringify(dados)})}if(!res.ok){const errText=await res.text();throw new Error(errText||'Erro '+res.status)}toast(editando?'Atualizado!':'Adicionado!',true);closeForm();loadProds()}catch(e){toast('Erro: '+e.message,false);console.error(e)}}
-async function delProd(id){if(!confirm('Excluir este produto?'))return;try{const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+id,{method:'DELETE',headers:getHeaders()});if(!res.ok)throw new Error('Erro '+res.status);toast('Excluido!',true);loadProds()}catch(e){toast('Erro: '+e.message,false);console.error(e)}}
-</script>
-</body>
-</html>
+
+// ===== NAVEGAÇÃO =====
+function showPage(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+}
+
+// ===== PRODUTOS (SUPABASE) =====
+async function loadProds(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()});
+    if(!res.ok){const errText=await res.text();throw new Error(errText||'Erro '+res.status)}
+    produtos=await res.json();
+    renderProdutos();
+    renderDashboard();
+  }catch(e){toast('Erro ao carregar: '+e.message,false);document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar. Verifique sua conexao.</div>';console.error(e)}
+}
+
+function renderProdutos(){
+  document.getElementById('stTotal').textContent=produtos.length;
+  document.getElementById('stAtivo').textContent=produtos.filter(p=>p.ativo).length;
+  document.getElementById('stDest').textContent=produtos.filter(p=>p.destaque).length;
+  document.getElementById('stClick').textContent=produtos.reduce((a,p)=>a+(p.cliques||0),0);
+  const el=document.getElementById('lista');
+  if(!produtos.length){el.innerHTML='<div class="empty">Nenhum produto. Clique no + para adicionar!</div>';return}
+  el.innerHTML=produtos.map(p=>{
+    const preco=parseFloat(p.preco_atual||0).toFixed(2).r
