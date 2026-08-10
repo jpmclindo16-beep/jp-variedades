@@ -319,6 +319,8 @@ function showAdmin(){
     log('ERRO: adminScreen nao encontrado');
   }
   loadProds();
+  renderOrders();
+  renderSuppliers();
 }
 
 // Auto-login
@@ -366,4 +368,4 @@ function loadProds(){
 function renderProdutos(){
   document.getElementById('stTotal').textContent=produtos.length;
   document.getElementById('stAtivo').textContent=produtos.filter(function(p){return p.ativo}).length;
-  document.getElementById('stDest').textContent=produt
+  document.getE
