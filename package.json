@@ -1,0 +1,11 @@
+{
+  "name": "jp-variedades",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "mercadopago": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
