@@ -10,59 +10,58 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* ===== LOGIN ===== */
+/* LOGIN */
 .login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)}
 .login-logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dark),var(--accent));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000;margin-bottom:16px}
 .login h1{font-size:22px;margin-bottom:4px}
 .login p{color:var(--muted);font-size:13px;margin-bottom:24px}
 .login input{width:100%;max-width:320px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;margin-bottom:12px;outline:none}
 .login input:focus{border-color:var(--accent)}
-.login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.login button:active{opacity:0.8;transform:scale(0.98)}
+.login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer}
+.login button:active{opacity:0.8}
 .login .erro{color:var(--danger);margin-top:12px;font-size:13px;text-align:center}
 
-/* ===== ADMIN LAYOUT ===== */
+/* DEBUG BOX */
+.debug-box{width:100%;max-width:320px;margin-top:16px;padding:10px;border-radius:8px;background:#1a1a1a;border:1px solid #333;font-size:11px;color:#888;font-family:monospace;max-height:120px;overflow-y:auto}
+.debug-box b{color:#00e676}
+
+/* ADMIN */
 .admin{display:none}
 .admin.on{display:block}
 .topbar{position:sticky;top:0;z-index:100;background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
 .topbar h2{font-size:16px;display:flex;align-items:center;gap:8px}
 .topbar h2 span{font-size:20px}
 .topbar button{padding:8px 14px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
-
 .nav{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--border);scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
-.nav-item{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.nav-item{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
 .nav-item.active{background:var(--accent);color:#000;border-color:var(--accent)}
-
-.main{padding:16px;min-height:calc(100vh - 110px)}
+.main{padding:16px}
 .page{display:none}
 .page.on{display:block}
 .page-title{font-size:18px;font-weight:700;margin-bottom:16px}
 
-/* ===== STATS ===== */
+/* STATS */
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
 .stat{background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--border);text-align:center}
 .stat b{display:block;font-size:22px;color:var(--accent);margin-bottom:4px}
 .stat span{font-size:11px;color:var(--muted)}
-.stat small{display:block;font-size:10px;color:#666;margin-top:4px}
 
-/* ===== CARDS ===== */
+/* CARDS */
 .card{background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
 .card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)}
 .card-title{font-size:14px;font-weight:700}
 .card-body{padding:12px 16px}
 
-/* ===== TABLES ===== */
+/* TABLES */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
-th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:12px 8px;border-bottom:1px solid #222;vertical-align:middle;color:#ccc}
+th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
 tr:last-child td{border-bottom:none}
 .price{color:var(--accent);font-weight:700}
 .profit{color:var(--accent);font-weight:700}
 .stock-low{color:var(--danger);font-weight:700}
-.stock-ok{color:var(--accent)}
-
 .status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .status-pago{background:rgba(0,230,118,.15);color:#00e676}
 .status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
@@ -70,25 +69,23 @@ tr:last-child td{border-bottom:none}
 .status-ativo{background:rgba(0,230,118,.15);color:#00e676}
 .status-inativo{background:rgba(107,114,128,.15);color:#9ca3af}
 .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
-
 .tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;background:var(--border);color:var(--muted)}
 
-/* ===== PRODUTOS LISTA ===== */
+/* PRODUTOS LISTA */
 .item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
 .item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--border);flex-shrink:0}
 .item-info{flex:1;min-width:0}
-.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;color:var(--text)}
+.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .item-info .price{font-size:14px;color:var(--accent);font-weight:700}
 .item-info .loja{font-size:11px;color:var(--muted)}
 .item-actions{display:flex;gap:6px}
 .item-actions button{width:32px;height:32px;border-radius:6px;border:none;background:var(--border);color:var(--text);font-size:14px;cursor:pointer}
-.item-actions button:active{background:#333}
-.empty{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.empty{text-align:center;padding:40px;color:var(--muted)}
 
-/* ===== FAB ===== */
+/* FAB */
 .fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--accent);color:#000;font-size:28px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,200,100,.3);z-index:200}
 
-/* ===== MODAL ===== */
+/* MODAL */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;z-index:300}
 .modal.on{display:flex}
 .modal-h{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--card)}
@@ -98,20 +95,19 @@ tr:last-child td{border-bottom:none}
 .form-group{margin-bottom:14px}
 .form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;outline:none}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
-.form-group textarea{min-height:80px;resize:vertical}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .form-check{display:flex;align-items:center;gap:8px;padding:8px 0}
 .form-check input{width:20px;height:20px;accent-color:var(--accent)}
 .save-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
 
-/* ===== TABS ===== */
+/* TABS */
 .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);overflow-x:auto}
 .tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);font-weight:600;white-space:nowrap}
 .tab.active{border-bottom-color:var(--accent);color:var(--accent)}
 
-/* ===== TOAST ===== */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none;white-space:nowrap}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none}
 .toast.on{display:block}
 .toast.ok{border-color:var(--accent);color:var(--accent)}
 .toast.err{border-color:var(--danger);color:var(--danger)}
@@ -123,17 +119,18 @@ tr:last-child td{border-bottom:none}
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
+<!-- LOGIN -->
 <div class="login" id="loginScreen">
   <div class="login-logo">JP</div>
   <h1>JP Variedades</h1>
   <p>Painel Administrativo</p>
   <input type="password" id="senhaInput" placeholder="Digite a senha" autocomplete="off">
-  <button type="button" id="btnEntrar">Entrar</button>
+  <button onclick="doLogin()" id="btnEntrar">Entrar</button>
   <div class="erro" id="loginErro"></div>
+  <div class="debug-box" id="debugBox"><b>DEBUG:</b><br>Aguardando login...</div>
 </div>
 
-<!-- ===== ADMIN ===== -->
+<!-- ADMIN -->
 <div class="admin" id="adminScreen">
   <div class="topbar">
     <h2><span>🛒</span> JP Admin</h2>
@@ -146,10 +143,8 @@ tr:last-child td{border-bottom:none}
     <button class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</button>
     <button class="nav-item" onclick="showPage('config',this)">⚙️ Config</button>
   </div>
-
   <div class="main">
 
-    <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
       <div class="page-title">Dashboard</div>
       <div class="stats">
@@ -168,7 +163,6 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- PRODUTOS -->
     <div class="page" id="page-produtos">
       <div class="page-title">Produtos</div>
       <div class="stats">
@@ -181,7 +175,6 @@ tr:last-child td{border-bottom:none}
       <button class="fab" onclick="openForm()">+</button>
     </div>
 
-    <!-- PEDIDOS -->
     <div class="page" id="page-pedidos">
       <div class="page-title">Pedidos</div>
       <div class="tabs">
@@ -195,7 +188,6 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- FORNECEDORES -->
     <div class="page" id="page-fornecedores">
       <div class="page-title">Fornecedores</div>
       <div class="card">
@@ -203,7 +195,6 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
 
-    <!-- CONFIG -->
     <div class="page" id="page-config">
       <div class="page-title">Configuracoes</div>
       <div class="card">
@@ -262,9 +253,18 @@ tr:last-child td{border-bottom:none}
 <div class="toast" id="toast"></div>
 
 <script>
+// ===== DEBUG =====
+function log(msg){
+  var d=document.getElementById('debugBox');
+  if(d)d.innerHTML+='<br>'+msg;
+}
+
+// ===== SUPABASE =====
 const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 const SENHA='jpvariedades2024';
+
+log('JS carregado OK');
 
 let produtos=[];
 let editando=null;
@@ -287,29 +287,52 @@ function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;
 
 // ===== LOGIN =====
 function doLogin(){
+  log('Botao clicado!');
   var input=document.getElementById('senhaInput');
-  var val=input?input.value:'';
+  if(!input){log('ERRO: input nao encontrado');return;}
+  var val=input.value;
+  log('Senha digitada: '+val.length+' chars');
+
   if(val===SENHA){
+    log('Senha CORRETA!');
     localStorage.setItem('jp_admin','1');
     showAdmin();
   }else{
+    log('Senha INCORRETA');
     var erro=document.getElementById('loginErro');
-    if(erro)erro.textContent='Senha incorreta';
+    if(erro)erro.textContent='Senha incorreta. Tente: jpvariedades2024';
   }
 }
+
 function logout(){localStorage.removeItem('jp_admin');location.reload()}
+
 function showAdmin(){
+  log('Mostrando admin...');
   var login=document.getElementById('loginScreen');
   var admin=document.getElementById('adminScreen');
-  if(login)login.style.display='none';
-  if(admin){admin.style.display='block';admin.classList.add('on');}
+  if(login){login.style.display='none';log('Login escondido');}
+  if(admin){
+    admin.style.display='block';
+    admin.classList.add('on');
+    log('Admin mostrado');
+  }else{
+    log('ERRO: adminScreen nao encontrado');
+  }
   loadProds();
 }
 
-document.getElementById('btnEntrar').addEventListener('click',doLogin);
-document.getElementById('senhaInput').addEventListener('keypress',function(e){if(e.key==='Enter')doLogin()});
+// Auto-login
+if(localStorage.getItem('jp_admin')==='1'){
+  log('Auto-login ativo');
+  showAdmin();
+}else{
+  log('Aguardando login manual');
+}
 
-if(localStorage.getItem('jp_admin')==='1'){showAdmin();}
+// Enter no input
+document.getElementById('senhaInput').addEventListener('keypress',function(e){
+  if(e.key==='Enter'){log('Enter pressionado');doLogin();}
+});
 
 // ===== NAVEGACAO =====
 function showPage(page,el){
@@ -324,17 +347,23 @@ function showPage(page,el){
 
 // ===== PRODUTOS =====
 function loadProds(){
+  log('Carregando produtos...');
   fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()})
     .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
-    .then(function(data){produtos=data||[];renderProdutos();renderDashboard();})
-    .catch(function(e){toast('Erro ao carregar: '+e.message,false);document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar. Verifique sua conexao.</div>';});
+    .then(function(data){
+      produtos=data||[];
+      log('Produtos carregados: '+produtos.length);
+      renderProdutos();
+      renderDashboard();
+    })
+    .catch(function(e){
+      log('Erro: '+e.message);
+      toast('Erro ao carregar: '+e.message,false);
+      document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar.</div>';
+    });
 }
 
 function renderProdutos(){
   document.getElementById('stTotal').textContent=produtos.length;
   document.getElementById('stAtivo').textContent=produtos.filter(function(p){return p.ativo}).length;
-  document.getElementById('stDest').textContent=produtos.filter(function(p){return p.destaque}).length;
-  document.getElementById('stClick').textContent=produtos.reduce(function(a,p){return a+(p.cliques||0)},0);
-  var el=document.getElementById('lista');
-  if(!produtos.length){el.innerHTML='<div class="empty">Nenhum produto. Clique no + para adicionar!</div>';return;}
-  el.i
+  document.getElementById('stDest').textContent=produt
