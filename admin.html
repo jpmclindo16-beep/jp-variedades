@@ -15,24 +15,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .login p{color:#888;font-size:13px;margin-bottom:24px}
 .login input{width:100%;max-width:320px;padding:14px 16px;border-radius:12px;border:1px solid #2a2a2a;background:#1a1a1a;color:#fff;font-size:16px;margin-bottom:12px;outline:none}
 .login input:focus{border-color:#00e676}
-.login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:#00e676;color:#000;font-size:16px;font-weight:700;cursor:pointer}
+.login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:#00e676;color:#000;font-size:16px;font-weight:700;cursor:pointer;pointer-events:auto}
+.login button:active{opacity:0.8}
 .login .erro{color:#ff5252;margin-top:12px;font-size:13px;text-align:center}
 
 /* ===== LAYOUT ADMIN ===== */
-.admin{display:none;flex-direction:column;min-height:100vh}
+.admin{display:none}
+.admin.ativo{display:flex;flex-direction:column;min-height:100vh}
 .sidebar{width:100%;background:#141414;border-bottom:1px solid #2a2a2a;position:sticky;top:0;z-index:100}
 .sidebar-top{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
 .sidebar-top h2{font-size:16px;display:flex;align-items:center;gap:8px}
 .sidebar-top h2 span{font-size:20px}
 .sidebar-top button{padding:8px 14px;border-radius:8px;border:none;background:#ff5252;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
 .nav{display:flex;gap:4px;padding:0 12px 8px;overflow-x:auto}
-.nav-item{flex-shrink:0;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#888;transition:all .15s;white-space:nowrap}
+.nav-item{flex-shrink:0;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#888;transition:all .15s;white-space:nowrap;border:none;background:transparent}
 .nav-item:hover{color:#fff;background:#1a1a1a}
 .nav-item.active{color:#000;background:#00e676}
 
 .main{flex:1;padding:16px;overflow-y:auto}
 .page{display:none}
-.page.active{display:block}
+.page.ativo{display:block}
 .page-title{font-size:18px;font-weight:700;margin-bottom:16px}
 
 /* ===== CARDS / STATS ===== */
@@ -114,7 +116,7 @@ tr:last-child td{border-bottom:none}
 
 /* ===== RESPONSIVO ===== */
 @media(min-width:768px){
-  .admin{flex-direction:row}
+  .admin.ativo{flex-direction:row}
   .sidebar{width:220px;border-bottom:none;border-right:1px solid #2a2a2a;position:fixed;height:100vh;flex-direction:column;display:flex}
   .nav{flex-direction:column;padding:8px;overflow-x:hidden}
   .nav-item{width:100%}
@@ -130,8 +132,8 @@ tr:last-child td{border-bottom:none}
   <div class="login-logo">JP</div>
   <h1>JP Variedades</h1>
   <p>Painel Administrativo</p>
-  <input type="password" id="senhaInput" placeholder="Digite a senha">
-  <button onclick="doLogin()">Entrar</button>
+  <input type="password" id="senhaInput" placeholder="Digite a senha" autocomplete="off">
+  <button type="button" id="btnEntrar">Entrar</button>
   <div class="erro" id="loginErro"></div>
 </div>
 
@@ -143,18 +145,18 @@ tr:last-child td{border-bottom:none}
       <button onclick="logout()">Sair</button>
     </div>
     <nav class="nav">
-      <div class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</div>
-      <div class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</div>
-      <div class="nav-item" onclick="showPage('pedidos',this)">📦 Pedidos</div>
-      <div class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</div>
-      <div class="nav-item" onclick="showPage('config',this)">⚙️ Config</div>
+      <button class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+      <button class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</button>
+      <button class="nav-item" onclick="showPage('pedidos',this)">📦 Pedidos</button>
+      <button class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</button>
+      <button class="nav-item" onclick="showPage('config',this)">⚙️ Config</button>
     </nav>
   </aside>
 
   <main class="main">
 
     <!-- ===== DASHBOARD ===== -->
-    <div class="page active" id="page-dashboard">
+    <div class="page ativo" id="page-dashboard">
       <div class="page-title">Dashboard</div>
       <div class="stats">
         <div class="stat"><b id="dashVendas">R$ 0</b><span>Vendas Hoje</span><small id="dashVendasChange">—</small></div>
@@ -314,55 +316,80 @@ let editando=null;
 let filtroPedido='todos';
 
 // ===== MOCK DADOS DROPSHIPPING =====
-// Substitua por fetch do Supabase quando criar as tabelas
 const pedidosMock=[
-  {id:1024,numero:'#1024',data:'10/08 14:32',cliente:'Maria Silva',produto:'Kit 12 Utensílios',total:43.90,lucro:15.40,status:'pago'},
-  {id:1023,numero:'#1023',data:'10/08 13:15',cliente:'João Pereira',produto:'Aspirador WAP',total:103.55,lucro:28.50,status:'pendente'},
+  {id:1024,numero:'#1024',data:'10/08 14:32',cliente:'Maria Silva',produto:'Kit 12 Utensilios',total:43.90,lucro:15.40,status:'pago'},
+  {id:1023,numero:'#1023',data:'10/08 13:15',cliente:'Joao Pereira',produto:'Aspirador WAP',total:103.55,lucro:28.50,status:'pendente'},
   {id:1022,numero:'#1022',data:'10/08 11:48',cliente:'Ana Costa',produto:'Garrafa Liquidificador',total:56.00,lucro:18.00,status:'enviado'},
   {id:1021,numero:'#1021',data:'10/08 09:22',cliente:'Carlos Lima',produto:'Kit 5 Toalhas',total:35.50,lucro:10.20,status:'pago'},
 ];
 const fornecedoresMock=[
   {id:1,nome:'Shopee',tipo:'Dropshipping',pedidos:89,total:4250,margem:32,status:'ativo'},
   {id:2,nome:'Mercado Livre',tipo:'Dropshipping',pedidos:67,total:3890,margem:28,status:'ativo'},
-  {id:3,nome:'AliExpress',tipo:'Importação',pedidos:0,total:0,margem:0,status:'inativo'},
+  {id:3,nome:'AliExpress',tipo:'Importacao',pedidos:0,total:0,margem:0,status:'inativo'},
 ];
 
 // ===== HELPERS =====
 function getHeaders(){return{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}}
-function toast(msg,ok){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(ok?'ok':'err');setTimeout(()=>t.classList.remove('show'),3000)}
+function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(ok?'ok':'err');setTimeout(function(){t.classList.remove('show')},3000)}
 
 // ===== LOGIN =====
-function doLogin(){if(document.getElementById('senhaInput').value===SENHA){localStorage.setItem('jp_admin','1');showAdmin()}else{document.getElementById('loginErro').textContent='Senha incorreta'}}
+function doLogin(){
+  try{
+    var input=document.getElementById('senhaInput');
+    var val=input?input.value:'';
+    if(val===SENHA){
+      localStorage.setItem('jp_admin','1');
+      showAdmin();
+    }else{
+      var erro=document.getElementById('loginErro');
+      if(erro)erro.textContent='Senha incorreta';
+    }
+  }catch(e){
+    alert('Erro no login: '+e.message);
+  }
+}
+
 function logout(){localStorage.removeItem('jp_admin');location.reload()}
-function showAdmin(){document.getElementById('loginScreen').style.display='none';document.getElementById('adminScreen').style.display='flex';loadProds()}
-if(localStorage.getItem('jp_admin')==='1')showAdmin();
+
+function showAdmin(){
+  try{
+    var login=document.getElementById('loginScreen');
+    var admin=document.getElementById('adminScreen');
+    if(login)login.style.display='none';
+    if(admin){
+      admin.style.display='flex';
+      admin.classList.add('ativo');
+    }
+    loadProds();
+  }catch(e){
+    alert('Erro ao mostrar admin: '+e.message);
+  }
+}
+
+// Bind do botão entrar
+document.getElementById('btnEntrar').addEventListener('click',doLogin);
 document.getElementById('senhaInput').addEventListener('keypress',function(e){if(e.key==='Enter')doLogin()});
 
-// ===== NAVEGAÇÃO =====
+// Auto-login se ja estiver logado
+if(localStorage.getItem('jp_admin')==='1'){
+  showAdmin();
+}
+
+// ===== NAVEGACAO =====
 function showPage(page,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  var pages=document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++)pages[i].classList.remove('ativo');
+  var target=document.getElementById('page-'+page);
+  if(target)target.classList.add('ativo');
+  var navs=document.querySelectorAll('.nav-item');
+  for(var i=0;i<navs.length;i++)navs[i].classList.remove('active');
   if(el)el.classList.add('active');
 }
 
 // ===== PRODUTOS (SUPABASE) =====
-async function loadProds(){
-  try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()});
-    if(!res.ok){const errText=await res.text();throw new Error(errText||'Erro '+res.status)}
-    produtos=await res.json();
-    renderProdutos();
-    renderDashboard();
-  }catch(e){toast('Erro ao carregar: '+e.message,false);document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar. Verifique sua conexao.</div>';console.error(e)}
-}
-
-function renderProdutos(){
-  document.getElementById('stTotal').textContent=produtos.length;
-  document.getElementById('stAtivo').textContent=produtos.filter(p=>p.ativo).length;
-  document.getElementById('stDest').textContent=produtos.filter(p=>p.destaque).length;
-  document.getElementById('stClick').textContent=produtos.reduce((a,p)=>a+(p.cliques||0),0);
-  const el=document.getElementById('lista');
-  if(!produtos.length){el.innerHTML='<div class="empty">Nenhum produto. Clique no + para adicionar!</div>';return}
-  el.innerHTML=produtos.map(p=>{
-    const preco=parseFloat(p.preco_atual||0).toFixed(2).r
+function loadProds(){
+  fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()})
+    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
+    .then(function(data){produtos=data||[];renderProdutos();renderDashboard()})
+    .catch(function(e){
+      toast('Erro ao carregar produtos: '+e.message,fa
