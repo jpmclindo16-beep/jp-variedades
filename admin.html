@@ -209,7 +209,6 @@ const SUPABASE_KEY = 'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 var produtos = [];
 var pedidos = [];
 var editando = null;
-var filtroPedido = 'todos';
 
 function getHeaders() {
   return {
@@ -246,34 +245,59 @@ function loadProds() {
     .then(function(data) {
       produtos = data || [];
       renderProdutos();
-      renderEstoqueBaixo();
     })
     .catch(function(e) {
       toast('Erro ao buscar produtos: ' + e.message, false);
     });
 }
 
-function loadPedidos() {
-  fetch(SUPABASE_URL + '/rest/v1/pedidos?select=*', { method: 'GET', headers: getHeaders() })
-    .then(function(res) {
-      if (!res.ok) return [];
-      return res.json();
-    })
-    .then(function(data) {
-      pedidos = data || [];
-      renderDashboardStats();
-      renderDashboardPedidos();
-      renderOrders();
-    })
-    .catch(function() {});
+// Extrator universal de imagem (procura qualquer propriedade com URL HTTP)
+function extractImage(item) {
+  for (var key in item) {
+    var val = String(item[key] || '').trim();
+    if (val.startsWith('http://') || val.startsWith('https://')) {
+      return val;
+    }
+  }
+  return '';
 }
 
-function getValue(obj, keys) {
-  for (var i = 0; i < keys.length; i++) {
-    var k = keys[i];
-    if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
+// Extrator universal de preço (procura valores numéricos ou formatação R$)
+function extractPrice(item) {
+  for (var key in item) {
+    var k = key.toLowerCase();
+    if (k.includes('preco') || k.includes('price') || k.includes('valor') || k.includes('val')) {
+      var raw = item[key];
+      if (typeof raw === 'number' && raw > 0) return raw;
+      if (typeof raw === 'string') {
+        var clean = raw.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+        var num = parseFloat(clean);
+        if (!isNaN(num) && num > 0) return num;
+      }
+    }
   }
-  return null;
+  for (var key in item) {
+    if (key === 'id') continue;
+    var raw = item[key];
+    if (typeof raw === 'number' && raw > 0) return raw;
+    if (typeof raw === 'string' && !raw.startsWith('http')) {
+      var clean = raw.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+      var num = parseFloat(clean);
+      if (!isNaN(num) && num > 0) return num;
+    }
+  }
+  return 0;
+}
+
+// Extrator universal de nome
+function extractName(item) {
+  for (var key in item) {
+    var k = key.toLowerCase();
+    if (k.includes('nome') || k.includes('title') || k.includes('titulo') || k.includes('name')) {
+      if (item[key]) return String(item[key]);
+    }
+  }
+  return item.nome || item.title || 'Produto sem nome';
 }
 
 function renderProdutos() {
@@ -286,13 +310,12 @@ function renderProdutos() {
   } else {
     for (var i = 0; i < produtos.length; i++) {
       var p = produtos[i];
-      var nome = getValue(p, ['nome', 'Nome', 'title', 'Title']) || 'Sem nome';
-      var rawPreco = getValue(p, ['preco', 'Preco', 'price', 'Price', 'valor', 'Valor']);
-      var preco = parseFloat(rawPreco) || 0;
-      var imagem = getValue(p, ['imagem', 'Imagem', 'image', 'Image', 'foto', 'Foto', 'img', 'Img', 'url']) || '';
-      var tipo = getValue(p, ['tipo', 'Tipo']) || 'afiliado';
-      var estoque = getValue(p, ['estoque', 'Estoque']) || 0;
-      var loja = getValue(p, ['loja', 'Loja']) || 'Geral';
+      var nome = extractName(p);
+      var preco = extractPrice(p);
+      var imagem = extractImage(p);
+      var loja = p.loja || p.Loja || 'Geral';
+      var tipo = p.tipo || p.Tipo || 'afiliado';
+      var estoque = p.estoque ?? p.Estoque ?? 0;
 
       html += '<div class="item">' +
         '<img src="' + imagem + '" alt="" onerror="this.src=\'https://via.placeholder.com/56?text=Sem+Foto\'">' +
@@ -311,37 +334,13 @@ function renderProdutos() {
   document.getElementById('lista').innerHTML = html;
 }
 
-function renderDashboardStats() {
-  document.getElementById('dashVendas').textContent = 'R$ 0,00';
-  document.getElementById('dashPedidos').textContent = pedidos.length;
-  document.getElementById('dashLucro').textContent = 'R$ 0,00';
-  document.getElementById('dashTicket').textContent = 'R$ 0,00';
-}
-
-function renderDashboardPedidos() {
-  document.getElementById('dashPedidosBody').innerHTML = '<tr><td colspan="5" class="empty" style="padding:15px">Nenhum pedido efetuado ainda.</td></tr>';
-}
-
-function renderEstoqueBaixo() {
-  document.getElementById('dashEstoqueBody').innerHTML = '<tr><td colspan="3" class="empty" style="padding:15px">Todos os produtos com estoque normal.</td></tr>';
-}
-
-function renderOrders() {
-  document.getElementById('ordersBody').innerHTML = '<tr><td colspan="6" class="empty">Nenhum pedido no histórico.</td></tr>';
-}
-
-function filterOrders(s, el) {}
-function renderSuppliers() {
-  document.getElementById('suppliersBody').innerHTML = '<tr><td><b>Shopee</b></td><td>Afiliado / Direct</td><td><span class="status status-ativo"><span class="status-dot"></span>Ativo</span></td></tr>';
-}
-
 function openForm(prod) {
   editando = prod || null;
   document.getElementById('formTitle').textContent = editando ? 'Editar Produto' : 'Novo Produto';
   document.getElementById('pid').value = editando ? editando.id : '';
-  document.getElementById('pNome').value = editando ? getValue(editando, ['nome', 'Nome']) : '';
-  document.getElementById('pPreco').value = editando ? getValue(editando, ['preco', 'Preco']) : '';
-  document.getElementById('pImg').value = editando ? getValue(editando, ['imagem', 'Imagem']) : '';
+  document.getElementById('pNome').value = editando ? extractName(editando) : '';
+  document.getElementById('pPreco').value = editando ? extractPrice(editando) : '';
+  document.getElementById('pImg').value = editando ? extractImage(editando) : '';
   document.getElementById('formModal').classList.add('on');
 }
 
@@ -405,8 +404,6 @@ function deleteProd(id) {
 
 window.onload = function() {
   loadProds();
-  loadPedidos();
-  renderSuppliers();
 };
 </script>
 </body>
