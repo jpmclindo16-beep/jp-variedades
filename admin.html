@@ -60,14 +60,11 @@ th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size
 td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
 tr:last-child td{border-bottom:none}
 .price{color:var(--accent);font-weight:700}
-.profit{color:var(--accent);font-weight:700}
 .stock-low{color:var(--danger);font-weight:700}
 .status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .status-approved,.status-pago{background:rgba(0,230,118,.15);color:#00e676}
 .status-pending,.status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
-.status-enviado{background:rgba(59,130,246,.15);color:#3b82f6}
 .status-ativo{background:rgba(0,230,118,.15);color:#00e676}
-.status-inativo{background:rgba(107,114,128,.15);color:#9ca3af}
 .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 
 /* PRODUTOS LISTA */
@@ -218,11 +215,23 @@ tr:last-child td{border-bottom:none}
     <input type="hidden" id="pid">
     <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome" placeholder="Ex: Creatina 1kg"></div>
     
-    <div class="form-group"><label>Tipo</label><select id="pTipo" onchange="toggleCamposTipo()"><option value="afiliado">Afiliado (link externo)</option><option value="dropshipping">Dropshipping (pagamento próprio)</option></select></div>
+    <div class="form-group">
+      <label>Tipo</label>
+      <select id="pTipo" onchange="toggleCamposTipo()">
+        <option value="afiliado">Afiliado (link externo)</option>
+        <option value="dropshipping">Dropshipping (pagamento próprio)</option>
+      </select>
+    </div>
     
-    <div class="form-group" id="grupoLinkAfiliado"><label id="labelLinkAfiliado">Link do afiliado *</label><input type="text" id="pLink" placeholder="https://meli.la/..."></div>
+    <div class="form-group" id="grupoLinkAfiliado">
+      <label id="labelLinkAfiliado">Link do afiliado *</label>
+      <input type="text" id="pLink" placeholder="https://meli.la/...">
+    </div>
     
-    <div class="form-group" id="pagamentoGroup" style="display:none"><label>Link de Pagamento (Mercado Pago) *</label><input type="text" id="pPagamento" placeholder="https://mpago.la/..."></div>
+    <div class="form-group" id="pagamentoGroup" style="display:none">
+      <label>Link de Pagamento (Mercado Pago) *</label>
+      <input type="text" id="pPagamento" placeholder="https://mpago.la/...">
+    </div>
     
     <div class="form-row">
       <div class="form-group"><label>Preço atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01"></div>
@@ -276,13 +285,17 @@ function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;
 // ===== LOGIN =====
 function doLogin(){
   var input=document.getElementById('senhaInput');
+  var erro=document.getElementById('loginErro');
   if(!input)return;
+  if(erro)erro.textContent='';
+
   if(input.value===SENHA){
     localStorage.setItem('jp_admin','1');
+    log('Login autorizado.');
     showAdmin();
   }else{
-    var erro=document.getElementById('loginErro');
     if(erro)erro.textContent='Senha incorreta.';
+    log('Senha inválida.');
   }
 }
 
@@ -378,4 +391,4 @@ function renderEstoqueBaixo(){
     htmlEstoque='<tr><td colspan="3" class="empty" style="padding:15px">Nenhum produto com estoque baixo.</td></tr>';
   }else{
     for(var i=0;i<estoqueBaixo.length;i++){
-   
+     
