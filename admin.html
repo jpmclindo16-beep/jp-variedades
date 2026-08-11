@@ -9,386 +9,81 @@
 :root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-
-/* LOGIN */
-.login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)}
-.login-logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dark),var(--accent));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000;margin-bottom:16px}
+.login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:#0a0a0a}
+.login-logo{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#000;margin-bottom:16px}
 .login h1{font-size:22px;margin-bottom:4px}
 .login p{color:var(--muted);font-size:13px;margin-bottom:24px}
 .login input{width:100%;max-width:320px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;margin-bottom:12px;outline:none}
-.login input:focus{border-color:var(--accent)}
 .login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer}
-.login button:active{opacity:0.8}
 .login .erro{color:var(--danger);margin-top:12px;font-size:13px;text-align:center}
-
-/* DEBUG BOX */
-.debug-box{width:100%;max-width:320px;margin-top:16px;padding:10px;border-radius:8px;background:#1a1a1a;border:1px solid #333;font-size:11px;color:#888;font-family:monospace;max-height:120px;overflow-y:auto}
-.debug-box b{color:#00e676}
-
-/* ADMIN */
 .admin{display:none}
 .admin.on{display:block}
 .topbar{position:sticky;top:0;z-index:100;background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-.topbar h2{font-size:16px;display:flex;align-items:center;gap:8px}
-.topbar h2 span{font-size:20px}
+.topbar h2{font-size:16px}
 .topbar button{padding:8px 14px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
-.nav{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--border);scrollbar-width:none}
-.nav::-webkit-scrollbar{display:none}
-.nav-item{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
-.nav-item.active{background:var(--accent);color:#000;border-color:var(--accent)}
 .main{padding:16px}
 .page{display:none}
 .page.on{display:block}
-.page-title{font-size:18px;font-weight:700;margin-bottom:16px}
-
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.stat{background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--border);text-align:center}
-.stat b{display:block;font-size:22px;color:var(--accent);margin-bottom:4px}
-.stat span{font-size:11px;color:var(--muted)}
-
-/* CARDS */
-.card{background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
-.card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)}
-.card-title{font-size:14px;font-weight:700}
-.card-body{padding:12px 16px}
-
-/* TABLES */
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
-th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}
-td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
-tr:last-child td{border-bottom:none}
-.price{color:var(--accent);font-weight:700}
-.stock-low{color:var(--danger);font-weight:700}
-.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.status-approved,.status-pago{background:rgba(0,230,118,.15);color:#00e676}
-.status-pending,.status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
-.status-ativo{background:rgba(0,230,118,.15);color:#00e676}
-.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
-
-/* PRODUTOS LISTA */
-.item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
-.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--border);flex-shrink:0}
-.item-info{flex:1;min-width:0}
-.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.item-info .price{font-size:14px;color:var(--accent);font-weight:700}
-.item-info .loja{font-size:11px;color:var(--muted)}
-.item-actions{display:flex;gap:6px}
-.item-actions button{width:32px;height:32px;border-radius:6px;border:none;background:var(--border);color:var(--text);font-size:14px;cursor:pointer}
-.empty{text-align:center;padding:40px;color:var(--muted)}
-
-/* FAB */
-.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--accent);color:#000;font-size:28px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,200,100,.3);z-index:200}
-
-/* MODAL */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;z-index:300}
-.modal.on{display:flex}
-.modal-h{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--card)}
-.modal-h h3{font-size:16px}
-.modal-h button{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:#fff;font-size:18px;cursor:pointer}
-.modal-body{flex:1;overflow-y:auto;padding:16px}
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;outline:none}
-.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.form-check{display:flex;align-items:center;gap:8px;padding:8px 0}
-.form-check input{width:20px;height:20px;accent-color:var(--accent)}
-.save-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
-
-/* TABS */
-.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);overflow-x:auto}
-.tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);font-weight:600;white-space:nowrap}
-.tab.active{border-bottom-color:var(--accent);color:var(--accent)}
-
-/* TOAST */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none}
-.toast.on{display:block}
-.toast.ok{border-color:var(--accent);color:var(--accent)}
-.toast.err{border-color:var(--danger);color:var(--danger)}
-
-@media(min-width:768px){
-  .stats{grid-template-columns:repeat(4,1fr)}
-}
+.card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:16px}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="login" id="loginScreen">
   <div class="login-logo">JP</div>
   <h1>JP Variedades</h1>
   <p>Painel Administrativo</p>
-  <input type="password" id="senhaInput" placeholder="Digite a senha" autocomplete="off">
-  <button onclick="doLogin()" id="btnEntrar">Entrar</button>
+  <input type="password" id="senhaInput" placeholder="Digite a senha">
+  <button onclick="fazerLogin()">Entrar</button>
   <div class="erro" id="loginErro"></div>
-  <div class="debug-box" id="debugBox"><b>DEBUG:</b><br>Aguardando login...</div>
 </div>
 
-<!-- ADMIN -->
 <div class="admin" id="adminScreen">
   <div class="topbar">
-    <h2><span>🛒</span> JP Admin</h2>
-    <button onclick="logout()">Sair</button>
-  </div>
-  <div class="nav">
-    <button class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
-    <button class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</button>
-    <button class="nav-item" onclick="showPage('pedidos',this)">📦 Pedidos</button>
-    <button class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</button>
-    <button class="nav-item" onclick="showPage('config',this)">⚙️ Config</button>
+    <h2>🛒 JP Admin</h2>
+    <button onclick="sair()">Sair</button>
   </div>
   <div class="main">
-
-    <div class="page on" id="page-dashboard">
-      <div class="page-title">Dashboard</div>
-      <div class="stats">
-        <div class="stat"><b id="dashVendas">R$ 0,00</b><span>Vendas Totais</span></div>
-        <div class="stat"><b id="dashPedidos">0</b><span>Pedidos</span></div>
-        <div class="stat"><b id="dashLucro">R$ 0,00</b><span>Lucro Estimado</span></div>
-        <div class="stat"><b id="dashTicket">R$ 0,00</b><span>Ticket Médio</span></div>
-      </div>
+    <div class="page on" id="page-dash">
       <div class="card">
-        <div class="card-header"><div class="card-title">📦 Pedidos Recentes</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">⚠️ Estoque Baixo</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Fornecedor</th><th>Estoque</th></tr></thead><tbody id="dashEstoqueBody"></tbody></table></div></div>
+        <h3>Painel Carregado com Sucesso!</h3>
+        <p style="color:var(--muted); margin-top:8px;">Seu login funcionou perfeitamente.</p>
       </div>
     </div>
-
-    <div class="page" id="page-produtos">
-      <div class="page-title">Produtos</div>
-      <div class="stats">
-        <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
-        <div class="stat"><b id="stAtivo">0</b><span>Ativos</span></div>
-        <div class="stat"><b id="stDest">0</b><span>Destaques</span></div>
-        <div class="stat"><b id="stClick">0</b><span>Cliques</span></div>
-      </div>
-      <div id="lista"></div>
-      <button class="fab" onclick="openForm()">+</button>
-    </div>
-
-    <div class="page" id="page-pedidos">
-      <div class="page-title">Pedidos</div>
-      <div class="tabs">
-        <div class="tab active" onclick="filterOrders('todos',this)">Todos</div>
-        <div class="tab" onclick="filterOrders('approved',this)">Pagos</div>
-        <div class="tab" onclick="filterOrders('pending',this)">Pendentes</div>
-        <div class="tab" onclick="filterOrders('enviado',this)">Enviados</div>
-      </div>
-      <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
-      </div>
-    </div>
-
-    <div class="page" id="page-fornecedores">
-      <div class="page-title">Fornecedores</div>
-      <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Tipo</th><th>Pedidos</th><th>Total</th><th>Margem</th><th>Status</th></tr></thead><tbody id="suppliersBody"></tbody></table></div></div>
-      </div>
-    </div>
-
-    <div class="page" id="page-config">
-      <div class="page-title">Configurações</div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">🔗 Integrações</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Serviço</th><th>Status</th></tr></thead><tbody>
-          <tr><td><b>💳 Mercado Pago</b><br><small style="color:var(--muted)">Pagamentos</small></td><td><span class="status status-pago"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
-          <tr><td><b>🗄️ Supabase</b><br><small style="color:var(--muted)">Banco de Dados</small></td><td><span class="status status-ativo"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
-        </tbody></table></div></div>
-      </div>
-    </div>
-
   </div>
 </div>
-
-<!-- MODAL -->
-<div class="modal" id="formModal">
-  <div class="modal-h">
-    <h3 id="formTitle">Novo Produto</h3>
-    <button onclick="closeForm()">&times;</button>
-  </div>
-  <div class="modal-body">
-    <input type="hidden" id="pid">
-    <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome" placeholder="Ex: Creatina 1kg"></div>
-    
-    <div class="form-group">
-      <label>Tipo</label>
-      <select id="pTipo" onchange="toggleCamposTipo()">
-        <option value="afiliado">Afiliado (link externo)</option>
-        <option value="dropshipping">Dropshipping (pagamento próprio)</option>
-      </select>
-    </div>
-    
-    <div class="form-group" id="grupoLinkAfiliado">
-      <label id="labelLinkAfiliado">Link do afiliado *</label>
-      <input type="text" id="pLink" placeholder="https://meli.la/...">
-    </div>
-    
-    <div class="form-group" id="pagamentoGroup" style="display:none">
-      <label>Link de Pagamento (Mercado Pago) *</label>
-      <input type="text" id="pPagamento" placeholder="https://mpago.la/...">
-    </div>
-    
-    <div class="form-row">
-      <div class="form-group"><label>Preço atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01"></div>
-      <div class="form-group"><label>Preço de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01"></div>
-    </div>
-    <div class="form-group"><label>URL da imagem *</label><input type="text" id="pImg" placeholder="https://..."></div>
-    <div class="form-row">
-      <div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div>
-      <div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Custo R$ (fornecedor)</label><input type="number" id="pCusto" placeholder="30.00" step="0.01"></div>
-      <div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1"></div>
-    </div>
-    
-    <div class="form-check"><input type="checkbox" id="pDest"><label for="pDest">Destacar produto</label></div>
-    <div class="form-check"><input type="checkbox" id="pAtivo" checked><label for="pAtivo">Produto ativo</label></div>
-    <button class="save-btn" onclick="saveProd()">Salvar Produto</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-// ===== DEBUG =====
-function log(msg){
-  var d=document.getElementById('debugBox');
-  if(d)d.innerHTML+='<br>'+msg;
-}
+const SENHA_MESTRE = 'jpvariedades2024';
 
-// ===== SUPABASE =====
-const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
-const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
-const SENHA='jpvariedades2024';
-
-log('JS carregado OK');
-
-let produtos=[];
-let pedidos=[];
-let editando=null;
-let filtroPedido='todos';
-
-const fornecedoresMock=[
-  {id:1,nome:'Shopee',tipo:'Dropshipping',pedidos:89,total:4250,margem:32,status:'ativo'},
-  {id:2,nome:'Mercado Livre',tipo:'Dropshipping',pedidos:67,total:3890,margem:28,status:'ativo'},
-];
-
-function getHeaders(){return{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}}
-function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(ok?'ok':'err');t.classList.add('on');setTimeout(function(){t.classList.remove('on')},3000)}
-
-// ===== LOGIN =====
-function doLogin(){
-  var input=document.getElementById('senhaInput');
-  var erro=document.getElementById('loginErro');
-  if(!input)return;
-  if(erro)erro.textContent='';
-
-  if(input.value===SENHA){
-    localStorage.setItem('jp_admin','1');
-    log('Login autorizado.');
-    showAdmin();
-  }else{
-    if(erro)erro.textContent='Senha incorreta.';
-    log('Senha inválida.');
+function fazerLogin() {
+  var input = document.getElementById('senhaInput').value;
+  var erro = document.getElementById('loginErro');
+  
+  if (input === SENHA_MESTRE) {
+    localStorage.setItem('jp_logado', 'true');
+    liberarPainel();
+  } else {
+    erro.textContent = 'Senha incorreta!';
   }
 }
 
-function logout(){localStorage.removeItem('jp_admin');location.reload()}
-
-function showAdmin(){
-  document.getElementById('loginScreen').style.display='none';
-  var admin=document.getElementById('adminScreen');
-  admin.style.display='block';
+function liberarPainel() {
+  document.getElementById('loginScreen').style.display = 'none';
+  var admin = document.getElementById('adminScreen');
+  admin.style.display = 'block';
   admin.classList.add('on');
-  loadProds();
-  loadPedidos();
-  renderSuppliers();
 }
 
-if(localStorage.getItem('jp_admin')==='1'){
-  showAdmin();
+function sair() {
+  localStorage.removeItem('jp_logado');
+  location.reload();
 }
 
-document.getElementById('senhaInput').addEventListener('keypress',function(e){
-  if(e.key==='Enter')doLogin();
-});
-
-// ===== NAVEGAÇÃO =====
-function showPage(page,el){
-  var pages=document.querySelectorAll('.page');
-  for(var i=0;i<pages.length;i++)pages[i].classList.remove('on');
-  var target=document.getElementById('page-'+page);
-  if(target)target.classList.add('on');
-  var navs=document.querySelectorAll('.nav-item');
-  for(var i=0;i<navs.length;i++)navs[i].classList.remove('active');
-  if(el)el.classList.add('active');
+// Verifica se já estava logado ao abrir
+if (localStorage.getItem('jp_logado') === 'true') {
+  liberarPainel();
 }
-
-// ===== CARREGAR DADOS DO SUPABASE =====
-function loadProds(){
-  fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()})
-    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
-    .then(function(data){
-      produtos=data||[];
-      renderProdutos();
-      renderEstoqueBaixo();
-    })
-    .catch(function(e){toast('Erro produtos: '+e.message,false);});
-}
-
-function loadPedidos(){
-  fetch(SUPABASE_URL+'/rest/v1/pedidos?order=criado_em.desc',{method:'GET',headers:getHeaders()})
-    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
-    .then(function(data){
-      pedidos=data||[];
-      renderDashboardStats();
-      renderDashboardPedidos();
-      renderOrders();
-    })
-    .catch(function(e){toast('Erro pedidos: '+e.message,false);});
-}
-
-// ===== RENDERIZAÇÃO DA DASHBOARD =====
-function renderDashboardStats(){
-  var pagos=pedidos.filter(function(o){return o.mercado_pago_status==='approved' || o.status_pedido==='pago'});
-  var totalVendas=pagos.reduce(function(acc,o){return acc+Number(o.valor||0)},0);
-  var totalLucro=totalVendas*0.35;
-  var totalPedidos=pedidos.length;
-  var ticketMedio=totalPedidos>0?totalVendas/totalPedidos:0;
-
-  document.getElementById('dashVendas').textContent='R$ '+totalVendas.toFixed(2);
-  document.getElementById('dashPedidos').textContent=totalPedidos;
-  document.getElementById('dashLucro').textContent='R$ '+totalLucro.toFixed(2);
-  document.getElementById('dashTicket').textContent='R$ '+ticketMedio.toFixed(2);
-}
-
-function renderDashboardPedidos(){
-  var html='';
-  var recentes=pedidos.slice(0,4);
-  if(recentes.length===0){
-    html='<tr><td colspan="5" class="empty" style="padding:15px">Nenhum pedido recente.</td></tr>';
-  }else{
-    for(var i=0;i<recentes.length;i++){
-      var o=recentes[i];
-      var dataFmt=o.criado_em?new Date(o.criado_em).toLocaleDateString('pt-BR'):'-';
-      var statusClass=o.mercado_pago_status==='approved'?'status-approved':'status-pending';
-      html+='<tr><td><b>#'+o.id+'</b><br><small style="color:var(--muted)">'+dataFmt+'</small></td><td>'+(o.cliente_nome||'Cliente')+'</td><td>'+(o.produto_nome||'Produto')+'</td><td class="price">R$ '+Number(o.valor||0).toFixed(2)+'</td><td><span class="status '+statusClass+'"><span class="status-dot"></span>'+(o.mercado_pago_status||'pendente')+'</span></td></tr>';
-    }
-  }
-  document.getElementById('dashPedidosBody').innerHTML=html;
-}
-
-function renderEstoqueBaixo(){
-  var estoqueBaixo=produtos.filter(function(p){return (p.estoque||0)<5});
-  var htmlEstoque='';
-  if(estoqueBaixo.length===0){
-    htmlEstoque='<tr><td colspan="3" class="empty" style="padding:15px">Nenhum produto com estoque baixo.</td></tr>';
-  }else{
-    for(var i=0;i<estoqueBaixo.length;i++){
-     
+</script>
+</body>
+</html>
