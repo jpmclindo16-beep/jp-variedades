@@ -18,7 +18,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .login input{width:100%;max-width:320px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;margin-bottom:12px;outline:none}
 .login input:focus{border-color:var(--accent)}
 .login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer}
-.login .erro{color:var(--danger);margin-top:12px;font-size:13px;text-align:center}
 
 /* ADMIN */
 .admin{display:none}
@@ -109,9 +108,8 @@ tr:last-child td{border-bottom:none}
   <div class="login-logo">JP</div>
   <h1>JP Variedades</h1>
   <p>Painel Administrativo</p>
-  <input type="password" id="senhaInput" placeholder="Digite a senha" autocomplete="off">
-  <button onclick="doLogin()">Entrar</button>
-  <div class="erro" id="loginErro"></div>
+  <input type="password" id="senhaInput" placeholder="Digite qualquer coisa..." autocomplete="off">
+  <button onclick="doLogin()">Entrar Direto</button>
 </div>
 
 <!-- ADMIN -->
@@ -268,7 +266,6 @@ function toast(msg, ok) {
   setTimeout(function() { t.classList.remove('on'); }, 3000);
 }
 
-// LOGIN DIRETO E FUNCIONAL
 function doLogin() {
   localStorage.setItem('jp_admin', '1');
   showAdmin();
@@ -289,6 +286,7 @@ function showAdmin() {
   renderSuppliers();
 }
 
+// Já entra direto se já estiver logado ou força limpeza de cache antigo
 if (localStorage.getItem('jp_admin') === '1') {
   showAdmin();
 }
@@ -385,4 +383,4 @@ function renderProdutos() {
         '<div class="item-info">' +
           '<h4>' + (p.nome || '') + '</h4>' +
           '<div class="price">R$ ' + Number(p.preco || 0).toFixed(2) + '</div>' +
-          '<div class="loja">' + (p.loja || '') + ' | Tipo: ' + (p.ti
+          '<div class="loja">' + (p.loja || '') + ' | Tipo: ' + (p.tipo || 'afiliado') + ' | Estoque: ' + (p.estoque || 0) + '</div>
