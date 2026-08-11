@@ -255,7 +255,7 @@ function render(){
     const badge=p.tipo==='dropshipping'?'<span class="badge b-ds">Loja Propria</span>':(p.platform=='mercado-livre'?'<span class="badge b-ml">Mercado Livre</span>':p.platform=='shopee'?'<span class="badge b-sh">Shopee</span>':'<span class="badge b-disc">Oferta</span>');
     const oldPrice=p.oldPrice?`<span class="card-old">${fmt(p.oldPrice)}</span>`:'';
     const discount=d?`<span class="card-discount">${d}</span>`:'';
-    const buyLink=p.tipo==='dropshipping'?p.paymentLink:p.link;
+    const buyLink=p.tipo==='dropshipping'?('checkout.html?id='+encodeURIComponent(p.id)):p.link;
     const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
     return`<div class="card"><div class="card-img"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">${p.bestseller?'<span class="b-best">🔥 MAIS VENDIDO</span>':''}${badge}<button class="fav ${f?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${f?'❤️':'🤍'}</button></div><div class="card-info"><div class="card-title">${p.name}</div><div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px"><span class="card-price">${fmt(p.price)}</span>${oldPrice}${discount}</div><div class="card-foot"><a href="${buyLink}" target="_blank" class="ver" onclick="event.stopPropagation()">${buyLabel}</a><button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button></div></div></div>`
   }).join('');
@@ -267,7 +267,7 @@ function renderFav(){
   const g=document.getElementById('favGrid');
   if(!list.length){g.innerHTML='<div class="empty">Voce ainda nao tem favoritos ❤️</div>';return}
   g.innerHTML=list.map(p=>{
-    const buyLink=p.tipo==='dropshipping'?p.paymentLink:p.link;
+    const buyLink=p.tipo==='dropshipping'?('checkout.html?id='+encodeURIComponent(p.id)):p.link;
     const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
     return`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${buyLink}" target="_blank" class="ver">${buyLabel}</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`
   }).join('');
