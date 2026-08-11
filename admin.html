@@ -10,21 +10,10 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* LOGIN */
-.login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)}
-.login-logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dark),var(--accent));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000;margin-bottom:16px}
-.login h1{font-size:22px;margin-bottom:4px}
-.login p{color:var(--muted);font-size:13px;margin-bottom:24px}
-.login input{width:100%;max-width:320px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;margin-bottom:12px;outline:none}
-.login input:focus{border-color:var(--accent)}
-.login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer}
-
-/* ADMIN */
-.admin{display:none}
-.admin.on{display:block}
+/* ADMIN DIRECT */
+.admin{display:block}
 .topbar{position:sticky;top:0;z-index:100;background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
 .topbar h2{font-size:16px;display:flex;align-items:center;gap:8px}
-.topbar button{padding:8px 14px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
 .nav{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--border);scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
 .nav-item{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
@@ -103,20 +92,10 @@ tr:last-child td{border-bottom:none}
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="login" id="loginScreen">
-  <div class="login-logo">JP</div>
-  <h1>JP Variedades</h1>
-  <p>Painel Administrativo</p>
-  <input type="password" id="senhaInput" placeholder="Sua senha..." autocomplete="off">
-  <button type="button" onclick="doLogin()">Entrar Direto</button>
-</div>
-
-<!-- ADMIN -->
+<!-- ADMIN DIRECT (SEM TELA DE LOGIN) -->
 <div class="admin" id="adminScreen">
   <div class="topbar">
     <h2><span>🛒</span> JP Admin</h2>
-    <button onclick="logout()">Sair</button>
   </div>
   <div class="nav">
     <button class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
@@ -266,33 +245,14 @@ function toast(msg, ok) {
   setTimeout(function() { t.classList.remove('on'); }, 3000);
 }
 
-function doLogin() {
-  localStorage.setItem('jp_admin', '1');
-  showAdmin();
-}
-
-function logout() {
-  localStorage.removeItem('jp_admin');
-  location.reload();
-}
-
-function showAdmin() {
-  document.getElementById('loginScreen').style.display = 'none';
-  var admin = document.getElementById('adminScreen');
-  admin.style.display = 'block';
-  admin.classList.add('on');
+function initAdmin() {
   loadProds();
   loadPedidos();
   renderSuppliers();
 }
 
-if (localStorage.getItem('jp_admin') === '1') {
-  showAdmin();
-}
-
-document.getElementById('senhaInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') doLogin();
-});
+document.addEventListener('DOMContentLoaded', initAdmin);
+window.onload = initAdmin;
 
 function showPage(page, el) {
   var pages = document.querySelectorAll('.page');
@@ -381,4 +341,173 @@ function renderProdutos() {
           '<div class="loja">' + (p.loja || '') + ' | Tipo: ' + (p.tipo || 'afiliado') + ' | Estoque: ' + (p.estoque || 0) + '</div>' +
         '</div>' +
         '<div class="item-actions">' +
-          '<button onclick="editProd(' + p.id + ')">✏️</button>' 
+          '<button onclick="editProd(' + p.id + ')">✏️</button>' +
+          '<button onclick="deleteProd(' + p.id + ')">🗑️</button>' +
+        '</div>' +
+      '</div>';
+    }
+  }
+  document.getElementById('lista').innerHTML = html;
+}
+
+function renderOrders() {
+  var filtered = pedidos;
+  if (filtroPedido !== 'todos') {
+    filtered = pedidos.filter(function(o) { return o.mercado_pago_status === filtroPedido || o.status_pedido === filtroPedido; });
+  }
+  var html = '';
+  if (filtered.length === 0) {
+    html = '<tr><td colspan="6" class="empty">Nenhum pedido encontrado.</td></tr>';
+  } else {
+    for (var i = 0; i < filtered.length; i++) {
+      var o = filtered[i];
+      var dataFmt = o.criado_em ? new Date(o.criado_em).toLocaleString('pt-BR') : '-';
+      var statusClass = o.mercado_pago_status === 'approved' ? 'status-approved' : 'status-pending';
+      html += '<tr><td><b>#' + o.id + '</b></td><td>' + dataFmt + '</td><td>' + (o.cliente_nome || '-') + '</td><td>' + (o.produto_nome || '-') + '</td><td class="price">R$ ' + Number(o.valor || 0).toFixed(2) + '</td><td><span class="status ' + statusClass + '"><span class="status-dot"></span>' + (o.mercado_pago_status || 'pendente') + '</span></td></tr>';
+    }
+  }
+  document.getElementById('ordersBody').innerHTML = html;
+}
+
+function filterOrders(status, el) {
+  filtroPedido = status;
+  var tabs = document.querySelectorAll('.tabs .tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  if (el) el.classList.add('active');
+  renderOrders();
+}
+
+function renderSuppliers() {
+  document.getElementById('suppliersBody').innerHTML = `
+    <tr><td><b>Shopee</b></td><td>Dropshipping / Afiliado</td><td><span class="status status-ativo"><span class="status-dot"></span>Ativo</span></td></tr>
+    <tr><td><b>Mercado Livre</b></td><td>Dropshipping / Afiliado</td><td><span class="status status-ativo"><span class="status-dot"></span>Ativo</span></td></tr>
+  `;
+}
+
+function openForm(prod) {
+  editando = prod || null;
+  document.getElementById('formTitle').textContent = editando ? 'Editar Produto' : 'Novo Produto';
+  document.getElementById('pid').value = editando ? editando.id : '';
+  document.getElementById('pNome').value = editando ? editando.nome || '' : '';
+  document.getElementById('pLink').value = editando ? editando.link || '' : '';
+  document.getElementById('pPreco').value = editando ? editando.preco || '' : '';
+  document.getElementById('pOld').value = editando ? editando.preco_antigo || '' : '';
+  document.getElementById('pImg').value = editando ? editando.imagem || '' : '';
+  document.getElementById('pLoja').value = editando ? editando.loja || 'Mercado Livre' : 'Mercado Livre';
+  document.getElementById('pCat').value = editando ? editando.categoria || '' : '';
+  document.getElementById('pCusto').value = editando ? editando.custo || '' : '';
+  document.getElementById('pEstoque').value = editando ? editando.estoque || 10 : '';
+  document.getElementById('pTipo').value = editando ? editando.tipo || 'afiliado' : 'afiliado';
+  document.getElementById('pPagamento').value = editando ? editando.link_pagamento || '' : '';
+  document.getElementById('pDest').checked = editando ? !!editando.destacado : false;
+  document.getElementById('pAtivo').checked = editando ? !!editando.ativo : true;
+  
+  toggleCamposTipo();
+  document.getElementById('formModal').classList.add('on');
+}
+
+function closeForm() {
+  document.getElementById('formModal').classList.remove('on');
+  editando = null;
+}
+
+function toggleCamposTipo() {
+  var tipo = document.getElementById('pTipo').value;
+  var grupoAfiliado = document.getElementById('grupoLinkAfiliado');
+  var grupoPagamento = document.getElementById('pagamentoGroup');
+  var labelAfiliado = document.getElementById('labelLinkAfiliado');
+
+  if (tipo === 'dropshipping') {
+    grupoAfiliado.style.display = 'none';
+    grupoPagamento.style.display = 'block';
+    labelAfiliado.textContent = 'Link do afiliado';
+  } else {
+    grupoAfiliado.style.display = 'block';
+    grupoPagamento.style.display = 'none';
+    labelAfiliado.textContent = 'Link do afiliado *';
+  }
+}
+
+function saveProd() {
+  var id = document.getElementById('pid').value;
+  var nome = document.getElementById('pNome').value;
+  var tipo = document.getElementById('pTipo').value;
+  var link = document.getElementById('pLink').value;
+  var link_pagamento = document.getElementById('pPagamento').value;
+  var preco = parseFloat(document.getElementById('pPreco').value);
+  var preco_antigo = parseFloat(document.getElementById('pOld').value) || null;
+  var imgInput = document.getElementById('pImg').value;
+  var loja = document.getElementById('pLoja').value;
+  var categoria = document.getElementById('pCat').value;
+  var custo = parseFloat(document.getElementById('pCusto').value) || 0;
+  var estoque = parseInt(document.getElementById('pEstoque').value) || 0;
+  var destacado = document.getElementById('pDest').checked;
+  var ativo = document.getElementById('pAtivo').checked;
+
+  if (!nome || isNaN(preco) || !imgInput) {
+    toast('Preencha os campos obrigatórios (*)', false);
+    return;
+  }
+
+  var payload = {
+    nome: nome,
+    link: tipo === 'afiliado' ? link : null,
+    link_pagamento: tipo === 'dropshipping' ? link_pagamento : null,
+    preco: preco,
+    preco_antigo: preco_antigo,
+    imagem: imgInput,
+    loja: loja,
+    categoria: categoria,
+    custo: custo,
+    estoque: estoque,
+    tipo: tipo,
+    destacado: destacado,
+    ativo: ativo
+  };
+
+  var url = SUPABASE_URL + '/rest/v1/produtos';
+  var method = 'POST';
+  if (id) {
+    url += '?id=eq.' + id;
+    method = 'PATCH';
+  }
+
+  fetch(url, {
+    method: method,
+    headers: getHeaders(),
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Erro ao salvar');
+    toast('Produto salvo com sucesso!', true);
+    closeForm();
+    loadProds();
+  })
+  .catch(function(e) {
+    toast('Erro: ' + e.message, false);
+  });
+}
+
+function editProd(id) {
+  var p = produtos.find(function(item) { return item.id === id; });
+  if (p) openForm(p);
+}
+
+function deleteProd(id) {
+  if (!confirm('Deseja realmente excluir este produto?')) return;
+  fetch(SUPABASE_URL + '/rest/v1/produtos?id=eq.' + id, {
+    method: 'DELETE',
+    headers: getHeaders()
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Erro ao excluir');
+    toast('Produto excluído com sucesso!', true);
+    loadProds();
+  })
+  .catch(function(e) {
+    toast('Erro: ' + e.message, false);
+  });
+}
+</script>
+</body>
+</html>
