@@ -108,8 +108,8 @@ tr:last-child td{border-bottom:none}
   <div class="login-logo">JP</div>
   <h1>JP Variedades</h1>
   <p>Painel Administrativo</p>
-  <input type="password" id="senhaInput" placeholder="Digite qualquer coisa..." autocomplete="off">
-  <button onclick="doLogin()">Entrar Direto</button>
+  <input type="password" id="senhaInput" placeholder="Sua senha..." autocomplete="off">
+  <button type="button" onclick="doLogin()">Entrar Direto</button>
 </div>
 
 <!-- ADMIN -->
@@ -286,7 +286,6 @@ function showAdmin() {
   renderSuppliers();
 }
 
-// Já entra direto se já estiver logado ou força limpeza de cache antigo
 if (localStorage.getItem('jp_admin') === '1') {
   showAdmin();
 }
@@ -295,7 +294,6 @@ document.getElementById('senhaInput').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') doLogin();
 });
 
-// NAVEGAÇÃO
 function showPage(page, el) {
   var pages = document.querySelectorAll('.page');
   for (var i = 0; i < pages.length; i++) pages[i].classList.remove('on');
@@ -306,7 +304,6 @@ function showPage(page, el) {
   if (el) el.classList.add('active');
 }
 
-// CARREGAR DADOS
 function loadProds() {
   fetch(SUPABASE_URL + '/rest/v1/produtos?order=created_at.desc', {method: 'GET', headers: getHeaders()})
     .then(function(res) { if (!res.ok) throw new Error('Erro ao carregar'); return res.json(); })
@@ -321,7 +318,6 @@ function loadPedidos() {
     .catch(function(e) { toast(e.message, false); });
 }
 
-// DASHBOARD
 function renderDashboardStats() {
   var pagos = pedidos.filter(function(o) { return o.mercado_pago_status === 'approved' || o.status_pedido === 'pago'; });
   var totalVendas = pagos.reduce(function(acc, o) { return acc + Number(o.valor || 0); }, 0);
@@ -365,7 +361,6 @@ function renderEstoqueBaixo() {
   document.getElementById('dashEstoqueBody').innerHTML = html;
 }
 
-// PRODUTOS
 function renderProdutos() {
   document.getElementById('stTotal').textContent = produtos.length;
   document.getElementById('stAtivo').textContent = produtos.filter(function(p) { return p.ativo; }).length;
@@ -383,4 +378,7 @@ function renderProdutos() {
         '<div class="item-info">' +
           '<h4>' + (p.nome || '') + '</h4>' +
           '<div class="price">R$ ' + Number(p.preco || 0).toFixed(2) + '</div>' +
-          '<div class="loja">' + (p.loja || '') + ' | Tipo: ' + (p.tipo || 'afiliado') + ' | Estoque: ' + (p.estoque || 0) + '</div>
+          '<div class="loja">' + (p.loja || '') + ' | Tipo: ' + (p.tipo || 'afiliado') + ' | Estoque: ' + (p.estoque || 0) + '</div>' +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button onclick="editProd(' + p.id + ')">✏️</button>' 
