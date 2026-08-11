@@ -37,20 +37,18 @@ th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size
 td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
 
 .price{color:var(--accent);font-weight:700}
-.stock-low{color:var(--danger);font-weight:700}
 .status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.status-approved,.status-pago,.status-ativo{background:rgba(0,230,118,.15);color:#00e676}
-.status-pending,.status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
+.status-ativo{background:rgba(0,230,118,.15);color:#00e676}
 .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 
-.item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
-.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--border);flex-shrink:0}
+.item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
+.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:#222;flex-shrink:0}
 .item-info{flex:1;min-width:0}
-.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;color:#fff}
 .item-info .price{font-size:14px;color:var(--accent);font-weight:700}
-.item-info .loja{font-size:11px;color:var(--muted)}
+.item-info .loja{font-size:11px;color:var(--muted);margin-top:2px}
 .item-actions{display:flex;gap:6px}
-.item-actions button{width:32px;height:32px;border-radius:6px;border:none;background:var(--border);color:var(--text);font-size:14px;cursor:pointer}
+.item-actions button{width:36px;height:36px;border-radius:8px;border:none;background:var(--border);color:var(--text);font-size:15px;cursor:pointer}
 .empty{text-align:center;padding:40px;color:var(--muted)}
 
 .fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--accent);color:#000;font-size:28px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,200,100,.3);z-index:200}
@@ -66,13 +64,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;outline:none}
 .form-group input:focus,.form-group select:focus{border-color:var(--accent)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.form-check{display:flex;align-items:center;gap:8px;padding:8px 0}
-.form-check input{width:20px;height:20px;accent-color:var(--accent)}
 .save-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
-
-.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);overflow-x:auto}
-.tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);font-weight:600;white-space:nowrap}
-.tab.active{border-bottom-color:var(--accent);color:var(--accent)}
 
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none}
 .toast.on{display:block}
@@ -105,11 +97,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">📦 Pedidos Recentes</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">⚠️ Estoque Baixo</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Loja</th><th>Estoque</th></tr></thead><tbody id="dashEstoqueBody"></tbody></table></div></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"><tr><td colspan="5" class="empty">Nenhum pedido efetuado ainda.</td></tr></tbody></table></div></div>
       </div>
     </div>
 
@@ -127,21 +115,12 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
 
     <div class="page" id="page-pedidos">
       <div class="page-title">Pedidos</div>
-      <div class="tabs">
-        <div class="tab active" onclick="filterOrders('todos',this)">Todos</div>
-        <div class="tab" onclick="filterOrders('approved',this)">Pagos</div>
-        <div class="tab" onclick="filterOrders('pending',this)">Pendentes</div>
-      </div>
-      <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
-      </div>
+      <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersBody"><tr><td colspan="6" class="empty">Nenhum pedido no histórico.</td></tr></tbody></table></div></div></div>
     </div>
 
     <div class="page" id="page-fornecedores">
       <div class="page-title">Fornecedores</div>
-      <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Tipo</th><th>Status</th></tr></thead><tbody id="suppliersBody"></tbody></table></div></div>
-      </div>
+      <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Tipo</th><th>Status</th></tr></thead><tbody><tr><td><b>Shopee</b></td><td>Afiliado</td><td><span class="status status-ativo"><span class="status-dot"></span>Ativo</span></td></tr></tbody></table></div></div></div>
     </div>
 
     <div class="page" id="page-config">
@@ -149,7 +128,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
       <div class="card">
         <div class="card-header"><div class="card-title">🔗 Integrações</div></div>
         <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Serviço</th><th>Status</th></tr></thead><tbody>
-          <tr><td><b>💳 Mercado Pago</b></td><td><span class="status status-pago"><span class="status-dot"></span>Conectado</span></td></tr>
+          <tr><td><b>💳 Mercado Pago</b></td><td><span class="status status-ativo"><span class="status-dot"></span>Conectado</span></td></tr>
           <tr><td><b>🗄️ Supabase</b></td><td><span class="status status-ativo"><span class="status-dot"></span>Conectado</span></td></tr>
         </tbody></table></div></div>
       </div>
@@ -160,43 +139,19 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
 
 <div class="modal" id="formModal">
   <div class="modal-h">
-    <h3 id="formTitle">Novo Produto</h3>
+    <h3 id="formTitle">Editar Produto</h3>
     <button onclick="closeForm()">&times;</button>
   </div>
   <div class="modal-body">
     <input type="hidden" id="pid">
-    <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome" placeholder="Ex: Creatina 1kg"></div>
-    <div class="form-group">
-      <label>Tipo</label>
-      <select id="pTipo" onchange="toggleCamposTipo()">
-        <option value="afiliado">Afiliado (link externo)</option>
-        <option value="dropshipping">Dropshipping (pagamento próprio)</option>
-      </select>
-    </div>
-    <div class="form-group" id="grupoLinkAfiliado">
-      <label id="labelLinkAfiliado">Link do afiliado *</label>
-      <input type="text" id="pLink" placeholder="https://...">
-    </div>
-    <div class="form-group" id="pagamentoGroup" style="display:none">
-      <label>Link de Pagamento (Mercado Pago) *</label>
-      <input type="text" id="pPagamento" placeholder="https://mpago.la/...">
-    </div>
+    <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome"></div>
     <div class="form-row">
-      <div class="form-group"><label>Preço atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01"></div>
-      <div class="form-group"><label>Preço de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01"></div>
+      <div class="form-group"><label>Preço R$ *</label><input type="number" id="pPreco" step="0.01"></div>
+      <div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" step="1"></div>
     </div>
-    <div class="form-group"><label>URL da imagem *</label><input type="text" id="pImg" placeholder="https://..."></div>
-    <div class="form-row">
-      <div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div>
-      <div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Custo R$</label><input type="number" id="pCusto" placeholder="30.00" step="0.01"></div>
-      <div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1"></div>
-    </div>
-    <div class="form-check"><input type="checkbox" id="pDest"><label for="pDest">Destacar produto</label></div>
-    <div class="form-check"><input type="checkbox" id="pAtivo" checked><label for="pAtivo">Produto ativo</label></div>
-    <button class="save-btn" onclick="saveProd()">Salvar Produto</button>
+    <div class="form-group"><label>URL da Imagem *</label><input type="text" id="pImg"></div>
+    <div class="form-group"><label>Link do Afiliado / Compra</label><input type="text" id="pLink"></div>
+    <button class="save-btn" onclick="saveProd()">Salvar Alterações</button>
   </div>
 </div>
 
@@ -207,7 +162,6 @@ const SUPABASE_URL = 'https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
 var produtos = [];
-var pedidos = [];
 var editando = null;
 
 function getHeaders() {
@@ -239,7 +193,7 @@ function showPage(page, el) {
 function loadProds() {
   fetch(SUPABASE_URL + '/rest/v1/produtos?select=*', { method: 'GET', headers: getHeaders() })
     .then(function(res) {
-      if (!res.ok) throw new Error('Status HTTP ' + res.status);
+      if (!res.ok) throw new Error('Erro na conexão com o Supabase');
       return res.json();
     })
     .then(function(data) {
@@ -247,26 +201,41 @@ function loadProds() {
       renderProdutos();
     })
     .catch(function(e) {
-      toast('Erro ao buscar produtos: ' + e.message, false);
+      toast(e.message, false);
     });
 }
 
-// Extrator universal de imagem (procura qualquer propriedade com URL HTTP)
+// Extrai URL de imagem sem confundir com link de afiliado
 function extractImage(item) {
-  for (var key in item) {
-    var val = String(item[key] || '').trim();
-    if (val.startsWith('http://') || val.startsWith('https://')) {
-      return val;
+  const imageKeys = ['imagem', 'image', 'foto', 'img', 'image_url', 'url_imagem', 'thumbnail', 'thumb'];
+  for (var i = 0; i < imageKeys.length; i++) {
+    var k = imageKeys[i];
+    for (var prop in item) {
+      if (prop.toLowerCase() === k && item[prop]) {
+        var v = String(item[prop]).trim();
+        if (v.startsWith('http')) return v;
+      }
+    }
+  }
+  for (var prop in item) {
+    if (prop.toLowerCase().includes('img') || prop.toLowerCase().includes('foto') || prop.toLowerCase().includes('image')) {
+      var v = String(item[prop] || '').trim();
+      if (v.startsWith('http')) return v;
+    }
+  }
+  for (var prop in item) {
+    var v = String(item[prop] || '').trim();
+    if (v.startsWith('http') && (v.includes('.jpg') || v.includes('.jpeg') || v.includes('.png') || v.includes('.webp') || v.includes('images') || v.includes('img'))) {
+      return v;
     }
   }
   return '';
 }
 
-// Extrator universal de preço (procura valores numéricos ou formatação R$)
 function extractPrice(item) {
   for (var key in item) {
     var k = key.toLowerCase();
-    if (k.includes('preco') || k.includes('price') || k.includes('valor') || k.includes('val')) {
+    if (k.includes('preco') || k.includes('price') || k.includes('valor')) {
       var raw = item[key];
       if (typeof raw === 'number' && raw > 0) return raw;
       if (typeof raw === 'string') {
@@ -289,7 +258,6 @@ function extractPrice(item) {
   return 0;
 }
 
-// Extrator universal de nome
 function extractName(item) {
   for (var key in item) {
     var k = key.toLowerCase();
@@ -297,7 +265,30 @@ function extractName(item) {
       if (item[key]) return String(item[key]);
     }
   }
-  return item.nome || item.title || 'Produto sem nome';
+  return item.nome || item.title || 'Produto';
+}
+
+function extractLink(item) {
+  for (var key in item) {
+    var k = key.toLowerCase();
+    if (k.includes('link') || k.includes('url') || k.includes('afiliado')) {
+      var v = String(item[key] || '').trim();
+      if (v.startsWith('http') && !v.includes('.jpg') && !v.includes('.png') && !v.includes('.webp')) {
+        return v;
+      }
+    }
+  }
+  return '';
+}
+
+function getKeyName(item, matchArray, defaultKey) {
+  for (var prop in item) {
+    var lower = prop.toLowerCase();
+    for (var i = 0; i < matchArray.length; i++) {
+      if (lower.includes(matchArray[i])) return prop;
+    }
+  }
+  return defaultKey;
 }
 
 function renderProdutos() {
@@ -316,9 +307,10 @@ function renderProdutos() {
       var loja = p.loja || p.Loja || 'Geral';
       var tipo = p.tipo || p.Tipo || 'afiliado';
       var estoque = p.estoque ?? p.Estoque ?? 0;
+      var fallbackImg = 'https://via.placeholder.com/56/1a1a1a/a0a0a0?text=Sem+Foto';
 
       html += '<div class="item">' +
-        '<img src="' + imagem + '" alt="" onerror="this.src=\'https://via.placeholder.com/56?text=Sem+Foto\'">' +
+        '<img src="' + (imagem || fallbackImg) + '" alt="" onerror="this.onerror=null;this.src=\'' + fallbackImg + '\';">' +
         '<div class="item-info">' +
           '<h4>' + nome + '</h4>' +
           '<div class="price">R$ ' + preco.toFixed(2) + '</div>' +
@@ -340,7 +332,9 @@ function openForm(prod) {
   document.getElementById('pid').value = editando ? editando.id : '';
   document.getElementById('pNome').value = editando ? extractName(editando) : '';
   document.getElementById('pPreco').value = editando ? extractPrice(editando) : '';
+  document.getElementById('pEstoque').value = editando ? (editando.estoque ?? editando.Estoque ?? 0) : 10;
   document.getElementById('pImg').value = editando ? extractImage(editando) : '';
+  document.getElementById('pLink').value = editando ? extractLink(editando) : '';
   document.getElementById('formModal').classList.add('on');
 }
 
@@ -348,22 +342,37 @@ function closeForm() {
   document.getElementById('formModal').classList.remove('on');
 }
 
-function toggleCamposTipo() {}
-
 function saveProd() {
   var id = document.getElementById('pid').value;
-  var nome = document.getElementById('pNome').value;
+  var nome = document.getElementById('pNome').value.trim();
   var preco = parseFloat(document.getElementById('pPreco').value);
-  var imgInput = document.getElementById('pImg').value;
+  var estoque = parseInt(document.getElementById('pEstoque').value) || 0;
+  var imgInput = document.getElementById('pImg').value.trim();
+  var linkInput = document.getElementById('pLink').value.trim();
 
-  if (!nome || isNaN(preco) || !imgInput) {
-    toast('Preencha os campos obrigatórios (*)', false);
+  if (!nome || isNaN(preco)) {
+    toast('Preencha pelo menos Nome e Preço', false);
     return;
   }
 
-  var payload = { nome: nome, preco: preco, imagem: imgInput };
+  var payload = {};
+  var sample = editando || (produtos.length > 0 ? produtos[0] : {});
+
+  var nameKey = getKeyName(sample, ['nome', 'title', 'titulo', 'name'], 'nome');
+  var priceKey = getKeyName(sample, ['preco', 'price', 'valor'], 'preco');
+  var imgKey = getKeyName(sample, ['imagem', 'image', 'foto', 'img', 'url_imagem'], 'imagem');
+  var linkKey = getKeyName(sample, ['link', 'url', 'afiliado'], 'link');
+  var stockKey = getKeyName(sample, ['estoque', 'stock', 'quantidade'], 'estoque');
+
+  payload[nameKey] = nome;
+  payload[priceKey] = preco;
+  payload[stockKey] = estoque;
+  if (imgInput) payload[imgKey] = imgInput;
+  if (linkInput) payload[linkKey] = linkInput;
+
   var url = SUPABASE_URL + '/rest/v1/produtos';
   var method = 'POST';
+
   if (id) {
     url += '?id=eq.' + id;
     method = 'PATCH';
@@ -375,7 +384,7 @@ function saveProd() {
     body: JSON.stringify(payload)
   })
   .then(function(res) {
-    if (!res.ok) throw new Error('Erro ao salvar no banco');
+    if (!res.ok) throw new Error('Falha ao salvar no Supabase');
     toast('Salvo com sucesso!', true);
     closeForm();
     loadProds();
@@ -386,19 +395,23 @@ function saveProd() {
 }
 
 function editProd(id) {
-  var p = produtos.find(function(item) { return item.id === id; });
+  var p = produtos.find(function(item) { return item.id == id; });
   if (p) openForm(p);
 }
 
 function deleteProd(id) {
-  if (!confirm('Excluir produto?')) return;
+  if (!confirm('Deseja realmente excluir este produto?')) return;
   fetch(SUPABASE_URL + '/rest/v1/produtos?id=eq.' + id, {
     method: 'DELETE',
     headers: getHeaders()
   })
-  .then(function() {
+  .then(function(res) {
+    if (!res.ok) throw new Error('Erro ao excluir');
     toast('Excluído com sucesso!', true);
     loadProds();
+  })
+  .catch(function(e) {
+    toast(e.message, false);
   });
 }
 
