@@ -2,1263 +2,1678 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#0a0a0a">
 <title>Admin - JP Variedades</title>
 
 <style>
 :root{
-  --bg:#0a0a0a;
-  --card:#171717;
-  --card2:#1d1d1d;
-  --border:#2b2b2b;
-  --text:#fff;
-  --muted:#999;
-  --accent:#00e676;
-  --accent-dark:#00c853;
-  --danger:#ff5252;
-  --warning:#f59e0b;
-  --blue:#3b82f6;
+--bg:#0a0a0a;
+--card:#171717;
+--border:#292929;
+--text:#fff;
+--muted:#999;
+--accent:#00e676;
+--danger:#ff5252;
+--warning:#f59e0b;
+--blue:#3b82f6
 }
 
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+margin:0;
+padding:0;
+box-sizing:border-box
 }
 
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+background:var(--bg);
+color:var(--text);
+min-height:100vh
 }
 
-/* ================= LOGIN ================= */
+button,input,select{
+font-family:inherit
+}
+
+/* LOGIN */
 
 .login{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:
-    radial-gradient(circle at top,#111 0%,#0a0a0a 55%);
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:linear-gradient(180deg,#080808,#151515)
 }
 
 .login-logo{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--accent-dark),var(--accent));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#000;
-  font-size:36px;
-  font-weight:900;
-  font-style:italic;
-  margin-bottom:18px;
-  box-shadow:0 0 35px rgba(0,230,118,.18);
+width:82px;
+height:82px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg,#00c853,#00e676);
+color:#000;
+font-size:34px;
+font-weight:900;
+font-style:italic;
+margin-bottom:18px
 }
 
 .login h1{
-  font-size:25px;
-  margin-bottom:5px;
+font-size:24px;
+margin-bottom:5px
 }
 
 .login p{
-  color:var(--muted);
-  font-size:14px;
-  margin-bottom:25px;
+color:var(--muted);
+font-size:14px;
+margin-bottom:25px
 }
 
 .login input{
-  width:100%;
-  max-width:360px;
-  padding:16px;
-  border-radius:13px;
-  border:1px solid var(--border);
-  background:var(--card);
-  color:white;
-  font-size:16px;
-  outline:none;
-  margin-bottom:12px;
+width:100%;
+max-width:360px;
+padding:16px;
+border-radius:13px;
+border:1px solid var(--border);
+background:#191919;
+color:#fff;
+font-size:16px;
+outline:none;
+margin-bottom:12px
 }
 
 .login input:focus{
-  border-color:var(--accent);
+border-color:var(--accent)
 }
 
 .login button{
-  width:100%;
-  max-width:360px;
-  padding:16px;
-  border:0;
-  border-radius:13px;
-  background:var(--accent);
-  color:#000;
-  font-size:17px;
-  font-weight:800;
-  cursor:pointer;
-}
-
-.login button:active{
-  transform:scale(.98);
+width:100%;
+max-width:360px;
+padding:16px;
+border:0;
+border-radius:13px;
+background:var(--accent);
+color:#000;
+font-size:16px;
+font-weight:800
 }
 
 .erro{
-  min-height:20px;
-  margin-top:12px;
-  color:var(--danger);
-  font-size:13px;
-  text-align:center;
+color:var(--danger);
+font-size:13px;
+margin-top:12px;
+text-align:center;
+min-height:18px
 }
 
-.debug-box{
-  width:100%;
-  max-width:360px;
-  margin-top:15px;
-  padding:12px;
-  border-radius:10px;
-  background:#151515;
-  border:1px solid #292929;
-  color:#888;
-  font-size:11px;
-  font-family:monospace;
-  max-height:120px;
-  overflow:auto;
-}
-
-.debug-box b{
-  color:var(--accent);
-}
-
-/* ================= ADMIN ================= */
+/* ADMIN */
 
 .admin{
-  display:none;
+display:none
 }
 
 .admin.on{
-  display:block;
+display:block
 }
 
 .topbar{
-  position:sticky;
-  top:0;
-  z-index:100;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:13px 16px;
-  background:rgba(23,23,23,.97);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
+position:sticky;
+top:0;
+z-index:100;
+background:var(--card);
+border-bottom:1px solid var(--border);
+padding:13px 16px;
+display:flex;
+align-items:center;
+justify-content:space-between
 }
 
 .topbar h2{
-  font-size:17px;
-  display:flex;
-  align-items:center;
-  gap:8px;
+font-size:17px
 }
 
 .topbar button{
-  padding:8px 14px;
-  border:0;
-  border-radius:8px;
-  background:var(--danger);
-  color:white;
-  font-size:12px;
-  font-weight:700;
+border:0;
+background:var(--danger);
+color:#fff;
+padding:8px 14px;
+border-radius:8px;
+font-size:12px;
+font-weight:700
 }
-
-/* NAV */
 
 .nav{
-  display:flex;
-  gap:5px;
-  padding:9px 14px;
-  overflow-x:auto;
-  background:var(--card);
-  border-bottom:1px solid var(--border);
-  scrollbar-width:none;
-}
-
-.nav::-webkit-scrollbar{
-  display:none;
+display:flex;
+gap:5px;
+padding:9px 16px;
+background:var(--card);
+border-bottom:1px solid var(--border);
+overflow-x:auto
 }
 
 .nav-item{
-  flex-shrink:0;
-  padding:9px 13px;
-  border-radius:50px;
-  border:1px solid var(--border);
-  background:var(--card);
-  color:var(--muted);
-  font-size:12px;
-  font-weight:700;
-  white-space:nowrap;
+white-space:nowrap;
+border:1px solid var(--border);
+background:#171717;
+color:var(--muted);
+padding:9px 14px;
+border-radius:50px;
+font-size:12px;
+font-weight:700
 }
 
 .nav-item.active{
-  background:var(--accent);
-  color:#000;
-  border-color:var(--accent);
+background:var(--accent);
+border-color:var(--accent);
+color:#000
 }
 
-/* MAIN */
-
 .main{
-  padding:16px;
-  max-width:1400px;
-  margin:auto;
+padding:16px
 }
 
 .page{
-  display:none;
+display:none
 }
 
 .page.on{
-  display:block;
+display:block
 }
 
 .page-title{
-  font-size:20px;
-  font-weight:800;
-  margin-bottom:16px;
+font-size:20px;
+font-weight:800;
+margin-bottom:16px
 }
 
 /* STATS */
 
 .stats{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin-bottom:16px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-bottom:16px
 }
 
 .stat{
-  padding:15px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:13px;
-  text-align:center;
+background:var(--card);
+border:1px solid var(--border);
+border-radius:13px;
+padding:15px;
+text-align:center
 }
 
 .stat b{
-  display:block;
-  color:var(--accent);
-  font-size:21px;
-  margin-bottom:5px;
+display:block;
+font-size:21px;
+color:var(--accent);
+margin-bottom:4px
 }
 
 .stat span{
-  color:var(--muted);
-  font-size:11px;
+font-size:11px;
+color:var(--muted)
 }
 
-/* CARD */
+/* CARDS */
 
 .card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:13px;
-  overflow:hidden;
-  margin-bottom:16px;
+background:var(--card);
+border:1px solid var(--border);
+border-radius:13px;
+overflow:hidden;
+margin-bottom:16px
 }
 
 .card-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 16px;
-  border-bottom:1px solid var(--border);
-}
-
-.card-title{
-  font-size:14px;
-  font-weight:800;
+padding:14px 16px;
+border-bottom:1px solid var(--border);
+font-weight:800;
+font-size:14px
 }
 
 .card-body{
-  padding:13px 16px;
+padding:13px 16px
 }
 
 /* TABLE */
 
 .table-wrap{
-  width:100%;
-  overflow-x:auto;
+overflow-x:auto
 }
 
 table{
-  width:100%;
-  min-width:650px;
-  border-collapse:collapse;
-  font-size:13px;
+width:100%;
+min-width:650px;
+border-collapse:collapse;
+font-size:13px
 }
 
 th{
-  text-align:left;
-  padding:10px 8px;
-  color:var(--muted);
-  font-size:10px;
-  text-transform:uppercase;
-  border-bottom:1px solid var(--border);
+padding:10px 8px;
+text-align:left;
+color:var(--muted);
+font-size:10px;
+text-transform:uppercase;
+border-bottom:1px solid var(--border)
 }
 
 td{
-  padding:12px 8px;
-  border-bottom:1px solid #242424;
-  color:#ddd;
+padding:12px 8px;
+border-bottom:1px solid #242424;
+color:#ddd
 }
 
-tr:last-child td{
-  border-bottom:0;
-}
-
-.price{
-  color:var(--accent);
-  font-weight:800;
-}
-
+.price,
 .profit{
-  color:var(--accent);
-  font-weight:800;
+color:var(--accent);
+font-weight:800
+}
+
+.stock-low{
+color:var(--danger);
+font-weight:800
 }
 
 /* STATUS */
 
 .status{
-  display:inline-flex;
-  align-items:center;
-  gap:5px;
-  padding:4px 9px;
-  border-radius:20px;
-  font-size:10px;
-  font-weight:800;
-  white-space:nowrap;
-}
-
-.status-dot{
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  display:inline-block;
+display:inline-flex;
+align-items:center;
+gap:5px;
+padding:4px 9px;
+border-radius:20px;
+font-size:10px;
+font-weight:800
 }
 
 .status-pago{
-  color:#00e676;
-  background:rgba(0,230,118,.13);
+background:rgba(0,230,118,.15);
+color:#00e676
 }
 
 .status-pendente{
-  color:#f59e0b;
-  background:rgba(245,158,11,.13);
+background:rgba(245,158,11,.15);
+color:#f59e0b
 }
 
 .status-enviado{
-  color:#3b82f6;
-  background:rgba(59,130,246,.13);
-}
-
-.status-inativo{
-  color:#999;
-  background:rgba(150,150,150,.12);
+background:rgba(59,130,246,.15);
+color:#3b82f6
 }
 
 .status-cancelado{
-  color:#ff5252;
-  background:rgba(255,82,82,.12);
+background:rgba(255,82,82,.15);
+color:#ff5252
+}
+
+.status-inativo{
+background:rgba(120,120,120,.15);
+color:#aaa
+}
+
+.status-dot{
+width:6px;
+height:6px;
+border-radius:50%
 }
 
 /* PRODUTOS */
 
 .item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:11px;
-  margin-bottom:8px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:11px;
+display:flex;
+align-items:center;
+gap:10px;
+padding:11px;
+background:var(--card);
+border:1px solid var(--border);
+border-radius:11px;
+margin-bottom:8px
 }
 
 .item img{
-  width:58px;
-  height:58px;
-  flex-shrink:0;
-  border-radius:9px;
-  object-fit:cover;
-  background:#222;
+width:58px;
+height:58px;
+object-fit:cover;
+border-radius:8px;
+background:#222
 }
 
 .item-info{
-  min-width:0;
-  flex:1;
+flex:1;
+min-width:0
 }
 
 .item-info h4{
-  font-size:13px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  margin-bottom:4px;
+font-size:13px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+margin-bottom:3px
 }
 
 .item-info .price{
-  font-size:14px;
+font-size:14px
 }
 
 .item-info .loja{
-  color:var(--muted);
-  font-size:10px;
-  margin-top:2px;
+font-size:11px;
+color:var(--muted);
+margin-top:2px
 }
 
 .item-actions{
-  display:flex;
-  gap:5px;
+display:flex;
+gap:5px
 }
 
 .item-actions button{
-  width:34px;
-  height:34px;
-  border:0;
-  border-radius:7px;
-  background:var(--border);
-  color:white;
-  font-size:15px;
-}
-
-.item-actions .delete{
-  color:var(--danger);
+width:34px;
+height:34px;
+border:0;
+border-radius:7px;
+background:#292929;
+color:#fff
 }
 
 .empty{
-  text-align:center;
-  padding:40px 15px;
-  color:var(--muted);
+padding:40px 15px;
+text-align:center;
+color:var(--muted)
 }
 
 /* FAB */
 
 .fab{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  width:57px;
-  height:57px;
-  border:0;
-  border-radius:50%;
-  background:var(--accent);
-  color:#000;
-  font-size:29px;
-  font-weight:900;
-  box-shadow:0 5px 20px rgba(0,230,118,.25);
-  z-index:200;
+position:fixed;
+right:20px;
+bottom:20px;
+z-index:200;
+width:57px;
+height:57px;
+border:0;
+border-radius:50%;
+background:var(--accent);
+color:#000;
+font-size:29px;
+font-weight:900;
+box-shadow:0 5px 20px rgba(0,230,118,.25)
 }
 
 /* MODAL */
 
 .modal{
-  position:fixed;
-  inset:0;
-  z-index:300;
-  display:none;
-  flex-direction:column;
-  background:rgba(0,0,0,.94);
+position:fixed;
+inset:0;
+z-index:300;
+display:none;
+flex-direction:column;
+background:rgba(0,0,0,.94)
 }
 
 .modal.on{
-  display:flex;
+display:flex
 }
 
 .modal-h{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 16px;
-  background:var(--card);
-  border-bottom:1px solid var(--border);
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 16px;
+background:var(--card);
+border-bottom:1px solid var(--border)
 }
 
 .modal-h h3{
-  font-size:16px;
+font-size:16px
 }
 
 .modal-h button{
-  width:33px;
-  height:33px;
-  border:0;
-  border-radius:50%;
-  background:var(--border);
-  color:white;
-  font-size:20px;
+width:33px;
+height:33px;
+border:0;
+border-radius:50%;
+background:#292929;
+color:#fff;
+font-size:20px
 }
 
 .modal-body{
-  flex:1;
-  overflow-y:auto;
-  padding:16px;
-  max-width:800px;
-  width:100%;
-  margin:auto;
+padding:16px;
+overflow-y:auto
 }
 
 .form-group{
-  margin-bottom:14px;
+margin-bottom:14px
 }
 
 .form-group label{
-  display:block;
-  margin-bottom:6px;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:700;
+display:block;
+font-size:12px;
+font-weight:700;
+color:var(--muted);
+margin-bottom:5px
 }
 
 .form-group input,
 .form-group select{
-  width:100%;
-  padding:13px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#0d0d0d;
-  color:white;
-  font-size:15px;
-  outline:none;
+width:100%;
+padding:13px;
+border-radius:10px;
+border:1px solid var(--border);
+background:#0c0c0c;
+color:#fff;
+outline:none
 }
 
 .form-group input:focus,
 .form-group select:focus{
-  border-color:var(--accent);
+border-color:var(--accent)
 }
 
 .form-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px
 }
 
 .form-check{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:10px 0;
+display:flex;
+align-items:center;
+gap:8px;
+padding:7px 0;
+font-size:13px
 }
 
 .form-check input{
-  width:19px;
-  height:19px;
-  accent-color:var(--accent);
+width:20px;
+height:20px;
+accent-color:var(--accent)
 }
 
 .save-btn{
-  width:100%;
-  padding:15px;
-  border:0;
-  border-radius:11px;
-  background:var(--accent);
-  color:#000;
-  font-size:16px;
-  font-weight:800;
-  margin-top:10px;
-}
-
-/* TOAST */
-
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:20px;
-  z-index:500;
-  transform:translateX(-50%);
-  display:none;
-  max-width:90%;
-  padding:12px 20px;
-  border-radius:50px;
-  background:#202020;
-  border:1px solid var(--border);
-  font-size:13px;
-  text-align:center;
-}
-
-.toast.on{
-  display:block;
-}
-
-.toast.ok{
-  color:var(--accent);
-  border-color:var(--accent);
-}
-
-.toast.err{
-  color:var(--danger);
-  border-color:var(--danger);
+width:100%;
+padding:15px;
+border:0;
+border-radius:10px;
+background:var(--accent);
+color:#000;
+font-size:16px;
+font-weight:800;
+margin-top:7px
 }
 
 /* TABS */
 
 .tabs{
-  display:flex;
-  gap:4px;
-  margin-bottom:14px;
-  overflow-x:auto;
-  border-bottom:1px solid var(--border);
+display:flex;
+gap:5px;
+overflow-x:auto;
+margin-bottom:14px;
+border-bottom:1px solid var(--border)
 }
 
 .tab{
-  flex-shrink:0;
-  padding:10px 14px;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:700;
-  border-bottom:2px solid transparent;
+padding:10px 14px;
+color:var(--muted);
+font-size:12px;
+font-weight:700;
+white-space:nowrap;
+border-bottom:2px solid transparent
 }
 
 .tab.active{
-  color:var(--accent);
-  border-bottom-color:var(--accent);
+color:var(--accent);
+border-bottom-color:var(--accent)
 }
 
-/* ORDER DETAIL */
+/* TOAST */
 
-.order-btn{
-  padding:6px 9px;
-  border:0;
-  border-radius:7px;
-  background:var(--border);
-  color:white;
-  font-size:11px;
+.toast{
+position:fixed;
+left:50%;
+bottom:20px;
+transform:translateX(-50%);
+z-index:500;
+display:none;
+padding:13px 20px;
+border-radius:50px;
+background:#202020;
+border:1px solid var(--border);
+font-size:13px;
+font-weight:700
 }
 
-/* RESPONSIVO */
+.toast.on{
+display:block
+}
+
+.toast.ok{
+color:var(--accent);
+border-color:var(--accent)
+}
+
+.toast.err{
+color:var(--danger);
+border-color:var(--danger)
+}
+
+.refresh{
+border:1px solid var(--border);
+background:#222;
+color:#fff;
+padding:7px 10px;
+border-radius:8px;
+font-size:11px
+}
 
 @media(min-width:768px){
-  .stats{
-    grid-template-columns:repeat(4,1fr);
-  }
-
-  .main{
-    padding:25px;
-  }
+.stats{
+grid-template-columns:repeat(4,1fr)
 }
-
-@media(max-width:500px){
-  .form-row{
-    grid-template-columns:1fr;
-    gap:0;
-  }
-
-  .main{
-    padding:12px;
-  }
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 
 <div class="login" id="loginScreen">
 
-  <div class="login-logo">JP</div>
+<div class="login-logo">JP</div>
 
-  <h1>JP Variedades</h1>
-  <p>Painel Administrativo</p>
+<h1>JP Variedades</h1>
 
-  <input
-    type="password"
-    id="senhaInput"
-    placeholder="Digite a senha"
-    autocomplete="off"
-  >
+<p>Painel Administrativo</p>
 
-  <button id="btnEntrar" onclick="doLogin()">
-    Entrar
-  </button>
+<input
+type="password"
+id="senhaInput"
+placeholder="Digite a senha"
+autocomplete="off">
 
-  <div class="erro" id="loginErro"></div>
+<button onclick="doLogin()" id="btnEntrar">
+Entrar
+</button>
 
-  <div class="debug-box" id="debugBox">
-    <b>DEBUG:</b><br>
-    Aguardando login...
-  </div>
+<div class="erro" id="loginErro"></div>
 
 </div>
 
 
-<!-- ================= ADMIN ================= -->
+<!-- ADMIN -->
 
 <div class="admin" id="adminScreen">
 
-  <div class="topbar">
+<div class="topbar">
 
-    <h2>
-      🛒 JP Admin
-    </h2>
+<h2>🛒 JP Admin</h2>
 
-    <button onclick="logout()">
-      Sair
-    </button>
-
-  </div>
-
-
-  <div class="nav">
-
-    <button class="nav-item active"
-      onclick="showPage('dashboard',this)">
-      📊 Dashboard
-    </button>
-
-    <button class="nav-item"
-      onclick="showPage('produtos',this)">
-      🛍️ Produtos
-    </button>
-
-    <button class="nav-item"
-      onclick="showPage('pedidos',this)">
-      📦 Pedidos
-    </button>
-
-    <button class="nav-item"
-      onclick="showPage('fornecedores',this)">
-      🏭 Fornecedores
-    </button>
-
-    <button class="nav-item"
-      onclick="showPage('config',this)">
-      ⚙️ Config
-    </button>
-
-  </div>
-
-
-  <div class="main">
-
-
-    <!-- ================= DASHBOARD ================= -->
-
-    <div class="page on" id="page-dashboard">
-
-      <div class="page-title">
-        Dashboard
-      </div>
-
-      <div class="stats">
-
-        <div class="stat">
-          <b id="dashVendas">R$ 0,00</b>
-          <span>Vendas</span>
-        </div>
-
-        <div class="stat">
-          <b id="dashPedidos">0</b>
-          <span>Pedidos</span>
-        </div>
-
-        <div class="stat">
-          <b id="dashLucro">R$ 0,00</b>
-          <span>Lucro estimado</span>
-        </div>
-
-        <div class="stat">
-          <b id="dashTicket">R$ 0,00</b>
-          <span>Ticket médio</span>
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="card-header">
-          <div class="card-title">
-            📦 Pedidos Recentes
-          </div>
-        </div>
-
-        <div class="card-body">
-
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Cliente</th>
-                  <th>Produto</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-
-              <tbody id="dashPedidosBody"></tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="card-header">
-          <div class="card-title">
-            🛍️ Produtos cadastrados
-          </div>
-        </div>
-
-        <div class="card-body">
-
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>Produto</th>
-                  <th>Loja</th>
-                  <th>Preço</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-
-              <tbody id="dashProdutosBody"></tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- ================= PRODUTOS ================= -->
-
-    <div class="page" id="page-produtos">
-
-      <div class="page-title">
-        Produtos
-      </div>
-
-      <div class="stats">
-
-        <div class="stat">
-          <b id="stTotal">0</b>
-          <span>Total</span>
-        </div>
-
-        <div class="stat">
-          <b id="stAtivo">0</b>
-          <span>Ativos</span>
-        </div>
-
-        <div class="stat">
-          <b id="stDest">0</b>
-          <span>Destaques</span>
-        </div>
-
-        <div class="stat">
-          <b id="stClick">—</b>
-          <span>Cliques</span>
-        </div>
-
-      </div>
-
-
-      <div id="lista"></div>
-
-      <button class="fab" onclick="openForm()">
-        +
-      </button>
-
-    </div>
-
-
-    <!-- ================= PEDIDOS ================= -->
-
-    <div class="page" id="page-pedidos">
-
-      <div class="page-title">
-        Pedidos
-      </div>
-
-      <div class="tabs">
-
-        <div class="tab active"
-          onclick="filterOrders('todos',this)">
-          Todos
-        </div>
-
-        <div class="tab"
-          onclick="filterOrders('pago',this)">
-          Pagos
-        </div>
-
-        <div class="tab"
-          onclick="filterOrders('pendente',this)">
-          Pendentes
-        </div>
-
-        <div class="tab"
-          onclick="filterOrders('enviado',this)">
-          Enviados
-        </div>
-
-        <div class="tab"
-          onclick="filterOrders('cancelado',this)">
-          Cancelados
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="card-body">
-
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-
-                <tr>
-                  <th>Pedido</th>
-                  <th>Data</th>
-                  <th>Cliente</th>
-                  <th>Produto</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-
-              </thead>
-
-              <tbody id="ordersBody"></tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- ================= FORNECEDORES ================= -->
-
-    <div class="page" id="page-fornecedores">
-
-      <div class="page-title">
-        Fornecedores
-      </div>
-
-      <div class="card">
-
-        <div class="card-header">
-          <div class="card-title">
-            🏭 Fornecedores utilizados
-          </div>
-        </div>
-
-        <div class="card-body">
-
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>Fornecedor</th>
-                  <th>Produtos</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-
-              <tbody id="suppliersBody"></tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- ================= CONFIG ================= -->
-
-    <div class="page" id="page-config">
-
-      <div class="page-title">
-        Configurações
-      </div>
-
-
-      <div class="card">
-
-        <div class="card-header">
-          <div class="card-title">
-            🔗 Integrações
-          </div>
-        </div>
-
-        <div class="card-body">
-
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>Serviço</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-
-              <tbody>
-
-                <tr>
-                  <td>
-                    <b>💳 Mercado Pago</b><br>
-                    <small style="color:#888">
-                      Pagamentos
-                    </small>
-                  </td>
-
-                  <td>
-                    <span class="status status-pago">
-                      ● Configurado
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <b>🗄️ Supabase</b><br>
-                    <small style="color:#888">
-                      Banco de dados
-                    </small>
-                  </td>
-
-                  <td>
-                    <span class="status status-pago">
-                      ● Conectado
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>
-                    <b>📦 Melhor Envio</b><br>
-                    <small style="color:#888">
-                      Frete
-                    </small>
-                  </td>
-
-                  <td>
-                    <span class="status status-pendente">
-                      ● Não configurado
-                    </span>
-                  </td>
-                </tr>
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="card-header">
-          <div class="card-title">
-            🏪 Informações da loja
-          </div>
-        </div>
-
-        <div class="card-body">
-
-          <div class="table-wrap">
-
-            <table>
-
-              <tbody>
-
-                <tr>
-                  <td style="color:#888">
-                    Nome
-                  </td>
-                  <td>
-                    <b>JP Variedades</b>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="color:#888">
-                    Site
-                  </td>
-                  <td>
-                    jp-variedades.vercel.app
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="color:#888">
-                    Banco
-                  </td>
-                  <td>
-                    Supabase
-                  </td>
-                </tr>
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
+<button onclick="logout()">
+Sair
+</button>
 
 </div>
 
 
-<!-- ================= MODAL PRODUTO ================= -->
+<div class="nav">
+
+<button class="nav-item active"
+onclick="showPage('dashboard',this)">
+📊 Dashboard
+</button>
+
+<button class="nav-item"
+onclick="showPage('produtos',this)">
+🛍️ Produtos
+</button>
+
+<button class="nav-item"
+onclick="showPage('pedidos',this)">
+📦 Pedidos
+</button>
+
+<button class="nav-item"
+onclick="showPage('fornecedores',this)">
+🏭 Fornecedores
+</button>
+
+<button class="nav-item"
+onclick="showPage('config',this)">
+⚙️ Config
+</button>
+
+</div>
+
+
+<div class="main">
+
+
+<!-- DASHBOARD -->
+
+<div class="page on" id="page-dashboard">
+
+<div class="page-title">
+Dashboard
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<b id="dashVendas">R$ 0,00</b>
+<span>Vendas Pagas</span>
+</div>
+
+<div class="stat">
+<b id="dashPedidos">0</b>
+<span>Pedidos</span>
+</div>
+
+<div class="stat">
+<b id="dashLucro">R$ 0,00</b>
+<span>Lucro Estimado</span>
+</div>
+
+<div class="stat">
+<b id="dashTicket">R$ 0,00</b>
+<span>Ticket Médio</span>
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-header">
+📦 Pedidos Recentes
+</div>
+
+<div class="card-body">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Pedido</th>
+<th>Cliente</th>
+<th>Produto</th>
+<th>Total</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="dashPedidosBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-header">
+⚠️ Estoque Baixo
+</div>
+
+<div class="card-body">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Produto</th>
+<th>Fornecedor</th>
+<th>Estoque</th>
+</tr>
+
+</thead>
+
+<tbody id="dashEstoqueBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- PRODUTOS -->
+
+<div class="page" id="page-produtos">
+
+<div class="page-title">
+Produtos
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<b id="stTotal">0</b>
+<span>Total</span>
+</div>
+
+<div class="stat">
+<b id="stAtivo">0</b>
+<span>Ativos</span>
+</div>
+
+<div class="stat">
+<b id="stDest">0</b>
+<span>Destaques</span>
+</div>
+
+<div class="stat">
+<b id="stClick">0</b>
+<span>Cliques</span>
+</div>
+
+</div>
+
+<div id="lista"></div>
+
+<button class="fab" onclick="openForm()">+</button>
+
+</div>
+
+
+<!-- PEDIDOS -->
+
+<div class="page" id="page-pedidos">
+
+<div class="page-title">
+Pedidos
+</div>
+
+<div class="tabs">
+
+<div class="tab active"
+onclick="filterOrders('todos',this)">
+Todos
+</div>
+
+<div class="tab"
+onclick="filterOrders('pago',this)">
+Pagos
+</div>
+
+<div class="tab"
+onclick="filterOrders('pendente',this)">
+Pendentes
+</div>
+
+<div class="tab"
+onclick="filterOrders('enviado',this)">
+Enviados
+</div>
+
+<div class="tab"
+onclick="filterOrders('cancelado',this)">
+Cancelados
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-body">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Pedido</th>
+<th>Data</th>
+<th>Cliente</th>
+<th>Produto</th>
+<th>Total</th>
+<th>Lucro</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="ordersBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- FORNECEDORES -->
+
+<div class="page" id="page-fornecedores">
+
+<div class="page-title">
+Fornecedores
+</div>
+
+<div class="card">
+
+<div class="card-header">
+Fornecedores dos produtos
+</div>
+
+<div class="card-body">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Fornecedor</th>
+<th>Produtos</th>
+<th>Estoque</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="suppliersBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- CONFIG -->
+
+<div class="page" id="page-config">
+
+<div class="page-title">
+Configurações
+</div>
+
+
+<div class="card">
+
+<div class="card-header">
+🔗 Integrações
+</div>
+
+<div class="card-body">
+
+<table>
+
+<tbody>
+
+<tr>
+
+<td>
+💳 Mercado Pago
+<br>
+<small style="color:var(--muted)">
+Pagamentos
+</small>
+</td>
+
+<td>
+<span class="status status-pago">
+<span class="status-dot"
+style="background:#00e676"></span>
+Ativo
+</span>
+</td>
+
+</tr>
+
+
+<tr>
+
+<td>
+🗄️ Supabase
+<br>
+<small style="color:var(--muted)">
+Banco de dados
+</small>
+</td>
+
+<td>
+<span class="status status-pago">
+<span class="status-dot"
+style="background:#00e676"></span>
+Conectado
+</span>
+</td>
+
+</tr>
+
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-header">
+🏪 Loja
+</div>
+
+<div class="card-body">
+
+<table>
+
+<tbody>
+
+<tr>
+<td>Nome</td>
+<td><b>JP Variedades</b></td>
+</tr>
+
+<tr>
+<td>URL</td>
+<td>jp-variedades.vercel.app</td>
+</tr>
+
+<tr>
+<td>Banco</td>
+<td>Supabase</td>
+</tr>
+
+<tr>
+<td>Pagamentos</td>
+<td>Mercado Pago</td>
+</tr>
+
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- MODAL PRODUTO -->
 
 <div class="modal" id="formModal">
 
-  <div class="modal-h">
+<div class="modal-h">
 
-    <h3 id="formTitle">
-      Novo Produto
-    </h3>
+<h3 id="formTitle">
+Novo Produto
+</h3>
 
-    <button onclick="closeForm()">
-      ×
-    </button>
+<button onclick="closeForm()">
+×
+</button>
 
-  </div>
-
-
-  <div class="modal-body">
-
-    <input type="hidden" id="pid">
+</div>
 
 
-    <div class="form-group">
+<div class="modal-body">
 
-      <label>
-        Nome do produto *
-      </label>
-
-      <input
-        type="text"
-        id="pNome"
-        placeholder="Ex: Produto novo"
-      >
-
-    </div>
+<input type="hidden" id="pid">
 
 
-    <div class="form-group">
+<div class="form-group">
 
-      <label>
-        Link do afiliado *
-      </label>
+<label>
+Nome do produto *
+</label>
 
-      <input
-        type="text"
-        id="pLink"
-        placeholder="https://meli.la/..."
-      >
+<input
+type="text"
+id="pNome"
+placeholder="Ex: Creatina 1kg">
 
-    </div>
-
-
-    <div class="form-row">
-
-      <div class="form-group">
-
-        <label>
-          Preço atual R$ *
-        </label>
-
-        <input
-          type="number"
-          id="pPreco"
-          step="0.01"
-          placeholder="59.90"
-        >
-
-      </div>
+</div>
 
 
-      <div class="form-group">
+<div class="form-group">
 
-        <label>
-          Preço antigo R$
-        </label>
+<label>
+Link do afiliado *
+</label>
 
-        <input
-          type="number"
-          id="pOld"
-          step="0.01"
-          placeholder="99.90"
-        >
+<input
+type="text"
+id="pLink"
+placeholder="https://meli.la/...">
 
-      </div>
-
-    </div>
+</div>
 
 
-    <div class="form-group">
+<div class="form-row">
 
-      <label>
-        URL da imagem *
-      </label>
+<div class="form-group">
 
-      <input
-        type="text"
-        id="pImg"
-        placeholder="https://..."
-      >
+<label>
+Preço atual R$
+</label>
 
-    </div>
+<input
+type="number"
+id="pPreco"
+step="0.01">
+
+</div>
 
 
-    <div class="form-row">
+<div class="form-group">
 
-      <div class="form-group">
+<label>
+Preço antigo R$
+</label>
 
- 
+<input
+type="number"
+id="pOld"
+step="0.01">
+
+</div>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+URL da imagem *
+</label>
+
+<input
+type="text"
+id="pImg"
+placeholder="https://...">
+
+</div>
+
+
+<div class="form-row">
+
+<div class="form-group">
+
+<label>
+Loja
+</label>
+
+<select id="pLoja">
+
+<option>Mercado Livre</option>
+<option>Shopee</option>
+<option>Shein</option>
+<option>AliExpress</option>
+<option>Outro</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Categoria
+</label>
+
+<input
+type="text"
+id="pCat"
+placeholder="Ex: Casa">
+
+</div>
+
+</div>
+
+
+<div class="form-row">
+
+<div class="form-group">
+
+<label>
+Custo R$
+</label>
+
+<input
+type="number"
+id="pCusto"
+step="0.01">
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Estoque
+</label>
+
+<input
+type="number"
+id="pEstoque">
+
+</div>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Tipo
+</label>
+
+<select id="pTipo">
+
+<option value="afiliado">
+Afiliado
+</option>
+
+<option value="dropshipping">
+Dropshipping
+</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group"
+id="pagamentoGroup"
+style="display:none">
+
+<label>
+Link de Pagamento
+</label>
+
+<input
+type="text"
+id="pPagamento"
+placeholder="https://mpago.la/...">
+
+</div>
+
+
+<div class="form-check">
+
+<input
+type="checkbox"
+id="pDest">
+
+<label for="pDest">
+Destacar produto
+</label>
+
+</div>
+
+
+<div class="form-check">
+
+<input
+type="checkbox"
+id="pAtivo"
+checked>
+
+<label for="pAtivo">
+Produto ativo
+</label>
+
+</div>
+
+
+<button
+class="save-btn"
+onclick="saveProd()">
+
+Salvar Produto
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+/* =========================================
+   CONFIGURAÇÃO
+========================================= */
+
+const SUPABASE_URL =
+"https://ocheynyjboagfybazcsi.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29";
+
+/*
+  SENHA DO PAINEL
+*/
+const SENHA = "Lucinha85";
+
+
+let produtos = [];
+let pedidos = [];
+let filtroPedido = "todos";
+let editando = null;
+
+
+/* =========================================
+   SUPABASE
+========================================= */
+
+function headers(){
+
+return {
+"apikey":SUPABASE_KEY,
+"Authorization":"Bearer "+SUPABASE_KEY,
+"Content-Type":"application/json",
+"Accept":"application/json",
+"Prefer":"return=representation"
+};
+
+}
+
+
+/* =========================================
+   UTILIDADES
+========================================= */
+
+function dinheiro(valor){
+
+return "R$ "+
+Number(valor || 0)
+.toFixed(2)
+.replace(".",",");
+
+}
+
+
+function escapeHTML(valor){
+
+return String(valor ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function toast(msg,ok=true){
+
+const t=document.getElementById("toast");
+
+t.textContent=msg;
+
+t.className="toast "+(ok?"ok":"err");
+
+t.classList.add("on");
+
+setTimeout(()=>{
+t.classList.remove("on");
+},3000);
+
+}
+
+
+/* =========================================
+   LOGIN
+========================================= */
+
+function doLogin(){
+
+const senha =
+document.getElementById("senhaInput").value;
+
+const erro =
+document.getElementById("loginErro");
+
+if(senha === SENHA){
+
+localStorage.setItem("jp_admin","1");
+
+erro.textContent="";
+
+showAdmin();
+
+}else{
+
+erro.textContent="Senha incorreta.";
+
+}
+
+}
+
+
+function logout(){
+
+localStorage.removeItem("jp_admin");
+
+location.reload();
+
+}
+
+
+function showAdmin(){
+
+document.getElementById("loginScreen")
+.style.display="none";
+
+document.getElementById("adminScreen")
+.style.display="block";
+
+document.getElementById("adminScreen")
+.classList.add("on");
+
+loadProds();
+
+loadPedidos();
+
+renderSuppliers();
+
+}
+
+
+/* ENTER */
+
+document
+.getElementById("senhaInput")
+.addEventListener("keydown",function(e){
+
+if(e.key==="Enter"){
+
+doLogin();
+
+}
+
+});
+
+
+/* =========================================
+   AUTO LOGIN
+========================================= */
+
+if(localStorage.getItem("jp_admin")==="1"){
+
+showAdmin();
+
+}
+
+
+/* =========================================
+   NAVEGAÇÃO
+========================================= */
+
+function showPage(page,el){
+
+document
+.querySelectorAll(".page")
+.forEach(p=>p.classList.remove("on"));
+
+const target =
+document.getElementById("page-"+page);
+
+if(target)
+target.classList.add("on");
+
+
+document
+.querySelectorAll(".nav-item")
+.forEach(n=>n.classList.remove("active"));
+
+if(el)
+el.classList.add("active");
+
+}
+
+
+/* =========================================
+   PRODUTOS
+========================================= */
+
+async function loadProds(){
+
+try{
+
+const response =
+await fetch(
+SUPABASE_URL+
+"/rest/v1/produtos?order=created_at.desc",
+{
+headers:headers()
+}
+);
+
+if(!response.ok){
+
+throw new Error(
+"Erro Supabase: "+response.status
+);
+
+}
+
+produtos =
+await response.json();
+
+renderProdutos();
+
+renderDashboard();
+
+renderSuppliers();
+
+}catch(error){
+
+console.error(error);
+
+document.getElementById("lista")
+.innerHTML=
+'<div class="empty">Erro ao carregar produtos.</div>';
+
+toast(error.message,false);
+
+}
+
+}
+
+
+function renderProdutos(){
+
+document.getElementById("stTotal")
+.textContent=produtos.length;
+
+
+document.getElementById("stAtivo")
+.textContent=
+produtos.filter(p=>p.ativo!==false).length;
+
+
+document.getElementById("stDest")
+.textContent=
+produtos.filter(p=>p.destaque).length;
+
+
+document.getElementById("stClick")
+.textContent=
+produtos.reduce(
+(total,p)=>total+Number(p.cliques||0),
+0
+);
+
+
+const lista=
+document.getElementById("lista");
+
+
+if(!produtos.length){
+
+lista.innerHTML=
+'<div class="empty">Nenhum produto cadastrado.</div>';
+
+return;
+
+}
+
+
+lista.innerHTML=
+produtos.map(p=>{
+
+const tipo=
+p.tipo==="dropshipping"
+?"Dropshipping"
+:"Afiliado";
+
+
+return `
+
+<div class="item">
+
+<img
+src="${escapeHTML(p.imagem_url||"")}"
+onerror="this.style.opacity='.3'"
+>
+
+<div class="item-info">
+
+<h4>
+${escapeHTML(p.nome)}
+</h4>
+
+<div class="price">
+${dinheiro(p.preco_atual)}
+</div>
+
+<div class="loja">
+${escapeHTML(p.loja_origem||"-")}
+•
+${tipo}
+</div>
+
+</div>
+
+
+<div class="item-actions">
+
+<button
+onclick="editProd('${p.id}')">
+✏️
+</button>
+
+<button
+onclick="deleteProd('${p.id}')">
+🗑️
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+}
+
+
+/* =========================================
+   DASHBOARD
+========================================= */
+
+function renderDashboard(){
+
+const pagos =
+pedidos.filter(p=>
+normalizarStatus(p) === "pago"
+);
+
+
+const vendas =
+pagos.reduce(
+(total,p)=>total+Number(p.valor||0),
+0
+);
+
+
+const lucro =
+pagos.reduce(
+(total,p)=>total+calcularLucro(p),
+0
+);
+
+
+document.getElementById("dashVendas")
+.textContent=dinheiro(vendas);
+
+
+document.getElementById("dashPedidos")
+.textContent=pedidos.length;
+
+
+document.getElementById("dashLucro")
+.textContent=dinheiro(lucro);
+
+
+document.getElementById("dashTicket")
+.textContent=
+pagos.length
+? dinheiro(vendas/pagos.length)
+: "R$ 0,00";
+
+
+const recentes=
+pedidos.slice(0,5);
+
+
+document.getElementById("dashPedidosBody")
+.innerHTML=
+recentes.length
+? recentes.map(p=>pedidoLinha(p)).join("")
+: `<tr>
+<td colspan="5" style="text-align:center;color:#888">
+Nenhum pedido ainda
+</td>
+</tr>`;
+
+
+const 
