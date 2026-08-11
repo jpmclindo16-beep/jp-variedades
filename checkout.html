@@ -202,6 +202,9 @@ button:disabled{
     <label>Telefone / WhatsApp</label>
     <input id="telefone" type="tel" placeholder="(00) 00000-0000">
 
+    <label>E-mail</label>
+    <input id="email" type="email" placeholder="seu@email.com">
+
     <label>CEP</label>
     <input id="cep" type="text" inputmode="numeric" placeholder="00000-000">
 
@@ -349,6 +352,7 @@ function validar(){
     ['nome','Nome completo'],
     ['cpf','CPF'],
     ['telefone','Telefone'],
+    ['email','E-mail'],
     ['cep','CEP'],
     ['endereco','Endereço'],
     ['numero','Número'],
@@ -396,6 +400,8 @@ async function comprar(){
     cpf:document.getElementById('cpf').value.trim(),
 
     telefone:document.getElementById('telefone').value.trim(),
+
+    email:document.getElementById('email').value.trim(),
 
     cep:document.getElementById('cep').value.trim(),
 
