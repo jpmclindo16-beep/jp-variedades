@@ -9,508 +9,654 @@
 <style>
 :root{
   --bg:#0a0a0a;
-  --card:#1a1a1a;
-  --border:#2a2a2a;
+  --card:#171717;
+  --card2:#1d1d1d;
+  --border:#2b2b2b;
   --text:#fff;
-  --muted:#a0a0a0;
+  --muted:#999;
   --accent:#00e676;
   --accent-dark:#00c853;
   --danger:#ff5252;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh
+  --warning:#f59e0b;
+  --blue:#3b82f6;
 }
 
-/* LOGIN */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ================= LOGIN ================= */
+
 .login{
+  min-height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  min-height:100vh;
   padding:20px;
-  background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)
+  background:
+    radial-gradient(circle at top,#111 0%,#0a0a0a 55%);
 }
+
 .login-logo{
-  width:80px;
-  height:80px;
+  width:90px;
+  height:90px;
   border-radius:50%;
   background:linear-gradient(135deg,var(--accent-dark),var(--accent));
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:32px;
+  color:#000;
+  font-size:36px;
   font-weight:900;
   font-style:italic;
-  color:#000;
-  margin-bottom:16px
+  margin-bottom:18px;
+  box-shadow:0 0 35px rgba(0,230,118,.18);
 }
-.login h1{font-size:22px;margin-bottom:4px}
-.login p{color:var(--muted);font-size:13px;margin-bottom:24px}
+
+.login h1{
+  font-size:25px;
+  margin-bottom:5px;
+}
+
+.login p{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:25px;
+}
+
 .login input{
   width:100%;
-  max-width:320px;
-  padding:14px 16px;
-  border-radius:12px;
+  max-width:360px;
+  padding:16px;
+  border-radius:13px;
   border:1px solid var(--border);
   background:var(--card);
-  color:var(--text);
+  color:white;
   font-size:16px;
+  outline:none;
   margin-bottom:12px;
-  outline:none
 }
-.login input:focus{border-color:var(--accent)}
+
+.login input:focus{
+  border-color:var(--accent);
+}
+
 .login button{
   width:100%;
-  max-width:320px;
-  padding:14px;
-  border-radius:12px;
-  border:none;
+  max-width:360px;
+  padding:16px;
+  border:0;
+  border-radius:13px;
   background:var(--accent);
   color:#000;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer
+  font-size:17px;
+  font-weight:800;
+  cursor:pointer;
 }
-.login button:active{opacity:.8}
-.login .erro{
-  color:var(--danger);
+
+.login button:active{
+  transform:scale(.98);
+}
+
+.erro{
+  min-height:20px;
   margin-top:12px;
+  color:var(--danger);
   font-size:13px;
-  text-align:center
+  text-align:center;
 }
+
 .debug-box{
   width:100%;
-  max-width:320px;
-  margin-top:16px;
-  padding:10px;
-  border-radius:8px;
-  background:#1a1a1a;
-  border:1px solid #333;
-  font-size:11px;
+  max-width:360px;
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  background:#151515;
+  border:1px solid #292929;
   color:#888;
+  font-size:11px;
   font-family:monospace;
   max-height:120px;
-  overflow-y:auto
+  overflow:auto;
 }
-.debug-box b{color:#00e676}
 
-/* ADMIN */
-.admin{display:none}
-.admin.on{display:block}
+.debug-box b{
+  color:var(--accent);
+}
+
+/* ================= ADMIN ================= */
+
+.admin{
+  display:none;
+}
+
+.admin.on{
+  display:block;
+}
 
 .topbar{
   position:sticky;
   top:0;
   z-index:100;
-  background:var(--card);
-  padding:12px 16px;
   display:flex;
+  align-items:center;
   justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid var(--border)
+  padding:13px 16px;
+  background:rgba(23,23,23,.97);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
 }
+
 .topbar h2{
-  font-size:16px;
+  font-size:17px;
   display:flex;
   align-items:center;
-  gap:8px
+  gap:8px;
 }
-.topbar h2 span{font-size:20px}
+
 .topbar button{
   padding:8px 14px;
+  border:0;
   border-radius:8px;
-  border:none;
   background:var(--danger);
-  color:#fff;
+  color:white;
   font-size:12px;
   font-weight:700;
-  cursor:pointer
 }
+
+/* NAV */
 
 .nav{
   display:flex;
-  gap:4px;
-  padding:8px 16px;
+  gap:5px;
+  padding:9px 14px;
   overflow-x:auto;
   background:var(--card);
   border-bottom:1px solid var(--border);
-  scrollbar-width:none
+  scrollbar-width:none;
 }
-.nav::-webkit-scrollbar{display:none}
+
+.nav::-webkit-scrollbar{
+  display:none;
+}
 
 .nav-item{
   flex-shrink:0;
-  padding:8px 14px;
+  padding:9px 13px;
   border-radius:50px;
   border:1px solid var(--border);
   background:var(--card);
   color:var(--muted);
   font-size:12px;
-  font-weight:600;
-  cursor:pointer;
-  white-space:nowrap
+  font-weight:700;
+  white-space:nowrap;
 }
+
 .nav-item.active{
   background:var(--accent);
   color:#000;
-  border-color:var(--accent)
+  border-color:var(--accent);
 }
 
-.main{padding:16px}
-.page{display:none}
-.page.on{display:block}
+/* MAIN */
+
+.main{
+  padding:16px;
+  max-width:1400px;
+  margin:auto;
+}
+
+.page{
+  display:none;
+}
+
+.page.on{
+  display:block;
+}
+
 .page-title{
-  font-size:18px;
-  font-weight:700;
-  margin-bottom:16px
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:16px;
 }
 
 /* STATS */
+
 .stats{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
-  margin-bottom:16px
+  margin-bottom:16px;
 }
+
 .stat{
+  padding:15px;
   background:var(--card);
-  padding:14px;
-  border-radius:12px;
   border:1px solid var(--border);
-  text-align:center
+  border-radius:13px;
+  text-align:center;
 }
+
 .stat b{
   display:block;
-  font-size:22px;
   color:var(--accent);
-  margin-bottom:4px
-}
-.stat span{
-  font-size:11px;
-  color:var(--muted)
+  font-size:21px;
+  margin-bottom:5px;
 }
 
-/* CARDS */
+.stat span{
+  color:var(--muted);
+  font-size:11px;
+}
+
+/* CARD */
+
 .card{
   background:var(--card);
-  border-radius:12px;
   border:1px solid var(--border);
+  border-radius:13px;
+  overflow:hidden;
   margin-bottom:16px;
-  overflow:hidden
 }
+
 .card-header{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   padding:14px 16px;
-  border-bottom:1px solid var(--border)
+  border-bottom:1px solid var(--border);
 }
+
 .card-title{
   font-size:14px;
-  font-weight:700
+  font-weight:800;
 }
-.card-body{padding:12px 16px}
 
-/* TABLES */
-.table-wrap{overflow-x:auto}
+.card-body{
+  padding:13px 16px;
+}
+
+/* TABLE */
+
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
 table{
   width:100%;
+  min-width:650px;
   border-collapse:collapse;
   font-size:13px;
-  min-width:500px
 }
+
 th{
   text-align:left;
   padding:10px 8px;
   color:var(--muted);
-  font-weight:600;
-  font-size:11px;
+  font-size:10px;
   text-transform:uppercase;
-  border-bottom:1px solid var(--border)
+  border-bottom:1px solid var(--border);
 }
+
 td{
   padding:12px 8px;
-  border-bottom:1px solid #222;
-  color:#ccc
+  border-bottom:1px solid #242424;
+  color:#ddd;
 }
-tr:last-child td{border-bottom:none}
+
+tr:last-child td{
+  border-bottom:0;
+}
+
 .price{
   color:var(--accent);
-  font-weight:700
+  font-weight:800;
 }
+
 .profit{
   color:var(--accent);
-  font-weight:700
+  font-weight:800;
 }
-.stock-low{
-  color:var(--danger);
-  font-weight:700
-}
+
+/* STATUS */
 
 .status{
   display:inline-flex;
   align-items:center;
   gap:5px;
-  padding:3px 10px;
+  padding:4px 9px;
   border-radius:20px;
-  font-size:11px;
-  font-weight:700
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
 }
-.status-pago{
-  background:rgba(0,230,118,.15);
-  color:#00e676
-}
-.status-pendente{
-  background:rgba(245,158,11,.15);
-  color:#f59e0b
-}
-.status-enviado{
-  background:rgba(59,130,246,.15);
-  color:#3b82f6
-}
-.status-ativo{
-  background:rgba(0,230,118,.15);
-  color:#00e676
-}
-.status-inativo{
-  background:rgba(107,114,128,.15);
-  color:#9ca3af
-}
+
 .status-dot{
   width:6px;
   height:6px;
   border-radius:50%;
-  display:inline-block
-}
-.tag{
   display:inline-block;
-  padding:3px 10px;
-  border-radius:6px;
-  font-size:11px;
-  background:var(--border);
-  color:var(--muted)
+}
+
+.status-pago{
+  color:#00e676;
+  background:rgba(0,230,118,.13);
+}
+
+.status-pendente{
+  color:#f59e0b;
+  background:rgba(245,158,11,.13);
+}
+
+.status-enviado{
+  color:#3b82f6;
+  background:rgba(59,130,246,.13);
+}
+
+.status-inativo{
+  color:#999;
+  background:rgba(150,150,150,.12);
+}
+
+.status-cancelado{
+  color:#ff5252;
+  background:rgba(255,82,82,.12);
 }
 
 /* PRODUTOS */
+
 .item{
   display:flex;
   align-items:center;
   gap:10px;
-  padding:12px;
+  padding:11px;
+  margin-bottom:8px;
   background:var(--card);
-  border-radius:10px;
   border:1px solid var(--border);
-  margin-bottom:8px
+  border-radius:11px;
 }
+
 .item img{
-  width:56px;
-  height:56px;
-  border-radius:8px;
+  width:58px;
+  height:58px;
+  flex-shrink:0;
+  border-radius:9px;
   object-fit:cover;
-  background:var(--border);
-  flex-shrink:0
+  background:#222;
 }
+
 .item-info{
+  min-width:0;
   flex:1;
-  min-width:0
 }
+
 .item-info h4{
   font-size:13px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  margin-bottom:2px
+  margin-bottom:4px;
 }
+
 .item-info .price{
   font-size:14px;
-  color:var(--accent);
-  font-weight:700
 }
+
 .item-info .loja{
-  font-size:11px;
-  color:var(--muted)
+  color:var(--muted);
+  font-size:10px;
+  margin-top:2px;
 }
+
 .item-actions{
   display:flex;
-  gap:6px
+  gap:5px;
 }
+
 .item-actions button{
-  width:32px;
-  height:32px;
-  border-radius:6px;
-  border:none;
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:7px;
   background:var(--border);
-  color:var(--text);
-  font-size:14px;
-  cursor:pointer
+  color:white;
+  font-size:15px;
 }
+
+.item-actions .delete{
+  color:var(--danger);
+}
+
 .empty{
   text-align:center;
-  padding:40px;
-  color:var(--muted)
+  padding:40px 15px;
+  color:var(--muted);
 }
 
 /* FAB */
+
 .fab{
   position:fixed;
-  bottom:20px;
   right:20px;
-  width:56px;
-  height:56px;
+  bottom:20px;
+  width:57px;
+  height:57px;
+  border:0;
   border-radius:50%;
-  border:none;
   background:var(--accent);
   color:#000;
-  font-size:28px;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,200,100,.3);
-  z-index:200
+  font-size:29px;
+  font-weight:900;
+  box-shadow:0 5px 20px rgba(0,230,118,.25);
+  z-index:200;
 }
 
 /* MODAL */
+
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.92);
+  z-index:300;
   display:none;
   flex-direction:column;
-  z-index:300
+  background:rgba(0,0,0,.94);
 }
-.modal.on{display:flex}
-.modal-h{
-  padding:14px 16px;
+
+.modal.on{
   display:flex;
-  justify-content:space-between;
+}
+
+.modal-h{
+  display:flex;
   align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  background:var(--card);
   border-bottom:1px solid var(--border);
-  background:var(--card)
 }
-.modal-h h3{font-size:16px}
+
+.modal-h h3{
+  font-size:16px;
+}
+
 .modal-h button{
-  width:32px;
-  height:32px;
+  width:33px;
+  height:33px;
+  border:0;
   border-radius:50%;
-  border:none;
   background:var(--border);
-  color:#fff;
-  font-size:18px;
-  cursor:pointer
+  color:white;
+  font-size:20px;
 }
+
 .modal-body{
   flex:1;
   overflow-y:auto;
-  padding:16px
+  padding:16px;
+  max-width:800px;
+  width:100%;
+  margin:auto;
 }
-.form-group{margin-bottom:14px}
+
+.form-group{
+  margin-bottom:14px;
+}
+
 .form-group label{
   display:block;
-  font-size:12px;
+  margin-bottom:6px;
   color:var(--muted);
-  margin-bottom:5px;
-  font-weight:600
+  font-size:12px;
+  font-weight:700;
 }
+
 .form-group input,
-.form-group select,
-.form-group textarea{
+.form-group select{
   width:100%;
-  padding:12px 14px;
+  padding:13px;
   border-radius:10px;
   border:1px solid var(--border);
-  background:var(--bg);
-  color:var(--text);
+  background:#0d0d0d;
+  color:white;
   font-size:15px;
-  outline:none
+  outline:none;
 }
+
 .form-group input:focus,
 .form-group select:focus{
-  border-color:var(--accent)
+  border-color:var(--accent);
 }
+
 .form-row{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px
+  gap:10px;
 }
+
 .form-check{
   display:flex;
   align-items:center;
   gap:8px;
-  padding:8px 0
+  margin:10px 0;
 }
+
 .form-check input{
-  width:20px;
-  height:20px;
-  accent-color:var(--accent)
+  width:19px;
+  height:19px;
+  accent-color:var(--accent);
 }
+
 .save-btn{
   width:100%;
-  padding:14px;
-  border-radius:10px;
-  border:none;
+  padding:15px;
+  border:0;
+  border-radius:11px;
   background:var(--accent);
   color:#000;
   font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  margin-top:8px
+  font-weight:800;
+  margin-top:10px;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:20px;
+  z-index:500;
+  transform:translateX(-50%);
+  display:none;
+  max-width:90%;
+  padding:12px 20px;
+  border-radius:50px;
+  background:#202020;
+  border:1px solid var(--border);
+  font-size:13px;
+  text-align:center;
+}
+
+.toast.on{
+  display:block;
+}
+
+.toast.ok{
+  color:var(--accent);
+  border-color:var(--accent);
+}
+
+.toast.err{
+  color:var(--danger);
+  border-color:var(--danger);
 }
 
 /* TABS */
+
 .tabs{
   display:flex;
   gap:4px;
   margin-bottom:14px;
+  overflow-x:auto;
   border-bottom:1px solid var(--border);
-  overflow-x:auto
-}
-.tab{
-  padding:10px 14px;
-  font-size:13px;
-  cursor:pointer;
-  border-bottom:2px solid transparent;
-  margin-bottom:-1px;
-  color:var(--muted);
-  font-weight:600;
-  white-space:nowrap
-}
-.tab.active{
-  border-bottom-color:var(--accent);
-  color:var(--accent)
 }
 
-/* TOAST */
-.toast{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--card);
-  color:var(--text);
-  padding:12px 20px;
-  border-radius:50px;
-  font-size:13px;
-  border:1px solid var(--border);
-  z-index:400;
-  display:none
+.tab{
+  flex-shrink:0;
+  padding:10px 14px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  border-bottom:2px solid transparent;
 }
-.toast.on{display:block}
-.toast.ok{
-  border-color:var(--accent);
-  color:var(--accent)
+
+.tab.active{
+  color:var(--accent);
+  border-bottom-color:var(--accent);
 }
-.toast.err{
-  border-color:var(--danger);
-  color:var(--danger)
+
+/* ORDER DETAIL */
+
+.order-btn{
+  padding:6px 9px;
+  border:0;
+  border-radius:7px;
+  background:var(--border);
+  color:white;
+  font-size:11px;
 }
+
+/* RESPONSIVO */
 
 @media(min-width:768px){
   .stats{
-    grid-template-columns:repeat(4,1fr)
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .main{
+    padding:25px;
+  }
+}
+
+@media(max-width:500px){
+  .form-row{
+    grid-template-columns:1fr;
+    gap:0;
+  }
+
+  .main{
+    padding:12px;
   }
 }
 </style>
@@ -525,7 +671,6 @@ tr:last-child td{border-bottom:none}
   <div class="login-logo">JP</div>
 
   <h1>JP Variedades</h1>
-
   <p>Painel Administrativo</p>
 
   <input
@@ -535,7 +680,7 @@ tr:last-child td{border-bottom:none}
     autocomplete="off"
   >
 
-  <button onclick="doLogin()" id="btnEntrar">
+  <button id="btnEntrar" onclick="doLogin()">
     Entrar
   </button>
 
@@ -548,6 +693,7 @@ tr:last-child td{border-bottom:none}
 
 </div>
 
+
 <!-- ================= ADMIN ================= -->
 
 <div class="admin" id="adminScreen">
@@ -555,8 +701,7 @@ tr:last-child td{border-bottom:none}
   <div class="topbar">
 
     <h2>
-      <span>🛒</span>
-      JP Admin
+      🛒 JP Admin
     </h2>
 
     <button onclick="logout()">
@@ -565,46 +710,39 @@ tr:last-child td{border-bottom:none}
 
   </div>
 
+
   <div class="nav">
 
-    <button
-      class="nav-item active"
-      onclick="showPage('dashboard',this)"
-    >
+    <button class="nav-item active"
+      onclick="showPage('dashboard',this)">
       📊 Dashboard
     </button>
 
-    <button
-      class="nav-item"
-      onclick="showPage('produtos',this)"
-    >
+    <button class="nav-item"
+      onclick="showPage('produtos',this)">
       🛍️ Produtos
     </button>
 
-    <button
-      class="nav-item"
-      onclick="showPage('pedidos',this)"
-    >
+    <button class="nav-item"
+      onclick="showPage('pedidos',this)">
       📦 Pedidos
     </button>
 
-    <button
-      class="nav-item"
-      onclick="showPage('fornecedores',this)"
-    >
+    <button class="nav-item"
+      onclick="showPage('fornecedores',this)">
       🏭 Fornecedores
     </button>
 
-    <button
-      class="nav-item"
-      onclick="showPage('config',this)"
-    >
+    <button class="nav-item"
+      onclick="showPage('config',this)">
       ⚙️ Config
     </button>
 
   </div>
 
+
   <div class="main">
+
 
     <!-- ================= DASHBOARD ================= -->
 
@@ -618,34 +756,33 @@ tr:last-child td{border-bottom:none}
 
         <div class="stat">
           <b id="dashVendas">R$ 0,00</b>
-          <span>Vendas Hoje</span>
+          <span>Vendas</span>
         </div>
 
         <div class="stat">
           <b id="dashPedidos">0</b>
-          <span>Pedidos Hoje</span>
+          <span>Pedidos</span>
         </div>
 
         <div class="stat">
           <b id="dashLucro">R$ 0,00</b>
-          <span>Lucro</span>
+          <span>Lucro estimado</span>
         </div>
 
         <div class="stat">
           <b id="dashTicket">R$ 0,00</b>
-          <span>Ticket Médio</span>
+          <span>Ticket médio</span>
         </div>
 
       </div>
 
+
       <div class="card">
 
         <div class="card-header">
-
           <div class="card-title">
             📦 Pedidos Recentes
           </div>
-
         </div>
 
         <div class="card-body">
@@ -655,15 +792,13 @@ tr:last-child td{border-bottom:none}
             <table>
 
               <thead>
-
                 <tr>
-                  <th>Pedido</th>
+                  <th>ID</th>
                   <th>Cliente</th>
                   <th>Produto</th>
                   <th>Total</th>
                   <th>Status</th>
                 </tr>
-
               </thead>
 
               <tbody id="dashPedidosBody"></tbody>
@@ -676,14 +811,13 @@ tr:last-child td{border-bottom:none}
 
       </div>
 
+
       <div class="card">
 
         <div class="card-header">
-
           <div class="card-title">
-            ⚠️ Estoque Baixo
+            🛍️ Produtos cadastrados
           </div>
-
         </div>
 
         <div class="card-body">
@@ -693,16 +827,15 @@ tr:last-child td{border-bottom:none}
             <table>
 
               <thead>
-
                 <tr>
                   <th>Produto</th>
-                  <th>Fornecedor</th>
-                  <th>Estoque</th>
+                  <th>Loja</th>
+                  <th>Preço</th>
+                  <th>Status</th>
                 </tr>
-
               </thead>
 
-              <tbody id="dashEstoqueBody"></tbody>
+              <tbody id="dashProdutosBody"></tbody>
 
             </table>
 
@@ -713,6 +846,7 @@ tr:last-child td{border-bottom:none}
       </div>
 
     </div>
+
 
     <!-- ================= PRODUTOS ================= -->
 
@@ -740,22 +874,21 @@ tr:last-child td{border-bottom:none}
         </div>
 
         <div class="stat">
-          <b id="stClick">0</b>
+          <b id="stClick">—</b>
           <span>Cliques</span>
         </div>
 
       </div>
 
+
       <div id="lista"></div>
 
-      <button
-        class="fab"
-        onclick="openForm()"
-      >
+      <button class="fab" onclick="openForm()">
         +
       </button>
 
     </div>
+
 
     <!-- ================= PEDIDOS ================= -->
 
@@ -767,35 +900,33 @@ tr:last-child td{border-bottom:none}
 
       <div class="tabs">
 
-        <div
-          class="tab active"
-          onclick="filterOrders('todos',this)"
-        >
+        <div class="tab active"
+          onclick="filterOrders('todos',this)">
           Todos
         </div>
 
-        <div
-          class="tab"
-          onclick="filterOrders('pago',this)"
-        >
+        <div class="tab"
+          onclick="filterOrders('pago',this)">
           Pagos
         </div>
 
-        <div
-          class="tab"
-          onclick="filterOrders('pendente',this)"
-        >
+        <div class="tab"
+          onclick="filterOrders('pendente',this)">
           Pendentes
         </div>
 
-        <div
-          class="tab"
-          onclick="filterOrders('enviado',this)"
-        >
+        <div class="tab"
+          onclick="filterOrders('enviado',this)">
           Enviados
         </div>
 
+        <div class="tab"
+          onclick="filterOrders('cancelado',this)">
+          Cancelados
+        </div>
+
       </div>
+
 
       <div class="card">
 
@@ -813,8 +944,8 @@ tr:last-child td{border-bottom:none}
                   <th>Cliente</th>
                   <th>Produto</th>
                   <th>Total</th>
-                  <th>Lucro</th>
                   <th>Status</th>
+                  <th></th>
                 </tr>
 
               </thead>
@@ -831,6 +962,7 @@ tr:last-child td{border-bottom:none}
 
     </div>
 
+
     <!-- ================= FORNECEDORES ================= -->
 
     <div class="page" id="page-fornecedores">
@@ -841,6 +973,12 @@ tr:last-child td{border-bottom:none}
 
       <div class="card">
 
+        <div class="card-header">
+          <div class="card-title">
+            🏭 Fornecedores utilizados
+          </div>
+        </div>
+
         <div class="card-body">
 
           <div class="table-wrap">
@@ -848,16 +986,11 @@ tr:last-child td{border-bottom:none}
             <table>
 
               <thead>
-
                 <tr>
                   <th>Fornecedor</th>
-                  <th>Tipo</th>
-                  <th>Pedidos</th>
-                  <th>Total</th>
-                  <th>Margem</th>
+                  <th>Produtos</th>
                   <th>Status</th>
                 </tr>
-
               </thead>
 
               <tbody id="suppliersBody"></tbody>
@@ -872,6 +1005,7 @@ tr:last-child td{border-bottom:none}
 
     </div>
 
+
     <!-- ================= CONFIG ================= -->
 
     <div class="page" id="page-config">
@@ -880,14 +1014,13 @@ tr:last-child td{border-bottom:none}
         Configurações
       </div>
 
+
       <div class="card">
 
         <div class="card-header">
-
           <div class="card-title">
             🔗 Integrações
           </div>
-
         </div>
 
         <div class="card-body">
@@ -897,95 +1030,57 @@ tr:last-child td{border-bottom:none}
             <table>
 
               <thead>
-
                 <tr>
                   <th>Serviço</th>
                   <th>Status</th>
                 </tr>
-
               </thead>
 
               <tbody>
 
                 <tr>
-
                   <td>
-                    <b>💳 Mercado Pago</b>
-                    <br>
-                    <small style="color:var(--muted)">
+                    <b>💳 Mercado Pago</b><br>
+                    <small style="color:#888">
                       Pagamentos
                     </small>
                   </td>
 
                   <td>
-
                     <span class="status status-pago">
-
-                      <span
-                        class="status-dot"
-                        style="background:#00e676"
-                      ></span>
-
-                      Conectado
-
+                      ● Configurado
                     </span>
-
                   </td>
-
                 </tr>
 
                 <tr>
-
                   <td>
-                    <b>🗄️ Supabase</b>
-                    <br>
-                    <small style="color:var(--muted)">
-                      Banco de Dados
+                    <b>🗄️ Supabase</b><br>
+                    <small style="color:#888">
+                      Banco de dados
                     </small>
                   </td>
 
                   <td>
-
-                    <span class="status status-ativo">
-
-                      <span
-                        class="status-dot"
-                        style="background:#00e676"
-                      ></span>
-
-                      Conectado
-
+                    <span class="status status-pago">
+                      ● Conectado
                     </span>
-
                   </td>
-
                 </tr>
 
                 <tr>
-
                   <td>
-                    <b>📦 Melhor Envio</b>
-                    <br>
-                    <small style="color:var(--muted)">
+                    <b>📦 Melhor Envio</b><br>
+                    <small style="color:#888">
                       Frete
                     </small>
                   </td>
 
                   <td>
-
                     <span class="status status-pendente">
-
-                      <span
-                        class="status-dot"
-                        style="background:#f59e0b"
-                      ></span>
-
-                      Não conectado
-
+                      ● Não configurado
                     </span>
-
                   </td>
-
                 </tr>
 
               </tbody>
@@ -998,14 +1093,13 @@ tr:last-child td{border-bottom:none}
 
       </div>
 
+
       <div class="card">
 
         <div class="card-header">
-
           <div class="card-title">
-            🏪 Loja
+            🏪 Informações da loja
           </div>
-
         </div>
 
         <div class="card-body">
@@ -1017,8 +1111,8 @@ tr:last-child td{border-bottom:none}
               <tbody>
 
                 <tr>
-                  <td style="width:50%;color:var(--muted)">
-                    Nome da Loja
+                  <td style="color:#888">
+                    Nome
                   </td>
                   <td>
                     <b>JP Variedades</b>
@@ -1026,8 +1120,8 @@ tr:last-child td{border-bottom:none}
                 </tr>
 
                 <tr>
-                  <td style="color:var(--muted)">
-                    URL
+                  <td style="color:#888">
+                    Site
                   </td>
                   <td>
                     jp-variedades.vercel.app
@@ -1035,20 +1129,11 @@ tr:last-child td{border-bottom:none}
                 </tr>
 
                 <tr>
-                  <td style="color:var(--muted)">
-                    Taxa de Lucro
+                  <td style="color:#888">
+                    Banco
                   </td>
                   <td>
-                    35%
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="color:var(--muted)">
-                    Frete Grátis acima de
-                  </td>
-                  <td>
-                    R$ 99,00
+                    Supabase
                   </td>
                 </tr>
 
@@ -1068,6 +1153,7 @@ tr:last-child td{border-bottom:none}
 
 </div>
 
+
 <!-- ================= MODAL PRODUTO ================= -->
 
 <div class="modal" id="formModal">
@@ -1079,17 +1165,16 @@ tr:last-child td{border-bottom:none}
     </h3>
 
     <button onclick="closeForm()">
-      &times;
+      ×
     </button>
 
   </div>
 
+
   <div class="modal-body">
 
-    <input
-      type="hidden"
-      id="pid"
-    >
+    <input type="hidden" id="pid">
+
 
     <div class="form-group">
 
@@ -1100,10 +1185,11 @@ tr:last-child td{border-bottom:none}
       <input
         type="text"
         id="pNome"
-        placeholder="Ex: Creatina 1kg"
+        placeholder="Ex: Produto novo"
       >
 
     </div>
+
 
     <div class="form-group">
 
@@ -1119,6 +1205,7 @@ tr:last-child td{border-bottom:none}
 
     </div>
 
+
     <div class="form-row">
 
       <div class="form-group">
@@ -1130,11 +1217,12 @@ tr:last-child td{border-bottom:none}
         <input
           type="number"
           id="pPreco"
-          placeholder="59.90"
           step="0.01"
+          placeholder="59.90"
         >
 
       </div>
+
 
       <div class="form-group">
 
@@ -1145,5 +1233,32 @@ tr:last-child td{border-bottom:none}
         <input
           type="number"
           id="pOld"
-          placeholder="239.90"
-          ste
+          step="0.01"
+          placeholder="99.90"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>
+        URL da imagem *
+      </label>
+
+      <input
+        type="text"
+        id="pImg"
+        placeholder="https://..."
+      >
+
+    </div>
+
+
+    <div class="form-row">
+
+      <div class="form-group">
+
+ 
