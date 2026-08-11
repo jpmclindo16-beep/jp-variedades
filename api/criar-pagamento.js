@@ -78,12 +78,12 @@ module.exports = async (req, res) => {
 
     // Limpa CPF (só números)
     const cpfLimpo = cliente.cpf.replace(/\D/g, "");
-    // Limpa telefone (só números)
     const telLimpo = cliente.telefone.replace(/\D/g, "");
-    // E-mail do cliente ou gera um temporário
     const emailCliente = cliente.email || `cliente${Date.now()}@jpvariedades.com`;
 
     const preference = new Preference(client);
+
+    const externalRef = `JP-${produto.id}-${Date.now()}`;
 
     const resultado = await preference.create({
       body: {
@@ -117,11 +117,9 @@ module.exports = async (req, res) => {
 
         auto_return: "approved",
 
-        notification_url:
-          `${process.env.SITE_URL}/api/pagamento-webhook`,
+        notification_url: `${process.env.SITE_URL}/api/pagamento-webhook`,
 
-        external_reference:
-          `JP-${produto.id}-${Date.now()}`,
+        external_reference: externalRef,
 
         metadata: {
           produto_id: String(produto.id),
@@ -138,6 +136,40 @@ module.exports = async (req, res) => {
           cliente_estado: cliente.estado || ""
         }
       }
+    });
+
+    // ===== SALVA PEDIDO NO SUPABASE =====
+    const pedidoBody = {
+      mp_preference_id: resultado.id,
+      external_reference: externalRef,
+      produto_id: String(produto.id),
+      produto_nome: produto.nome,
+      valor: preco,
+      custo: produto.custo || 0,
+      status: "aguardando_pagamento",
+      cliente_nome: cliente.nome,
+      cliente_email: emailCliente,
+      cliente_cpf: cpfLimpo,
+      cliente_telefone: telLimpo,
+      cliente_cep: cliente.cep || "",
+      cliente_endereco: cliente.endereco || "",
+      cliente_numero: cliente.numero || "",
+      cliente_complemento: cliente.complemento || "",
+      cliente_bairro: cliente.bairro || "",
+      cliente_cidade: cliente.cidade || "",
+      cliente_estado: cliente.estado || "",
+      criado_em: new Date().toISOString()
+    };
+
+    await fetch(`${supabaseUrl}/rest/v1/pedidos`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify(pedidoBody)
     });
 
     return res.status(200).json({
