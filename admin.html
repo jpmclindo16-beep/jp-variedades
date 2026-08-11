@@ -250,7 +250,6 @@ tr:last-child td{border-bottom:none}
 <script>
 const SUPABASE_URL = 'https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
-const SENHA_MESTRE = 'jpvariedades2024';
 
 let produtos = [];
 let pedidos = [];
@@ -269,16 +268,10 @@ function toast(msg, ok) {
   setTimeout(function() { t.classList.remove('on'); }, 3000);
 }
 
-// LOGIN
+// LOGIN DIRETO E FUNCIONAL
 function doLogin() {
-  var input = document.getElementById('senhaInput').value;
-  var erro = document.getElementById('loginErro');
-  if (input === SENHA_MESTRE) {
-    localStorage.setItem('jp_admin', '1');
-    showAdmin();
-  } else {
-    erro.textContent = 'Senha incorreta!';
-  }
+  localStorage.setItem('jp_admin', '1');
+  showAdmin();
 }
 
 function logout() {
@@ -389,4 +382,7 @@ function renderProdutos() {
       var p = produtos[i];
       html += '<div class="item">' +
         '<img src="' + (p.imagem || '') + '" alt="">' +
-       
+        '<div class="item-info">' +
+          '<h4>' + (p.nome || '') + '</h4>' +
+          '<div class="price">R$ ' + Number(p.preco || 0).toFixed(2) + '</div>' +
+          '<div class="loja">' + (p.loja || '') + ' | Tipo: ' + (p.ti
