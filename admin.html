@@ -21,10 +21,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .login button:active{opacity:0.8}
 .login .erro{color:var(--danger);margin-top:12px;font-size:13px;text-align:center}
 
-/* DEBUG BOX */
-.debug-box{width:100%;max-width:320px;margin-top:16px;padding:10px;border-radius:8px;background:#1a1a1a;border:1px solid #333;font-size:11px;color:#888;font-family:monospace;max-height:120px;overflow-y:auto}
-.debug-box b{color:#00e676}
-
 /* ADMIN */
 .admin{display:none}
 .admin.on{display:block}
@@ -60,8 +56,6 @@ th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size
 td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
 tr:last-child td{border-bottom:none}
 .price{color:var(--accent);font-weight:700}
-.profit{color:var(--accent);font-weight:700}
-.stock-low{color:var(--danger);font-weight:700}
 .status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .status-pago{background:rgba(0,230,118,.15);color:#00e676}
 .status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
@@ -69,7 +63,6 @@ tr:last-child td{border-bottom:none}
 .status-ativo{background:rgba(0,230,118,.15);color:#00e676}
 .status-inativo{background:rgba(107,114,128,.15);color:#9ca3af}
 .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
-.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;background:var(--border);color:var(--muted)}
 
 /* PRODUTOS LISTA */
 .item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
@@ -127,7 +120,6 @@ tr:last-child td{border-bottom:none}
   <input type="password" id="senhaInput" placeholder="Digite a senha" autocomplete="off">
   <button onclick="doLogin()" id="btnEntrar">Entrar</button>
   <div class="erro" id="loginErro"></div>
-  <div class="debug-box" id="debugBox"><b>DEBUG:</b><br>Aguardando login...</div>
 </div>
 
 <!-- ADMIN -->
@@ -184,7 +176,7 @@ tr:last-child td{border-bottom:none}
         <div class="tab" onclick="filterOrders('enviado',this)">Enviados</div>
       </div>
       <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
       </div>
     </div>
 
@@ -200,9 +192,8 @@ tr:last-child td{border-bottom:none}
       <div class="card">
         <div class="card-header"><div class="card-title">🔗 Integracoes</div></div>
         <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Servico</th><th>Status</th></tr></thead><tbody>
-          <tr><td><b>💳 Mercado Pago</b><br><small style="color:var(--muted)">Pagamentos</small></td><td><span class="status status-pago"><span class="status-dot" style="background:#00e676"></span>Conectado (Teste)</span></td></tr>
+          <tr><td><b>💳 Mercado Pago</b><br><small style="color:var(--muted)">Pagamentos</small></td><td><span class="status status-pago"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
           <tr><td><b>🗄️ Supabase</b><br><small style="color:var(--muted)">Banco de Dados</small></td><td><span class="status status-ativo"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
-          <tr><td><b>📦 Melhor Envio</b><br><small style="color:var(--muted)">Frete</small></td><td><span class="status status-pendente"><span class="status-dot" style="background:#f59e0b"></span>Nao conectado</span></td></tr>
         </tbody></table></div></div>
       </div>
       <div class="card">
@@ -211,7 +202,6 @@ tr:last-child td{border-bottom:none}
           <tr><td style="width:50%;color:var(--muted)">Nome da Loja</td><td><b>JP Variedades</b></td></tr>
           <tr><td style="color:var(--muted)">URL</td><td>jp-variedades.vercel.app</td></tr>
           <tr><td style="color:var(--muted)">Taxa de Lucro</td><td>35%</td></tr>
-          <tr><td style="color:var(--muted)">Frete Gratis acima de</td><td>R$ 99,00</td></tr>
         </tbody></table></div></div>
       </div>
     </div>
@@ -228,7 +218,7 @@ tr:last-child td{border-bottom:none}
   <div class="modal-body">
     <input type="hidden" id="pid">
     <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome" placeholder="Ex: Creatina 1kg"></div>
-    <div class="form-group"><label>Link do afiliado <span id="linkObrigLabel">*</span></label><input type="text" id="pLink" placeholder="https://meli.la/..."></div>
+    <div class="form-group"><label>Link do afiliado *</label><input type="text" id="pLink" placeholder="https://meli.la/..."></div>
     <div class="form-row">
       <div class="form-group"><label>Preco atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01"></div>
       <div class="form-group"><label>Preco de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01"></div>
@@ -243,7 +233,6 @@ tr:last-child td{border-bottom:none}
       <div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1"></div>
     </div>
     <div class="form-group"><label>Tipo</label><select id="pTipo"><option value="afiliado">Afiliado (link externo)</option><option value="dropshipping">Dropshipping (pagamento proprio)</option></select></div>
-    <div class="form-group" id="pagamentoGroup" style="display:none"><label>Link de Pagamento (Mercado Pago)</label><input type="text" id="pPagamento" placeholder="https://mpago.la/..."></div>
     <div class="form-check"><input type="checkbox" id="pDest"><label for="pDest">Destacar produto</label></div>
     <div class="form-check"><input type="checkbox" id="pAtivo" checked><label for="pAtivo">Produto ativo</label></div>
     <button class="save-btn" onclick="saveProd()">Salvar Produto</button>
@@ -253,18 +242,10 @@ tr:last-child td{border-bottom:none}
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== DEBUG =====
-function log(msg){
-  var d=document.getElementById('debugBox');
-  if(d)d.innerHTML+='<br>'+msg;
-}
-
 // ===== SUPABASE =====
 const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 const SENHA='jpvariedades2024';
-
-log('JS carregado OK');
 
 let produtos=[];
 let pedidos=[];
@@ -279,11 +260,6 @@ function statusClass(s){
   var map={pago:'status-pago',aguardando_pagamento:'status-pendente',em_analise:'status-pendente',cancelado:'status-inativo',reembolsado:'status-inativo',enviado:'status-enviado'};
   return map[s]||'status-inativo';
 }
-function calcLucro(pedido){
-  var prod=produtos.find(function(p){return p.id==pedido.produto_id});
-  var custo=(prod&&prod.custo)?parseFloat(prod.custo):0;
-  return (pedido.valor||0)-custo;
-}
 
 const fornecedoresMock=[
   {id:1,nome:'Shopee',tipo:'Dropshipping',pedidos:89,total:4250,margem:32,status:'ativo'},
@@ -296,18 +272,13 @@ function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;
 
 // ===== LOGIN =====
 function doLogin(){
-  log('Botao clicado!');
   var input=document.getElementById('senhaInput');
-  if(!input){log('ERRO: input nao encontrado');return;}
+  if(!input)return;
   var val=input.value;
-  log('Senha digitada: '+val.length+' chars');
-
   if(val===SENHA){
-    log('Senha CORRETA!');
     localStorage.setItem('jp_admin','1');
     showAdmin();
   }else{
-    log('Senha INCORRETA');
     var erro=document.getElementById('loginErro');
     if(erro)erro.textContent='Senha incorreta. Tente: jpvariedades2024';
   }
@@ -316,17 +287,10 @@ function doLogin(){
 function logout(){localStorage.removeItem('jp_admin');location.reload()}
 
 function showAdmin(){
-  log('Mostrando admin...');
   var login=document.getElementById('loginScreen');
   var admin=document.getElementById('adminScreen');
-  if(login){login.style.display='none';log('Login escondido');}
-  if(admin){
-    admin.style.display='block';
-    admin.classList.add('on');
-    log('Admin mostrado');
-  }else{
-    log('ERRO: adminScreen nao encontrado');
-  }
+  if(login)login.style.display='none';
+  if(admin){admin.style.display='block';admin.classList.add('on');}
   loadProds();
   loadPedidos();
   renderSuppliers();
@@ -347,15 +311,12 @@ function loadPedidos(){
 
 // Auto-login
 if(localStorage.getItem('jp_admin')==='1'){
-  log('Auto-login ativo');
   showAdmin();
-}else{
-  log('Aguardando login manual');
 }
 
 // Enter no input
 document.getElementById('senhaInput').addEventListener('keypress',function(e){
-  if(e.key==='Enter'){log('Enter pressionado');doLogin();}
+  if(e.key==='Enter')doLogin();
 });
 
 // ===== NAVEGACAO =====
@@ -371,8 +332,42 @@ function showPage(page,el){
 
 // ===== PRODUTOS =====
 function loadProds(){
-  log('Carregando produtos...');
   fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()})
     .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
     .then(function(data){
-      pro
+      produtos=data||[];
+      renderProds();
+      updateStats();
+    })
+    .catch(function(e){
+      toast('Erro ao carregar produtos: '+e.message,false);
+    });
+}
+
+function updateStats(){
+  var total=produtos.length;
+  var ativos=produtos.filter(function(p){return p.ativo!==false}).length;
+  var destaques=produtos.filter(function(p){return p.destaque}).length;
+  var cliques=produtos.reduce(function(s,p){return s+(p.cliques||0)},0);
+  document.getElementById('stTotal').textContent=total;
+  document.getElementById('stAtivo').textContent=ativos;
+  document.getElementById('stDest').textContent=destaques;
+  document.getElementById('stClick').textContent=cliques;
+}
+
+function renderProds(){
+  var lista=document.getElementById('lista');
+  if(!produtos.length){lista.innerHTML='<div class="empty">Nenhum produto cadastrado</div>';return;}
+  var html='';
+  for(var i=0;i<produtos.length;i++){
+    var p=produtos[i];
+    html+='<div class="item">'+
+      '<img src="'+(p.imagem_url||'https://via.placeholder.com/100')+'" onerror="this.src=\'https://via.placeholder.com/100\'">'+
+      '<div class="item-info"><h4>'+(p.nome||'Sem nome')+'</h4><div class="price">R$ '+(p.preco_atual||0)+'</div><div class="loja">'+(p.loja||'')+' &bull; '+(p.tipo||'afiliado')+'</div></div>'+
+      '<div class="item-actions"><button onclick="editProd('+i+')">✏️</button><button onclick="delProd('+i+')">🗑️</button></div>'+
+      '</div>';
+  }
+  lista.innerHTML=html;
+}
+
+function openForm(){editando=null;document.getElementById('formTitle').textContent='Novo Produto';document.getElementById('pid').value='';document.getElementById('pNome').value='';document.getElementById('pLink').value='';document.getElementById('pPreco').value='';document.getElementById('pOld').value='';document.getElementById('pImg').value='';document.getElementById('pLoja').value='Mercado Livre';document.getElementById('pCat').value='';docum
