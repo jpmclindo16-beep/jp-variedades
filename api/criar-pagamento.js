@@ -20,9 +20,9 @@ module.exports = async (req, res) => {
       });
     }
 
-    if (!cliente || !cliente.nome || !cliente.telefone) {
+    if (!cliente || !cliente.nome || !cliente.telefone || !cliente.cpf) {
       return res.status(400).json({
-        error: "Dados do cliente incompletos"
+        error: "Dados do cliente incompletos. Nome, telefone e CPF são obrigatórios."
       });
     }
 
@@ -76,6 +76,13 @@ module.exports = async (req, res) => {
       });
     }
 
+    // Limpa CPF (só números)
+    const cpfLimpo = cliente.cpf.replace(/\D/g, "");
+    // Limpa telefone (só números)
+    const telLimpo = cliente.telefone.replace(/\D/g, "");
+    // E-mail do cliente ou gera um temporário
+    const emailCliente = cliente.email || `cliente${Date.now()}@jpvariedades.com`;
+
     const preference = new Preference(client);
 
     const resultado = await preference.create({
@@ -92,8 +99,13 @@ module.exports = async (req, res) => {
 
         payer: {
           name: cliente.nome,
+          email: emailCliente,
           phone: {
-            number: cliente.telefone.replace(/\D/g, "")
+            number: telLimpo
+          },
+          identification: {
+            type: "CPF",
+            number: cpfLimpo
           }
         },
 
@@ -114,8 +126,9 @@ module.exports = async (req, res) => {
         metadata: {
           produto_id: String(produto.id),
           cliente_nome: cliente.nome,
-          cliente_cpf: cliente.cpf || "",
-          cliente_telefone: cliente.telefone,
+          cliente_email: emailCliente,
+          cliente_cpf: cpfLimpo,
+          cliente_telefone: telLimpo,
           cliente_cep: cliente.cep || "",
           cliente_endereco: cliente.endereco || "",
           cliente_numero: cliente.numero || "",
