@@ -2,175 +2,556 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0a0a">
 <title>Admin - JP Variedades</title>
 <style>
-:root{--bg:#0a0a0a;--card:#171717;--border:#292929;--text:#fff;--muted:#999;--accent:#00e676;--danger:#ff5252;--warn:#f59e0b}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-button,input,select{font:inherit}.login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:linear-gradient(#090909,#151515)}
-.logo{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#00c853,#00e676);color:#000;font-size:34px;font-weight:900;font-style:italic;margin-bottom:16px}
-.login h1{font-size:23px}.login p{color:var(--muted);margin:5px 0 22px}.login input{width:min(100%,360px);padding:15px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:#fff;outline:none;margin-bottom:10px}.login input:focus{border-color:var(--accent)}
-.btn{border:0;border-radius:10px;padding:13px 16px;font-weight:800;cursor:pointer}.primary{background:var(--accent);color:#000}.danger{background:var(--danger);color:#fff}.login .btn{width:min(100%,360px)}.error{min-height:20px;color:var(--danger);font-size:13px;margin-top:10px;text-align:center}
-.admin{display:none}.top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}.top h2{font-size:16px}.nav{display:flex;gap:6px;overflow:auto;padding:9px 12px;background:var(--card);border-bottom:1px solid var(--border)}.nav button{flex:none;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:30px;padding:8px 13px;font-size:12px}.nav button.active{background:var(--accent);color:#000;border-color:var(--accent)}
-main{padding:16px;max-width:1100px;margin:auto}.page{display:none}.page.active{display:block}.title{font-size:19px;font-weight:800;margin-bottom:14px}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:15px}.stat,.card,.item{background:var(--card);border:1px solid var(--border);border-radius:12px}.stat{text-align:center;padding:15px}.stat b{display:block;color:var(--accent);font-size:21px;margin-bottom:4px}.stat span{font-size:11px;color:var(--muted)}.card{margin-bottom:15px;overflow:hidden}.card h3{padding:13px 15px;border-bottom:1px solid var(--border);font-size:14px}.body{padding:12px 15px}
-.table{overflow:auto}table{width:100%;min-width:650px;border-collapse:collapse;font-size:12px}th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;padding:9px 7px;border-bottom:1px solid var(--border)}td{padding:10px 7px;border-bottom:1px solid #222}.price{color:var(--accent);font-weight:800}.status{display:inline-block;border-radius:20px;padding:4px 9px;font-size:10px;font-weight:800}.pago{color:#00e676;background:#00e6761a}.pendente,.analise{color:#f59e0b;background:#f59e0b1a}.enviado{color:#3b82f6;background:#3b82f61a}.cancelado,.reembolsado{color:#aaa;background:#aaa1a}
-.products{display:grid;gap:8px}.item{display:flex;align-items:center;gap:10px;padding:10px}.item img{width:58px;height:58px;border-radius:8px;object-fit:cover;background:#222}.iteminfo{flex:1;min-width:0}.iteminfo b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.iteminfo small{color:var(--muted);display:block;margin-top:2px}.actions{display:flex;gap:5px}.icon{border:0;background:#292929;color:#fff;border-radius:7px;width:34px;height:34px;cursor:pointer}.fab{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border:0;border-radius:50%;background:var(--accent);color:#000;font-size:27px;font-weight:900;box-shadow:0 5px 20px #0008}
-.modal{display:none;position:fixed;inset:0;background:#000e;z-index:50}.modal.show{display:flex}.sheet{margin:auto;width:min(100%,600px);height:100%;background:#111;overflow:auto;padding:16px}.sheethead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.x{border:0;background:#292929;color:#fff;border-radius:50%;width:34px;height:34px}.field{margin-bottom:12px}.field label{display:block;color:var(--muted);font-size:11px;font-weight:700;margin-bottom:5px}.field input,.field select{width:100%;padding:12px;border:1px solid var(--border);border-radius:9px;background:#090909;color:#fff;outline:none}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{display:flex;gap:8px;align-items:center;margin:10px 0;color:#ddd;font-size:13px}.save{width:100%;margin-top:8px}.empty{text-align:center;color:var(--muted);padding:35px 10px}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;border:1px solid var(--border);border-radius:30px;padding:12px 18px;display:none;z-index:100;color:#fff;font-size:13px}.toast.show{display:block}.toast.ok{border-color:var(--accent);color:var(--accent)}.toast.err{border-color:var(--danger);color:var(--danger)}
-@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}.sheet{height:auto;max-height:94vh;border:1px solid var(--border);border-radius:15px}}
+:root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+.login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)}
+.login-logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dark),var(--accent));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000;margin-bottom:16px}
+.login h1{font-size:22px;margin-bottom:4px}
+.login p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.login input{width:100%;max-width:320px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;margin-bottom:12px;outline:none}
+.login input:focus{border-color:var(--accent)}
+.login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer}
+.login button:active{opacity:0.8}
+.login .erro{color:var(--danger);margin-top:12px;font-size:13px;text-align:center}
+
+/* DEBUG BOX */
+.debug-box{width:100%;max-width:320px;margin-top:16px;padding:10px;border-radius:8px;background:#1a1a1a;border:1px solid #333;font-size:11px;color:#888;font-family:monospace;max-height:120px;overflow-y:auto}
+.debug-box b{color:#00e676}
+
+/* ADMIN */
+.admin{display:none}
+.admin.on{display:block}
+.topbar{position:sticky;top:0;z-index:100;background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.topbar h2{font-size:16px;display:flex;align-items:center;gap:8px}
+.topbar h2 span{font-size:20px}
+.topbar button{padding:8px 14px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.nav{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--border);scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-item{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.nav-item.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.main{padding:16px}
+.page{display:none}
+.page.on{display:block}
+.page-title{font-size:18px;font-weight:700;margin-bottom:16px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--border);text-align:center}
+.stat b{display:block;font-size:22px;color:var(--accent);margin-bottom:4px}
+.stat span{font-size:11px;color:var(--muted)}
+
+/* CARDS */
+.card{background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)}
+.card-title{font-size:14px;font-weight:700}
+.card-body{padding:12px 16px}
+
+/* TABLES */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
+th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
+tr:last-child td{border-bottom:none}
+.price{color:var(--accent);font-weight:700}
+.profit{color:var(--accent);font-weight:700}
+.stock-low{color:var(--danger);font-weight:700}
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.status-pago{background:rgba(0,230,118,.15);color:#00e676}
+.status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
+.status-enviado{background:rgba(59,130,246,.15);color:#3b82f6}
+.status-ativo{background:rgba(0,230,118,.15);color:#00e676}
+.status-inativo{background:rgba(107,114,128,.15);color:#9ca3af}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;background:var(--border);color:var(--muted)}
+
+/* PRODUTOS LISTA */
+.item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
+.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--border);flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.item-info .price{font-size:14px;color:var(--accent);font-weight:700}
+.item-info .loja{font-size:11px;color:var(--muted)}
+.item-actions{display:flex;gap:6px}
+.item-actions button{width:32px;height:32px;border-radius:6px;border:none;background:var(--border);color:var(--text);font-size:14px;cursor:pointer}
+.empty{text-align:center;padding:40px;color:var(--muted)}
+
+/* FAB */
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--accent);color:#000;font-size:28px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,200,100,.3);z-index:200}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;z-index:300}
+.modal.on{display:flex}
+.modal-h{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--card)}
+.modal-h h3{font-size:16px}
+.modal-h button{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:#fff;font-size:18px;cursor:pointer}
+.modal-body{flex:1;overflow-y:auto;padding:16px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;outline:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-check{display:flex;align-items:center;gap:8px;padding:8px 0}
+.form-check input{width:20px;height:20px;accent-color:var(--accent)}
+.save-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);font-weight:600;white-space:nowrap}
+.tab.active{border-bottom-color:var(--accent);color:var(--accent)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none}
+.toast.on{display:block}
+.toast.ok{border-color:var(--accent);color:var(--accent)}
+.toast.err{border-color:var(--danger);color:var(--danger)}
+
+@media(min-width:768px){
+  .stats{grid-template-columns:repeat(4,1fr)}
+}
 </style>
 </head>
 <body>
-<section class="login" id="login">
-  <div class="logo">JP</div><h1>JP Variedades</h1><p>Painel Administrativo</p>
-  <input id="senha" type="password" placeholder="Digite a senha" autocomplete="current-password">
-  <button class="btn primary" id="entrar">Entrar</button>
-  <div class="error" id="loginError"></div>
-</section>
 
-<section class="admin" id="admin">
-  <header class="top"><h2>🛒 JP Admin</h2><button class="btn danger" id="sair">Sair</button></header>
-  <nav class="nav">
-    <button class="active" data-page="dashboard">📊 Dashboard</button>
-    <button data-page="produtos">🛍️ Produtos</button>
-    <button data-page="pedidos">📦 Pedidos</button>
-    <button data-page="fornecedores">🏭 Fornecedores</button>
-    <button data-page="config">⚙️ Config</button>
-  </nav>
-  <main>
-    <section class="page active" id="dashboard">
-      <div class="title">Dashboard</div>
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+  <div class="login-logo">JP</div>
+  <h1>JP Variedades</h1>
+  <p>Painel Administrativo</p>
+  <input type="password" id="senhaInput" placeholder="Digite a senha" autocomplete="off">
+  <button onclick="doLogin()" id="btnEntrar">Entrar</button>
+  <div class="erro" id="loginErro"></div>
+  <div class="debug-box" id="debugBox"><b>DEBUG:</b><br>Aguardando login...</div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin" id="adminScreen">
+  <div class="topbar">
+    <h2><span>🛒</span> JP Admin</h2>
+    <button onclick="logout()">Sair</button>
+  </div>
+  <div class="nav">
+    <button class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+    <button class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</button>
+    <button class="nav-item" onclick="showPage('pedidos',this)">📦 Pedidos</button>
+    <button class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</button>
+    <button class="nav-item" onclick="showPage('config',this)">⚙️ Config</button>
+  </div>
+  <div class="main">
+
+    <div class="page on" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
       <div class="stats">
-        <div class="stat"><b id="vendas">R$ 0,00</b><span>Vendas pagas</span></div>
-        <div class="stat"><b id="qtdPedidos">0</b><span>Pedidos</span></div>
-        <div class="stat"><b id="lucro">R$ 0,00</b><span>Lucro estimado</span></div>
-        <div class="stat"><b id="ticket">R$ 0,00</b><span>Ticket médio</span></div>
+        <div class="stat"><b id="dashVendas">R$ 0</b><span>Vendas Hoje</span></div>
+        <div class="stat"><b id="dashPedidos">0</b><span>Pedidos</span></div>
+        <div class="stat"><b id="dashLucro">R$ 0</b><span>Lucro</span></div>
+        <div class="stat"><b id="dashTicket">R$ 0</b><span>Ticket Medio</span></div>
       </div>
-      <div class="card"><h3>📦 Pedidos recentes</h3><div class="body table"><table><thead><tr><th>ID</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table></div></div>
-      <div class="card"><h3>⚠️ Estoque baixo</h3><div class="body table"><table><thead><tr><th>Produto</th><th>Loja</th><th>Estoque</th></tr></thead><tbody id="lowStock"></tbody></table></div></div>
-    </section>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📦 Pedidos Recentes</div></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">⚠️ Estoque Baixo</div></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Fornecedor</th><th>Estoque</th></tr></thead><tbody id="dashEstoqueBody"></tbody></table></div></div>
+      </div>
+    </div>
 
-    <section class="page" id="produtos">
-      <div class="title">Produtos</div>
+    <div class="page" id="page-produtos">
+      <div class="page-title">Produtos</div>
       <div class="stats">
-        <div class="stat"><b id="totalProd">0</b><span>Total</span></div><div class="stat"><b id="ativos">0</b><span>Ativos</span></div><div class="stat"><b id="destaques">0</b><span>Destaques</span></div><div class="stat"><b id="drops">0</b><span>Dropshipping</span></div>
+        <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
+        <div class="stat"><b id="stAtivo">0</b><span>Ativos</span></div>
+        <div class="stat"><b id="stDest">0</b><span>Destaques</span></div>
+        <div class="stat"><b id="stClick">0</b><span>Cliques</span></div>
       </div>
-      <div id="lista" class="products"></div><button class="fab" id="novo">+</button>
-    </section>
+      <div id="lista"></div>
+      <button class="fab" onclick="openForm()">+</button>
+    </div>
 
-    <section class="page" id="pedidos">
-      <div class="title">Pedidos</div>
-      <div class="card"><div class="body table"><table><thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th><th>Ação</th></tr></thead><tbody id="orders"></tbody></table></div></div>
-    </section>
+    <div class="page" id="page-pedidos">
+      <div class="page-title">Pedidos</div>
+      <div class="tabs">
+        <div class="tab active" onclick="filterOrders('todos',this)">Todos</div>
+        <div class="tab" onclick="filterOrders('pago',this)">Pagos</div>
+        <div class="tab" onclick="filterOrders('aguardando_pagamento',this)">Pendentes</div>
+        <div class="tab" onclick="filterOrders('enviado',this)">Enviados</div>
+      </div>
+      <div class="card">
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+      </div>
+    </div>
 
-    <section class="page" id="fornecedores">
-      <div class="title">Fornecedores</div>
-      <div class="card"><div class="body table"><table><thead><tr><th>Loja</th><th>Produtos</th><th>Ativos</th><th>Pedidos</th></tr></thead><tbody id="suppliers"></tbody></table></div></div>
-    </section>
+    <div class="page" id="page-fornecedores">
+      <div class="page-title">Fornecedores</div>
+      <div class="card">
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Tipo</th><th>Pedidos</th><th>Total</th><th>Margem</th><th>Status</th></tr></thead><tbody id="suppliersBody"></tbody></table></div></div>
+      </div>
+    </div>
 
-    <section class="page" id="config">
-      <div class="title">Configurações</div>
-      <div class="card"><h3>🔗 Integrações</h3><div class="body">
-        <p>🗄️ Supabase: <b style="color:#00e676">conectado</b></p>
-        <p style="margin-top:10px">💳 Mercado Pago: configurado pela API da Vercel</p>
-        <p style="margin-top:10px">📦 Webhook: <code>/api/pagamento-webhook</code></p>
-      </div></div>
-      <div class="card"><h3>🏪 Loja</h3><div class="body"><p>JP Variedades</p><p style="margin-top:8px;color:var(--muted)">jp-variedades.vercel.app</p></div></div>
-    </section>
-  </main>
-</section>
+    <div class="page" id="page-config">
+      <div class="page-title">Configuracoes</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔗 Integracoes</div></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Servico</th><th>Status</th></tr></thead><tbody>
+          <tr><td><b>💳 Mercado Pago</b><br><small style="color:var(--muted)">Pagamentos</small></td><td><span class="status status-pago"><span class="status-dot" style="background:#00e676"></span>Conectado (Teste)</span></td></tr>
+          <tr><td><b>🗄️ Supabase</b><br><small style="color:var(--muted)">Banco de Dados</small></td><td><span class="status status-ativo"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
+          <tr><td><b>📦 Melhor Envio</b><br><small style="color:var(--muted)">Frete</small></td><td><span class="status status-pendente"><span class="status-dot" style="background:#f59e0b"></span>Nao conectado</span></td></tr>
+        </tbody></table></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏪 Loja</div></div>
+        <div class="card-body"><div class="table-wrap"><table><tbody>
+          <tr><td style="width:50%;color:var(--muted)">Nome da Loja</td><td><b>JP Variedades</b></td></tr>
+          <tr><td style="color:var(--muted)">URL</td><td>jp-variedades.vercel.app</td></tr>
+          <tr><td style="color:var(--muted)">Taxa de Lucro</td><td>35%</td></tr>
+          <tr><td style="color:var(--muted)">Frete Gratis acima de</td><td>R$ 99,00</td></tr>
+        </tbody></table></div></div>
+      </div>
+    </div>
 
-<div class="modal" id="modal"><div class="sheet">
-  <div class="sheethead"><h3 id="modalTitle">Novo Produto</h3><button class="x" id="fechar">×</button></div>
-  <input type="hidden" id="pid">
-  <div class="field"><label>Nome *</label><input id="nome" required></div>
-  <div class="field"><label>Link do afiliado</label><input id="link" placeholder="https://meli.la/..."></div>
-  <div class="row"><div class="field"><label>Preço atual *</label><input id="preco" type="number" step="0.01"></div><div class="field"><label>Preço antigo</label><input id="precoAntigo" type="number" step="0.01"></div></div>
-  <div class="field"><label>URL da imagem *</label><input id="imagem"></div>
-  <div class="row"><div class="field"><label>Loja</label><select id="loja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>AliExpress</option><option>Outro</option></select></div><div class="field"><label>Categoria</label><input id="categoria"></div></div>
-  <div class="row"><div class="field"><label>Custo</label><input id="custo" type="number" step="0.01"></div><div class="field"><label>Estoque</label><input id="estoque" type="number" step="1"></div></div>
-  <div class="field"><label>Tipo</label><select id="tipo"><option value="afiliado">Afiliado</option><option value="dropshipping">Dropshipping</option></select></div>
-  <div class="field" id="pgWrap"><label>Link de pagamento (opcional)</label><input id="pagamento" placeholder="Não é necessário para o checkout automático"></div>
-  <label class="check"><input id="destaque" type="checkbox"> Destacar produto</label>
-  <label class="check"><input id="ativo" type="checkbox" checked> Produto ativo</label>
-  <button class="btn primary save" id="salvar">Salvar produto</button>
-</div></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="formModal">
+  <div class="modal-h">
+    <h3 id="formTitle">Novo Produto</h3>
+    <button onclick="closeForm()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="pid">
+    <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome" placeholder="Ex: Creatina 1kg"></div>
+    <div class="form-group"><label>Link do afiliado *</label><input type="text" id="pLink" placeholder="https://meli.la/..."></div>
+    <div class="form-row">
+      <div class="form-group"><label>Preco atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01"></div>
+      <div class="form-group"><label>Preco de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01"></div>
+    </div>
+    <div class="form-group"><label>URL da imagem *</label><input type="text" id="pImg" placeholder="https://..."></div>
+    <div class="form-row">
+      <div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div>
+      <div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Custo R$ (fornecedor)</label><input type="number" id="pCusto" placeholder="30.00" step="0.01"></div>
+      <div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1"></div>
+    </div>
+    <div class="form-group"><label>Tipo</label><select id="pTipo"><option value="afiliado">Afiliado (link externo)</option><option value="dropshipping">Dropshipping (pagamento proprio)</option></select></div>
+    <div class="form-group" id="pagamentoGroup" style="display:none"><label>Link de Pagamento (Mercado Pago)</label><input type="text" id="pPagamento" placeholder="https://mpago.la/..."></div>
+    <div class="form-check"><input type="checkbox" id="pDest"><label for="pDest">Destacar produto</label></div>
+    <div class="form-check"><input type="checkbox" id="pAtivo" checked><label for="pAtivo">Produto ativo</label></div>
+    <button class="save-btn" onclick="saveProd()">Salvar Produto</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+// ===== DEBUG =====
+function log(msg){
+  var d=document.getElementById('debugBox');
+  if(d)d.innerHTML+='<br>'+msg;
+}
+
+// ===== SUPABASE =====
 const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
-const PASSWORD_HASH='cb4d54b9f23b8b7e49f41501272f21fdf385d4b736aaa948d0cd3ccf14054ac8';
-let produtos=[],pedidos=[],editId=null;
+const SENHA='jpvariedades2024';
 
-const $=id=>document.getElementById(id);
-const headers=()=>({'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'});
-const money=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function toast(msg,ok=true){const t=$('toast');t.textContent=msg;t.className='toast show '+(ok?'ok':'err');setTimeout(()=>t.className='toast',2800)}
-async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+log('JS carregado OK');
 
-async function login(){
-  const btn=$('entrar'), err=$('loginError'); btn.disabled=true; err.textContent='';
-  try{
-    const hash=await sha256($('senha').value);
-    if(hash!==PASSWORD_HASH){err.textContent='Senha incorreta.';return}
-    sessionStorage.setItem('jp_admin','1'); $('login').style.display='none'; $('admin').style.display='block'; await carregarTudo();
-  }catch(e){err.textContent='Não foi possível iniciar o painel.'}
-  finally{btn.disabled=false}
+let produtos=[];
+let pedidos=[];
+let editando=null;
+let filtroPedido='todos';
+
+function statusLabel(s){
+  var map={pago:'Pago',aguardando_pagamento:'Aguardando Pagamento',em_analise:'Em Analise',cancelado:'Cancelado',reembolsado:'Reembolsado',enviado:'Enviado'};
+  return map[s]||s;
 }
-$('entrar').addEventListener('click',login);$('senha').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-$('sair').addEventListener('click',()=>{sessionStorage.removeItem('jp_admin');location.reload()});
-if(sessionStorage.getItem('jp_admin')==='1'){ $('login').style.display='none';$('admin').style.display='block'; carregarTudo() }
-
-document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
- document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');
- document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(b.dataset.page).classList.add('active');
-}));
-
-async function api(url,opt={}){const r=await fetch(SUPABASE_URL+url,{...opt,headers:{...headers(),...(opt.headers||{})}});if(!r.ok){const tx=await r.text();throw new Error('Supabase '+r.status+(tx?' - '+tx.slice(0,160):''))}return r.status===204?null:r.json()}
-async function carregarTudo(){
- try{[produtos,pedidos]=await Promise.all([
-   api('/rest/v1/produtos?select=*&order=created_at.desc'),
-   api('/rest/v1/pedidos?select=*&order=criado_em.desc')
- ]);renderAll()}catch(e){toast(e.message,false)}
+function statusClass(s){
+  var map={pago:'status-pago',aguardando_pagamento:'status-pendente',em_analise:'status-pendente',cancelado:'status-inativo',reembolsado:'status-inativo',enviado:'status-enviado'};
+  return map[s]||'status-inativo';
 }
-function statusClass(s){return ({pago:'pago',aguardando_pagamento:'pendente',em_analise:'analise',enviado:'enviado',cancelado:'cancelado',reembolsado:'reembolsado'})[s]||'pendente'}
-function statusText(s){return ({pago:'Pago',aguardando_pagamento:'Aguardando',em_analise:'Em análise',enviado:'Enviado',cancelado:'Cancelado',reembolsado:'Reembolsado'})[s]||s||'Aguardando'}
-function lucroPedido(o){const p=produtos.find(x=>String(x.id)===String(o.produto_id));return Number(o.valor||0)-Number(p?.custo||0)}
-function renderAll(){renderProducts();renderOrders();renderDashboard();renderSuppliers()}
-function renderProducts(){
- $('totalProd').textContent=produtos.length;$('ativos').textContent=produtos.filter(p=>p.ativo).length;$('destaques').textContent=produtos.filter(p=>p.destaque).length;$('drops').textContent=produtos.filter(p=>p.tipo==='dropshipping').length;
- $('lista').innerHTML=produtos.length?produtos.map(p=>`<div class="item"><img src="${esc(p.imagem_url||'')}" onerror="this.style.opacity=.25"><div class="iteminfo"><b>${esc(p.nome)}</b><span class="price">${money(p.preco_atual)}</span><small>${esc(p.loja_origem||'')} • ${p.tipo==='dropshipping'?'Dropshipping':'Afiliado'} • ${p.ativo?'Ativo':'Inativo'}</small></div><div class="actions"><button class="icon" onclick="editar('${p.id}')">✏️</button><button class="icon" onclick="excluir('${p.id}')">🗑️</button></div></div>`).join(''):'<div class="empty">Nenhum produto cadastrado.</div>'
+function calcLucro(pedido){
+  var prod=produtos.find(function(p){return p.id==pedido.produto_id});
+  var custo=(prod&&prod.custo)?parseFloat(prod.custo):0;
+  return (pedido.valor||0)-custo;
+}
+
+const fornecedoresMock=[
+  {id:1,nome:'Shopee',tipo:'Dropshipping',pedidos:89,total:4250,margem:32,status:'ativo'},
+  {id:2,nome:'Mercado Livre',tipo:'Dropshipping',pedidos:67,total:3890,margem:28,status:'ativo'},
+  {id:3,nome:'AliExpress',tipo:'Importacao',pedidos:0,total:0,margem:0,status:'inativo'},
+];
+
+function getHeaders(){return{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}}
+function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(ok?'ok':'err');t.classList.add('on');setTimeout(function(){t.classList.remove('on')},3000)}
+
+// ===== LOGIN =====
+function doLogin(){
+  log('Botao clicado!');
+  var input=document.getElementById('senhaInput');
+  if(!input){log('ERRO: input nao encontrado');return;}
+  var val=input.value;
+  log('Senha digitada: '+val.length+' chars');
+
+  if(val===SENHA){
+    log('Senha CORRETA!');
+    localStorage.setItem('jp_admin','1');
+    showAdmin();
+  }else{
+    log('Senha INCORRETA');
+    var erro=document.getElementById('loginErro');
+    if(erro)erro.textContent='Senha incorreta. Tente: jpvariedades2024';
+  }
+}
+
+function logout(){localStorage.removeItem('jp_admin');location.reload()}
+
+function showAdmin(){
+  log('Mostrando admin...');
+  var login=document.getElementById('loginScreen');
+  var admin=document.getElementById('adminScreen');
+  if(login){login.style.display='none';log('Login escondido');}
+  if(admin){
+    admin.style.display='block';
+    admin.classList.add('on');
+    log('Admin mostrado');
+  }else{
+    log('ERRO: adminScreen nao encontrado');
+  }
+  loadProds();
+  loadPedidos();
+  renderSuppliers();
+}
+
+function loadPedidos(){
+  fetch(SUPABASE_URL+'/rest/v1/pedidos?order=criado_em.desc',{method:'GET',headers:getHeaders()})
+    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
+    .then(function(data){
+      pedidos=data||[];
+      renderDashboard();
+      renderOrders();
+    })
+    .catch(function(e){
+      toast('Erro ao carregar pedidos: '+e.message,false);
+    });
+}
+
+// Auto-login
+if(localStorage.getItem('jp_admin')==='1'){
+  log('Auto-login ativo');
+  showAdmin();
+}else{
+  log('Aguardando login manual');
+}
+
+// Enter no input
+document.getElementById('senhaInput').addEventListener('keypress',function(e){
+  if(e.key==='Enter'){log('Enter pressionado');doLogin();}
+});
+
+// ===== NAVEGACAO =====
+function showPage(page,el){
+  var pages=document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++)pages[i].classList.remove('on');
+  var target=document.getElementById('page-'+page);
+  if(target)target.classList.add('on');
+  var navs=document.querySelectorAll('.nav-item');
+  for(var i=0;i<navs.length;i++)navs[i].classList.remove('active');
+  if(el)el.classList.add('active');
+}
+
+// ===== PRODUTOS =====
+function loadProds(){
+  log('Carregando produtos...');
+  fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()})
+    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
+    .then(function(data){
+      produtos=data||[];
+      log('Produtos carregados: '+produtos.length);
+      renderProdutos();
+      renderDashboard();
+    })
+    .catch(function(e){
+      log('Erro: '+e.message);
+      toast('Erro ao carregar: '+e.message,false);
+      document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar.</div>';
+    });
+}
+
+function renderProdutos(){
+  document.getElementById('stTotal').textContent=produtos.length;
+  document.getElementById('stAtivo').textContent=produtos.filter(function(p){return p.ativo}).length;
+  document.getElementById('stDest').textContent=produtos.filter(function(p){return p.destaque}).length;
+  document.getElementById('stClick').textContent=produtos.reduce(function(a,p){return a+(p.cliques||0)},0);
+
+  var lista=document.getElementById('lista');
+  if(!produtos.length){lista.innerHTML='<div class="empty">Nenhum produto cadastrado.</div>';return}
+  lista.innerHTML=produtos.map(function(p){
+    var tipoLabel=p.tipo==='dropshipping'?'Dropshipping':'Afiliado';
+    return '<div class="item">'+
+      '<img src="'+(p.imagem_url||'')+'" onerror="this.src=\'https://via.placeholder.com/56\'">'+
+      '<div class="item-info">'+
+        '<h4>'+p.nome+'</h4>'+
+        '<div class="price">R$ '+parseFloat(p.preco_atual||0).toFixed(2).replace('.',',')+'</div>'+
+        '<div class="loja">'+(p.loja_origem||'')+' • '+tipoLabel+'</div>'+
+      '</div>'+
+      '<div class="item-actions">'+
+        '<button onclick="editProd(\''+p.id+'\')">✏️</button>'+
+        '<button onclick="deleteProd(\''+p.id+'\')">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderDashboard(){
+  var pagos=pedidos.filter(function(o){return o.status_pedido==='pago'});
+  var totalVendas=pagos.reduce(function(a,o){return a+(o.valor||0)},0);
+  var totalLucro=pagos.reduce(function(a,o){return a+calcLucro(o)},0);
+  document.getElementById('dashVendas').textContent='R$ '+totalVendas.toFixed(2).replace('.',',');
+  document.getElementById('dashPedidos').textContent=pedidos.length;
+  document.getElementById('dashLucro').textContent='R$ '+totalLucro.toFixed(2).replace('.',',');
+  document.getElementById('dashTicket').textContent='R$ '+(pagos.length?(totalVendas/pagos.length).toFixed(2).replace('.',','):'0,00');
+
+  document.getElementById('dashPedidosBody').innerHTML=pedidos.length?pedidos.slice(0,5).map(function(o){
+    return '<tr><td>#'+o.id+'</td><td>'+(o.cliente_nome||'-')+'</td><td>'+(o.produto_nome||'-')+'</td>'+
+      '<td class="price">R$ '+(o.valor||0).toFixed(2).replace('.',',')+'</td>'+
+      '<td><span class="status '+statusClass(o.status_pedido)+'">'+statusLabel(o.status_pedido)+'</span></td></tr>';
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum pedido ainda</td></tr>';
+
+  var baixos=produtos.filter(function(p){return (p.estoque||0)<5 && p.tipo==='dropshipping'});
+  document.getElementById('dashEstoqueBody').innerHTML=baixos.length?baixos.map(function(p){
+    return '<tr><td>'+p.nome+'</td><td>'+(p.loja_origem||'-')+'</td><td class="stock-low">'+(p.estoque||0)+'</td></tr>';
+  }).join(''):'<tr><td colspan="3" style="text-align:center;color:var(--muted)">Nenhum produto com estoque baixo</td></tr>';
+}
+
+// ===== PEDIDOS =====
+function filterOrders(f,el){
+  filtroPedido=f;
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');
+  if(el)el.classList.add('active');
+  renderOrders();
 }
 function renderOrders(){
- const rows=pedidos||[];
- $('orders').innerHTML=rows.length?rows.map(o=>`<tr><td>#${esc(o.id)}</td><td>${esc((o.criado_em||o.atualizado_em||'').replace('T',' ').slice(0,16))}</td><td>${esc(o.cliente_nome||'Cliente')}</td><td>${esc(o.produto_nome||'Produto')}</td><td class="price">${money(o.valor)}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusText(o.status_pedido)}</span></td><td><select onchange="alterarStatus('${o.id}',this.value)"><option value="">Alterar</option><option value="aguardando_pagamento">Aguardando</option><option value="pago">Pago</option><option value="enviado">Enviado</option><option value="cancelado">Cancelado</option></select></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#999">Nenhum pedido ainda.</td></tr>'
+  var list=filtroPedido==='todos'?pedidos:pedidos.filter(function(o){return o.status_pedido===filtroPedido});
+  document.getElementById('ordersBody').innerHTML=list.length?list.map(function(o){
+    var data=o.criado_em?new Date(o.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+    return '<tr><td>#'+o.id+'</td><td>'+data+'</td><td>'+(o.cliente_nome||'-')+'</td><td>'+(o.produto_nome||'-')+'</td>'+
+      '<td class="price">R$ '+(o.valor||0).toFixed(2).replace('.',',')+'</td>'+
+      '<td class="profit">R$ '+calcLucro(o).toFixed(2).replace('.',',')+'</td>'+
+      '<td><span class="status '+statusClass(o.status_pedido)+'">'+statusLabel(o.status_pedido)+'</span></td></tr>';
+  }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
 }
-function renderDashboard(){
- const pagos=pedidos.filter(o=>o.status_pedido==='pago'||o.status_pedido==='enviado');
- const vendas=pagos.reduce((a,o)=>a+Number(o.valor||0),0), lucro=pagos.reduce((a,o)=>a+lucroPedido(o),0);
- $('vendas').textContent=money(vendas);$('qtdPedidos').textContent=pedidos.length;$('lucro').textContent=money(lucro);$('ticket').textContent=money(pagos.length?vendas/pagos.length:0);
- $('recent').innerHTML=pedidos.slice(0,8).map(o=>`<tr><td>#${esc(o.id)}</td><td>${esc(o.cliente_nome||'')}</td><td>${esc(o.produto_nome||'')}</td><td class="price">${money(o.valor)}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusText(o.status_pedido)}</span></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:#999">Nenhum pedido.</td></tr>';
- const low=produtos.filter(p=>p.tipo==='dropshipping'&&Number(p.estoque||0)<5);
- $('lowStock').innerHTML=low.map(p=>`<tr><td>${esc(p.nome)}</td><td>${esc(p.loja_origem||'')}</td><td style="color:#ff5252;font-weight:800">${Number(p.estoque||0)}</td></tr>`).join('')||'<tr><td colspan="3" style="text-align:center;color:#999">Nenhum estoque baixo.</td></tr>'
-}
+
+// ===== FORNECEDORES =====
 function renderSuppliers(){
- const map={};produtos.forEach(p=>{const k=p.loja_origem||'Outro';if(!map[k])map[k]={prod:0,active:0};map[k].prod++;if(p.ativo)map[k].active++});
- pedidos.forEach(o=>{const p=produtos.find(x=>String(x.id)===String(o.produto_id));const k=p?.loja_origem||'Outro';if(!map[k])map[k]={prod:0,active:0};map[k].orders=(map[k].orders||0)+1});
- $('suppliers').innerHTML=Object.entries(map).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v.prod}</td><td>${v.active}</td><td>${v.orders||0}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:#999">Sem fornecedores.</td></tr>'
+  document.getElementById('suppliersBody').innerHTML=fornecedoresMock.map(function(f){
+    return '<tr><td>'+f.nome+'</td><td>'+f.tipo+'</td><td>'+f.pedidos+'</td>'+
+      '<td>R$ '+f.total.toFixed(2).replace('.',',')+'</td><td>'+f.margem+'%</td>'+
+      '<td><span class="status status-'+f.status+'">'+f.status+'</span></td></tr>';
+  }).join('');
 }
-async function alterarStatus(id,status){if(!status)return;try{await api('/rest/v1/pedidos?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({status_pedido:status,atualizado_em:new Date().toISOString()})});toast('Status atualizado');await carregarTudo()}catch(e){toast(e.message,false)}}
-function limpar(){editId=null;$('modalTitle').textContent='Novo Produto';['pid','nome','link','preco','precoAntigo','imagem','categoria','custo','estoque','pagamento'].forEach(id=>$(id).value='');$('loja').value='Mercado Livre';$('tipo').value='afiliado';$('destaque').checked=false;$('ativo').checked=true}
-$('novo').addEventListener('click',()=>{limpar();$('modal').classList.add('show')});$('fechar').addEventListener('click',()=>$('modal').classList.remove('show'));
-$('tipo').addEventListener('change',()=>{$('pgWrap').style.display='block'});
-function editar(id){const p=produtos.find(x=>String(x.id)===String(id));if(!p)return;editId=id;$('modalTitle').textContent='Editar Produto';$('pid').value=p.id;$('nome').value=p.nome||'';$('link').value=p.link_afiliado||'';$('preco').value=p.preco_atual||'';$('precoAntigo').value=p.preco_antigo||'';$('imagem').value=p.imagem_url||'';$('loja').value=p.loja_origem||'Mercado Livre';$('categoria').value=p.categoria||'';$('custo').value=p.custo??'';$('estoque').value=p.estoque??'';$('tipo').value=p.tipo||'afiliado';$('pagamento').value=p.link_pagamento||'';$('destaque').checked=!!p.destaque;$('ativo').checked=p.ativo!==false;$('modal').classList.add('show')}
-async function excluir(id){if(!confirm('Excluir este produto?'))return;try{await api('/rest/v1/produtos?id=eq.'+encodeURIComponent(id),{method:'DELETE'});toast('Produto excluído');await carregarTudo()}catch(e){toast(e.message,false)}}
-$('salvar').addEventListener('click',async()=>{
- const body={nome:$('nome').value.trim(),link_afiliado:$('link').value.trim(),preco_atual:Number($('preco').value),preco_antigo:$('precoAntigo').value?Number($('precoAntigo').value):null,imagem_url:$('imagem').value.trim(),loja_origem:$('loja').value,categoria:$('categoria').value.trim(),custo:$('custo').value?Number($('custo').value):null,estoque:$('estoque').value?Number($('estoque').value):null,tipo:$('tipo').value,link_pagamento:$('pagamento').value.trim(),destaque:$('destaque').checked,ativo:$('ativo').checked};
- if(!body.nome||!body.preco_atual||!body.imagem_url){toast('Preencha nome, preço e imagem.',false);return}
- try{if(editId)await api('/rest/v1/produtos?id=eq.'+encodeURIComponent(editId),{method:'PATCH',body:JSON.stringify(body)});else await api('/rest/v1/produtos',{method:'POST',body:JSON.stringify(body)});$('modal').classList.remove('show');toast('Produto salvo');await carregarTudo()}catch(e){toast(e.message,false)}
+
+// ===== FORMULARIO =====
+function openForm(){
+  editando=null;
+  document.getElementById('formTitle').textContent='Novo Produto';
+  document.getElementById('pid').value='';
+  document.getElementById('pNome').value='';
+  document.getElementById('pLink').value='';
+  document.getElementById('pPreco').value='';
+  document.getElementById('pOld').value='';
+  document.getElementById('pImg').value='';
+  document.getElementById('pLoja').value='Mercado Livre';
+  document.getElementById('pCat').value='';
+  document.getElementById('pCusto').value='';
+  document.getElementById('pEstoque').value='';
+  document.getElementById('pTipo').value='afiliado';
+  document.getElementById('pPagamento').value='';
+  document.getElementById('pagamentoGroup').style.display='none';
+  document.getElementById('pDest').checked=false;
+  document.getElementById('pAtivo').checked=true;
+  document.getElementById('formModal').classList.add('on');
+}
+
+function closeForm(){document.getElementById('formModal').classList.remove('on')}
+
+function editProd(id){
+  var p=produtos.find(function(x){return x.id==id});
+  if(!p)return;
+  editando=id;
+  document.getElementById('formTitle').textContent='Editar Produto';
+  document.getElementById('pid').value=p.id;
+  document.getElementById('pNome').value=p.nome||'';
+  document.getElementById('pLink').value=p.link_afiliado||'';
+  document.getElementById('pPreco').value=p.preco_atual||'';
+  document.getElementById('pOld').value=p.preco_antigo||'';
+  document.getElementById('pImg').value=p.imagem_url||'';
+  document.getElementById('pLoja').value=p.loja_origem||'Mercado Livre';
+  document.getElementById('pCat').value=p.categoria||'';
+  document.getElementById('pCusto').value=p.custo||'';
+  document.getElementById('pEstoque').value=p.estoque||'';
+  document.getElementById('pTipo').value=p.tipo||'afiliado';
+  document.getElementById('pPagamento').value=p.link_pagamento||'';
+  document.getElementById('pagamentoGroup').style.display=(p.tipo==='dropshipping')?'block':'none';
+  document.getElementById('pDest').checked=!!p.destaque;
+  document.getElementById('pAtivo').checked=p.ativo!==false;
+  document.getElementById('formModal').classList.add('on');
+}
+
+document.getElementById('pTipo').addEventListener('change',function(){
+  document.getElementById('pagamentoGroup').style.display=(this.value==='dropshipping')?'block':'none';
 });
+
+function deleteProd(id){
+  if(!confirm('Excluir este produto?'))return;
+  fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+id,{method:'DELETE',headers:getHeaders()})
+    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Produto excluido!',true);loadProds();})
+    .catch(function(e){toast('Erro: '+e.message,false)});
+}
+
+function saveProd(){
+  var nome=document.getElementById('pNome').value.trim();
+  var link=document.getElementById('pLink').value.trim();
+  var preco=document.getElementById('pPreco').value;
+  var img=document.getElementById('pImg').value.trim();
+  if(!nome||!link||!preco||!img){toast('Preencha os campos obrigatorios (*)',false);return}
+
+  var body={
+    nome:nome,
+    link_afiliado:link,
+    preco_atual:parseFloat(preco),
+    preco_antigo:document.getElementById('pOld').value?parseFloat(document.getElementById('pOld').value):null,
+    imagem_url:img,
+    loja_origem:document.getElementById('pLoja').value,
+    categoria:document.getElementById('pCat').value.trim(),
+    custo:document.getElementById('pCusto').value?parseFloat(document.getElementById('pCusto').value):null,
+    estoque:document.getElementById('pEstoque').value?parseInt(document.getElementById('pEstoque').value):null,
+    tipo:document.getElementById('pTipo').value,
+    link_pagamento:document.getElementById('pPagamento').value.trim(),
+    destaque:document.getElementById('pDest').checked,
+    ativo:document.getElementById('pAtivo').checked
+  };
+
+  var id=document.getElementById('pid').value;
+  var req;
+  if(id){
+    req=fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+id,{method:'PATCH',headers:getHeaders(),body:JSON.stringify(body)});
+  }else{
+    req=fetch(SUPABASE_URL+'/rest/v1/produtos',{method:'POST',headers:getHeaders(),body:JSON.stringify(body)});
+  }
+  req.then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Produto salvo!',true);closeForm();loadProds();})
+    .catch(function(e){toast('Erro ao salvar: '+e.message,false)});
+}
 </script>
 </body>
 </html>
