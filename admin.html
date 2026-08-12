@@ -9,133 +9,65 @@
 :root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-
-/* LOGIN */
 .login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(180deg,#0a0a0a 0%,#141414 100%)}
 .login-logo{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent-dark),var(--accent));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;color:#000;margin-bottom:16px}
-.login h1{font-size:22px;margin-bottom:4px}
-.login p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.login h1{font-size:22px;margin-bottom:4px}.login p{color:var(--muted);font-size:13px;margin-bottom:24px}
 .login input{width:100%;max-width:320px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;margin-bottom:12px;outline:none}
 .login input:focus{border-color:var(--accent)}
 .login button{width:100%;max-width:320px;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer}
-.login button:active{opacity:0.8}
-.login .erro{color:var(--danger);margin-top:12px;font-size:13px;text-align:center}
-
-/* DEBUG BOX */
-.debug-box{width:100%;max-width:320px;margin-top:16px;padding:10px;border-radius:8px;background:#1a1a1a;border:1px solid #333;font-size:11px;color:#888;font-family:monospace;max-height:120px;overflow-y:auto}
-.debug-box b{color:#00e676}
-
-/* ADMIN */
-.admin{display:none}
-.admin.on{display:block}
+.login button:disabled{opacity:.6;cursor:wait}.login button:active{opacity:.8}
+.login .erro{color:var(--danger);margin-top:12px;font-size:13px;text-align:center;max-width:320px}
+.admin{display:none}.admin.on{display:block}
 .topbar{position:sticky;top:0;z-index:100;background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-.topbar h2{font-size:16px;display:flex;align-items:center;gap:8px}
-.topbar h2 span{font-size:20px}
+.topbar h2{font-size:16px;display:flex;align-items:center;gap:8px}.topbar h2 span{font-size:20px}
 .topbar button{padding:8px 14px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
 .nav{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--border);scrollbar-width:none}
-.nav::-webkit-scrollbar{display:none}
-.nav-item{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.nav::-webkit-scrollbar{display:none}.nav-item{flex-shrink:0;padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
 .nav-item.active{background:var(--accent);color:#000;border-color:var(--accent)}
-.main{padding:16px}
-.page{display:none}
-.page.on{display:block}
-.page-title{font-size:18px;font-weight:700;margin-bottom:16px}
-
-/* STATS */
+.main{padding:16px}.page{display:none}.page.on{display:block}.page-title{font-size:18px;font-weight:700;margin-bottom:16px}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.stat{background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--border);text-align:center}
-.stat b{display:block;font-size:22px;color:var(--accent);margin-bottom:4px}
-.stat span{font-size:11px;color:var(--muted)}
-
-/* CARDS */
+.stat{background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--border);text-align:center}.stat b{display:block;font-size:22px;color:var(--accent);margin-bottom:4px}.stat span{font-size:11px;color:var(--muted)}
 .card{background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
-.card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)}
-.card-title{font-size:14px;font-weight:700}
-.card-body{padding:12px 16px}
-
-/* TABLES */
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)}.card-title{font-size:14px;font-weight:700}.card-body{padding:12px 16px}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
 th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}
-td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}
-tr:last-child td{border-bottom:none}
-.price{color:var(--accent);font-weight:700}
-.profit{color:var(--accent);font-weight:700}
-.stock-low{color:var(--danger);font-weight:700}
+td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{border-bottom:none}
+.price{color:var(--accent);font-weight:700}.profit{color:var(--accent);font-weight:700}.stock-low{color:var(--danger);font-weight:700}
 .status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.status-pago{background:rgba(0,230,118,.15);color:#00e676}
-.status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}
-.status-enviado{background:rgba(59,130,246,.15);color:#3b82f6}
-.status-ativo{background:rgba(0,230,118,.15);color:#00e676}
-.status-inativo{background:rgba(107,114,128,.15);color:#9ca3af}
-.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
-.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;background:var(--border);color:var(--muted)}
-
-/* PRODUTOS LISTA */
+.status-pago{background:rgba(0,230,118,.15);color:#00e676}.status-pendente{background:rgba(245,158,11,.15);color:#f59e0b}.status-enviado{background:rgba(59,130,246,.15);color:#3b82f6}.status-ativo{background:rgba(0,230,118,.15);color:#00e676}.status-inativo{background:rgba(107,114,128,.15);color:#9ca3af}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;background:var(--border);color:var(--muted)}
 .item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
-.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--border);flex-shrink:0}
-.item-info{flex:1;min-width:0}
-.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.item-info .price{font-size:14px;color:var(--accent);font-weight:700}
-.item-info .loja{font-size:11px;color:var(--muted)}
-.item-actions{display:flex;gap:6px}
-.item-actions button{width:32px;height:32px;border-radius:6px;border:none;background:var(--border);color:var(--text);font-size:14px;cursor:pointer}
-.empty{text-align:center;padding:40px;color:var(--muted)}
-
-/* FAB */
+.item img{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--border);flex-shrink:0}.item-info{flex:1;min-width:0}
+.item-info h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}.item-info .price{font-size:14px;color:var(--accent);font-weight:700}.item-info .loja{font-size:11px;color:var(--muted)}
+.item-actions{display:flex;gap:6px}.item-actions button{width:32px;height:32px;border-radius:6px;border:none;background:var(--border);color:var(--text);font-size:14px;cursor:pointer}.empty{text-align:center;padding:40px;color:var(--muted)}
 .fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--accent);color:#000;font-size:28px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,200,100,.3);z-index:200}
-
-/* MODAL */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;z-index:300}
-.modal.on{display:flex}
-.modal-h{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--card)}
-.modal-h h3{font-size:16px}
-.modal-h button{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:#fff;font-size:18px;cursor:pointer}
-.modal-body{flex:1;overflow-y:auto;padding:16px}
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;z-index:300}.modal.on{display:flex}
+.modal-h{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--card)}.modal-h h3{font-size:16px}
+.modal-h button{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:#fff;font-size:18px;cursor:pointer}.modal-body{flex:1;overflow-y:auto;padding:16px}
+.form-group{margin-bottom:14px}.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;outline:none}
-.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.form-check{display:flex;align-items:center;gap:8px;padding:8px 0}
-.form-check input{width:20px;height:20px;accent-color:var(--accent)}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-check{display:flex;align-items:center;gap:8px;padding:8px 0}.form-check input{width:20px;height:20px;accent-color:var(--accent)}
 .save-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
-
-/* TABS */
-.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);overflow-x:auto}
-.tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);font-weight:600;white-space:nowrap}
-.tab.active{border-bottom-color:var(--accent);color:var(--accent)}
-
-/* TOAST */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none}
-.toast.on{display:block}
-.toast.ok{border-color:var(--accent);color:var(--accent)}
-.toast.err{border-color:var(--danger);color:var(--danger)}
-
-@media(min-width:768px){
-  .stats{grid-template-columns:repeat(4,1fr)}
-}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);overflow-x:auto}.tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);font-weight:600;white-space:nowrap}.tab.active{border-bottom-color:var(--accent);color:var(--accent)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none}.toast.on{display:block}.toast.ok{border-color:var(--accent);color:var(--accent)}.toast.err{border-color:var(--danger);color:var(--danger)}
+@media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="login" id="loginScreen">
   <div class="login-logo">JP</div>
   <h1>JP Variedades</h1>
   <p>Painel Administrativo</p>
-  <input type="password" id="senhaInput" placeholder="Digite a senha" autocomplete="off">
+  <input type="email" id="emailInput" placeholder="E-mail do administrador" autocomplete="username" inputmode="email">
+  <input type="password" id="senhaInput" placeholder="Senha" autocomplete="current-password">
   <button onclick="doLogin()" id="btnEntrar">Entrar</button>
   <div class="erro" id="loginErro"></div>
-  <div class="debug-box" id="debugBox"><b>DEBUG:</b><br>Aguardando login...</div>
 </div>
 
-<!-- ADMIN -->
 <div class="admin" id="adminScreen">
-  <div class="topbar">
-    <h2><span>🛒</span> JP Admin</h2>
-    <button onclick="logout()">Sair</button>
-  </div>
+  <div class="topbar"><h2><span>🛒</span> JP Admin</h2><button onclick="logout()">Sair</button></div>
   <div class="nav">
     <button class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
     <button class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</button>
@@ -144,7 +76,6 @@ tr:last-child td{border-bottom:none}
     <button class="nav-item" onclick="showPage('config',this)">⚙️ Config</button>
   </div>
   <div class="main">
-
     <div class="page on" id="page-dashboard">
       <div class="page-title">Dashboard</div>
       <div class="stats">
@@ -153,446 +84,384 @@ tr:last-child td{border-bottom:none}
         <div class="stat"><b id="dashLucro">R$ 0</b><span>Lucro</span></div>
         <div class="stat"><b id="dashTicket">R$ 0</b><span>Ticket Medio</span></div>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">📦 Pedidos Recentes</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">⚠️ Estoque Baixo</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Fornecedor</th><th>Estoque</th></tr></thead><tbody id="dashEstoqueBody"></tbody></table></div></div>
-      </div>
+      <div class="card"><div class="card-header"><div class="card-title">📦 Pedidos Recentes</div></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div></div>
+      <div class="card"><div class="card-header"><div class="card-title">⚠️ Estoque Baixo</div></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Fornecedor</th><th>Estoque</th></tr></thead><tbody id="dashEstoqueBody"></tbody></table></div></div></div>
     </div>
 
     <div class="page" id="page-produtos">
       <div class="page-title">Produtos</div>
       <div class="stats">
-        <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
-        <div class="stat"><b id="stAtivo">0</b><span>Ativos</span></div>
-        <div class="stat"><b id="stDest">0</b><span>Destaques</span></div>
-        <div class="stat"><b id="stClick">0</b><span>Cliques</span></div>
+        <div class="stat"><b id="stTotal">0</b><span>Total</span></div><div class="stat"><b id="stAtivo">0</b><span>Ativos</span></div><div class="stat"><b id="stDest">0</b><span>Destaques</span></div><div class="stat"><b id="stClick">0</b><span>Cliques</span></div>
       </div>
-      <div id="lista"></div>
-      <button class="fab" onclick="openForm()">+</button>
+      <div id="lista"></div><button class="fab" onclick="openForm()">+</button>
     </div>
 
     <div class="page" id="page-pedidos">
       <div class="page-title">Pedidos</div>
-      <div class="tabs">
-        <div class="tab active" onclick="filterOrders('todos',this)">Todos</div>
-        <div class="tab" onclick="filterOrders('pago',this)">Pagos</div>
-        <div class="tab" onclick="filterOrders('aguardando_pagamento',this)">Pendentes</div>
-        <div class="tab" onclick="filterOrders('enviado',this)">Enviados</div>
-      </div>
-      <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th><th>Endereco</th><th>Acoes</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
-      </div>
+      <div class="tabs"><div class="tab active" onclick="filterOrders('todos',this)">Todos</div><div class="tab" onclick="filterOrders('pago',this)">Pagos</div><div class="tab" onclick="filterOrders('aguardando_pagamento',this)">Pendentes</div><div class="tab" onclick="filterOrders('enviado',this)">Enviados</div></div>
+      <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th><th>Endereco</th><th>Acoes</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div></div>
     </div>
 
     <div class="page" id="page-fornecedores">
       <div class="page-title">Fornecedores</div>
-      <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Tipo</th><th>Pedidos</th><th>Total</th><th>Margem</th><th>Status</th></tr></thead><tbody id="suppliersBody"></tbody></table></div></div>
-      </div>
+      <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Tipo</th><th>Pedidos</th><th>Total</th><th>Margem</th><th>Status</th></tr></thead><tbody id="suppliersBody"></tbody></table></div></div></div>
     </div>
 
     <div class="page" id="page-config">
       <div class="page-title">Configuracoes</div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">🔗 Integracoes</div></div>
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Servico</th><th>Status</th></tr></thead><tbody>
-          <tr><td><b>💳 Mercado Pago</b><br><small style="color:var(--muted)">Pagamentos</small></td><td><span class="status status-pago"><span class="status-dot" style="background:#00e676"></span>Conectado (Teste)</span></td></tr>
-          <tr><td><b>🗄️ Supabase</b><br><small style="color:var(--muted)">Banco de Dados</small></td><td><span class="status status-ativo"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
-          <tr><td><b>📦 Melhor Envio</b><br><small style="color:var(--muted)">Frete</small></td><td><span class="status status-pendente"><span class="status-dot" style="background:#f59e0b"></span>Nao conectado</span></td></tr>
-        </tbody></table></div></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">🏪 Loja</div></div>
-        <div class="card-body"><div class="table-wrap"><table><tbody>
-          <tr><td style="width:50%;color:var(--muted)">Nome da Loja</td><td><b>JP Variedades</b></td></tr>
-          <tr><td style="color:var(--muted)">URL</td><td>jp-variedades.vercel.app</td></tr>
-          <tr><td style="color:var(--muted)">Taxa de Lucro</td><td>35%</td></tr>
-          <tr><td style="color:var(--muted)">Frete Gratis acima de</td><td>R$ 99,00</td></tr>
-        </tbody></table></div></div>
-      </div>
+      <div class="card"><div class="card-header"><div class="card-title">🔗 Integracoes</div></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Servico</th><th>Status</th></tr></thead><tbody>
+        <tr><td><b>💳 Mercado Pago</b><br><small style="color:var(--muted)">Pagamentos</small></td><td><span class="status status-pago"><span class="status-dot" style="background:#00e676"></span>Conectado (Teste)</span></td></tr>
+        <tr><td><b>🗄️ Supabase</b><br><small style="color:var(--muted)">Banco de Dados</small></td><td><span class="status status-ativo"><span class="status-dot" style="background:#00e676"></span>Conectado</span></td></tr>
+        <tr><td><b>📦 Melhor Envio</b><br><small style="color:var(--muted)">Frete</small></td><td><span class="status status-pendente"><span class="status-dot" style="background:#f59e0b"></span>Nao conectado</span></td></tr>
+      </tbody></table></div></div></div>
+      <div class="card"><div class="card-header"><div class="card-title">🏪 Loja</div></div><div class="card-body"><div class="table-wrap"><table><tbody>
+        <tr><td style="width:50%;color:var(--muted)">Nome da Loja</td><td><b>JP Variedades</b></td></tr><tr><td style="color:var(--muted)">URL</td><td>jp-variedades.vercel.app</td></tr><tr><td style="color:var(--muted)">Taxa de Lucro</td><td>35%</td></tr><tr><td style="color:var(--muted)">Frete Gratis acima de</td><td>R$ 99,00</td></tr>
+      </tbody></table></div></div></div>
     </div>
-
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="formModal">
-  <div class="modal-h">
-    <h3 id="formTitle">Novo Produto</h3>
-    <button onclick="closeForm()">&times;</button>
-  </div>
+  <div class="modal-h"><h3 id="formTitle">Novo Produto</h3><button onclick="closeForm()">&times;</button></div>
   <div class="modal-body">
     <input type="hidden" id="pid">
     <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome" placeholder="Ex: Creatina 1kg"></div>
-    <div class="form-group"><label>Link do afiliado <span id="linkObrigLabel">*</span></label><input type="text" id="pLink" placeholder="https://meli.la/..."></div>
-    <div class="form-row">
-      <div class="form-group"><label>Preco atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01"></div>
-      <div class="form-group"><label>Preco de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01"></div>
-    </div>
-    <div class="form-group"><label>URL da imagem *</label><input type="text" id="pImg" placeholder="https://..."></div>
-    <div class="form-row">
-      <div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div>
-      <div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Custo R$ (fornecedor)</label><input type="number" id="pCusto" placeholder="30.00" step="0.01"></div>
-      <div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1"></div>
-    </div>
+    <div class="form-group"><label>Link do afiliado <span id="linkObrigLabel">*</span></label><input type="url" id="pLink" placeholder="https://meli.la/..."></div>
+    <div class="form-row"><div class="form-group"><label>Preco atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01" min="0"></div><div class="form-group"><label>Preco de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01" min="0"></div></div>
+    <div class="form-group"><label>URL da imagem *</label><input type="url" id="pImg" placeholder="https://..."></div>
+    <div class="form-row"><div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div><div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia"></div></div>
+    <div class="form-row"><div class="form-group"><label>Custo R$ (fornecedor)</label><input type="number" id="pCusto" placeholder="30.00" step="0.01" min="0"></div><div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1" min="0"></div></div>
     <div class="form-group"><label>Tipo</label><select id="pTipo"><option value="afiliado">Afiliado (link externo)</option><option value="dropshipping">Dropshipping (pagamento proprio)</option></select></div>
-    <div class="form-group" id="pagamentoGroup" style="display:none"><label>Link de Pagamento (Mercado Pago)</label><input type="text" id="pPagamento" placeholder="https://mpago.la/..."></div>
+    <div class="form-group" id="pagamentoGroup" style="display:none"><label>Link de Pagamento (Mercado Pago)</label><input type="url" id="pPagamento" placeholder="https://mpago.la/..."></div>
     <div class="form-check"><input type="checkbox" id="pDest"><label for="pDest">Destacar produto</label></div>
     <div class="form-check"><input type="checkbox" id="pAtivo" checked><label for="pAtivo">Produto ativo</label></div>
     <button class="save-btn" onclick="saveProd()">Salvar Produto</button>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
+<!-- Biblioteca oficial do Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ===== DEBUG =====
-function log(msg){
-  var d=document.getElementById('debugBox');
-  if(d)d.innerHTML+='<br>'+msg;
-}
-
-// ===== SUPABASE =====
 const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
-const SENHA='jpvariedades2024';
+const ADMIN_EMAIL='pedrosanttos793@gmail.com';
 
-log('JS carregado OK');
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let produtos=[];
-let pedidos=[];
-let editando=null;
-let filtroPedido='todos';
+let produtos=[],pedidos=[],editando=null,filtroPedido='todos';
+
+function toast(msg,ok){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(ok?'ok':'err');t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),3000);
+}
+function setLoginError(msg){
+  const e=document.getElementById('loginErro');if(e)e.textContent=msg||'';
+}
+function setLoading(v){
+  const b=document.getElementById('btnEntrar');
+  if(b){b.disabled=v;b.textContent=v?'Entrando...':'Entrar';}
+}
+function escapeHtml(v){
+  return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+function money(v){return 'R$ '+Number(v||0).toFixed(2).replace('.',',');}
 
 function statusLabel(s){
-  var map={pago:'Pago',aguardando_pagamento:'Aguardando Pagamento',em_analise:'Em Analise',cancelado:'Cancelado',reembolsado:'Reembolsado',enviado:'Enviado'};
+  const map={pago:'Pago',aguardando_pagamento:'Aguardando Pagamento',em_analise:'Em Analise',cancelado:'Cancelado',reembolsado:'Reembolsado',enviado:'Enviado',entregue:'Entregue'};
   return map[s]||s;
 }
 function statusClass(s){
-  var map={pago:'status-pago',aguardando_pagamento:'status-pendente',em_analise:'status-pendente',cancelado:'status-inativo',reembolsado:'status-inativo',enviado:'status-enviado'};
+  const map={pago:'status-pago',aguardando_pagamento:'status-pendente',em_analise:'status-pendente',cancelado:'status-inativo',reembolsado:'status-inativo',enviado:'status-enviado',entregue:'status-pago'};
   return map[s]||'status-inativo';
 }
 function calcLucro(pedido){
-  var prod=produtos.find(function(p){return p.id==pedido.produto_id});
-  var custo=(prod&&prod.custo)?parseFloat(prod.custo):0;
-  return (pedido.valor||0)-custo;
+  const prod=produtos.find(p=>p.id==pedido.produto_id);
+  const custo=prod&&prod.custo?parseFloat(prod.custo):0;
+  return (Number(pedido.valor)||0)-custo;
 }
 
 const fornecedoresMock=[
   {id:1,nome:'Shopee',tipo:'Dropshipping',pedidos:89,total:4250,margem:32,status:'ativo'},
   {id:2,nome:'Mercado Livre',tipo:'Dropshipping',pedidos:67,total:3890,margem:28,status:'ativo'},
-  {id:3,nome:'AliExpress',tipo:'Importacao',pedidos:0,total:0,margem:0,status:'inativo'},
+  {id:3,nome:'AliExpress',tipo:'Importacao',pedidos:0,total:0,margem:0,status:'inativo'}
 ];
 
-function getHeaders(){return{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}}
-function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(ok?'ok':'err');t.classList.add('on');setTimeout(function(){t.classList.remove('on')},3000)}
-
-// ===== LOGIN =====
-function doLogin(){
-  log('Botao clicado!');
-  var input=document.getElementById('senhaInput');
-  if(!input){log('ERRO: input nao encontrado');return;}
-  var val=input.value;
-  log('Senha digitada: '+val.length+' chars');
-
-  if(val===SENHA){
-    log('Senha CORRETA!');
-    localStorage.setItem('jp_admin','1');
-    showAdmin();
-  }else{
-    log('Senha INCORRETA');
-    var erro=document.getElementById('loginErro');
-    if(erro)erro.textContent='Senha incorreta. Tente: jpvariedades2024';
-  }
+async function getAuthHeaders(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session)throw new Error('Sessao expirada. Entre novamente.');
+  return {
+    apikey:SUPABASE_KEY,
+    Authorization:'Bearer '+session.access_token,
+    'Content-Type':'application/json',
+    Accept:'application/json',
+    Prefer:'return=representation'
+  };
 }
 
-function logout(){localStorage.removeItem('jp_admin');location.reload()}
+/* LOGIN REAL PELO SUPABASE */
+async function doLogin(){
+  const email=document.getElementById('emailInput').value.trim().toLowerCase();
+  const password=document.getElementById('senhaInput').value;
+  setLoginError('');
+
+  if(!email||!password){
+    setLoginError('Digite seu e-mail e sua senha.');
+    return;
+  }
+  if(email!==ADMIN_EMAIL){
+    setLoginError('Este e-mail não tem acesso ao painel.');
+    return;
+  }
+
+  setLoading(true);
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  setLoading(false);
+
+  if(error){
+    setLoginError('E-mail ou senha incorretos.');
+    return;
+  }
+  if(!data.session){
+    setLoginError('Não foi possível iniciar a sessão.');
+    return;
+  }
+
+  await verifyAdminAndShow();
+}
+
+async function verifyAdminAndShow(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session||session.user.email.toLowerCase()!==ADMIN_EMAIL){
+    await supabaseClient.auth.signOut();
+    setLoginError('Acesso não autorizado.');
+    return;
+  }
+  showAdmin();
+}
+
+async function logout(){
+  await supabaseClient.auth.signOut();
+  document.getElementById('adminScreen').style.display='none';
+  document.getElementById('adminScreen').classList.remove('on');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('emailInput').value='';
+  document.getElementById('senhaInput').value='';
+  setLoginError('');
+}
 
 function showAdmin(){
-  log('Mostrando admin...');
-  var login=document.getElementById('loginScreen');
-  var admin=document.getElementById('adminScreen');
-  if(login){login.style.display='none';log('Login escondido');}
-  if(admin){
-    admin.style.display='block';
-    admin.classList.add('on');
-    log('Admin mostrado');
-  }else{
-    log('ERRO: adminScreen nao encontrado');
+  document.getElementById('loginScreen').style.display='none';
+  const admin=document.getElementById('adminScreen');
+  admin.style.display='block';admin.classList.add('on');
+  loadProds();loadPedidos();renderSuppliers();
+}
+
+async function loadPedidos(){
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/pedidos?order=criado_em.desc',{headers});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    pedidos=await res.json()||[];
+    renderDashboard();renderOrders();
+  }catch(e){
+    if(e.message.includes('Sessao')){await logout();return;}
+    toast('Erro ao carregar pedidos: '+e.message,false);
   }
-  loadProds();
-  loadPedidos();
-  renderSuppliers();
 }
 
-function loadPedidos(){
-  fetch(SUPABASE_URL+'/rest/v1/pedidos?order=criado_em.desc',{method:'GET',headers:getHeaders()})
-    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
-    .then(function(data){
-      pedidos=data||[];
-      renderDashboard();
-      renderOrders();
-    })
-    .catch(function(e){
-      toast('Erro ao carregar pedidos: '+e.message,false);
-    });
-}
-
-// Auto-login
-if(localStorage.getItem('jp_admin')==='1'){
-  log('Auto-login ativo');
-  showAdmin();
-}else{
-  log('Aguardando login manual');
-}
-
-// Enter no input
-document.getElementById('senhaInput').addEventListener('keypress',function(e){
-  if(e.key==='Enter'){log('Enter pressionado');doLogin();}
-});
-
-// ===== NAVEGACAO =====
 function showPage(page,el){
-  var pages=document.querySelectorAll('.page');
-  for(var i=0;i<pages.length;i++)pages[i].classList.remove('on');
-  var target=document.getElementById('page-'+page);
-  if(target)target.classList.add('on');
-  var navs=document.querySelectorAll('.nav-item');
-  for(var i=0;i<navs.length;i++)navs[i].classList.remove('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  const target=document.getElementById('page-'+page);if(target)target.classList.add('on');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el)el.classList.add('active');
 }
 
-// ===== PRODUTOS =====
-function loadProds(){
-  log('Carregando produtos...');
-  fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()})
-    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
-    .then(function(data){
-      produtos=data||[];
-      log('Produtos carregados: '+produtos.length);
-      renderProdutos();
-      renderDashboard();
-    })
-    .catch(function(e){
-      log('Erro: '+e.message);
-      toast('Erro ao carregar: '+e.message,false);
-      document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar.</div>';
-    });
+async function loadProds(){
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{headers});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    produtos=await res.json()||[];
+    renderProdutos();renderDashboard();
+  }catch(e){
+    if(e.message.includes('Sessao')){await logout();return;}
+    toast('Erro ao carregar produtos: '+e.message,false);
+    document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar.</div>';
+  }
 }
 
 function renderProdutos(){
   document.getElementById('stTotal').textContent=produtos.length;
-  document.getElementById('stAtivo').textContent=produtos.filter(function(p){return p.ativo}).length;
-  document.getElementById('stDest').textContent=produtos.filter(function(p){return p.destaque}).length;
-  document.getElementById('stClick').textContent=produtos.reduce(function(a,p){return a+(p.cliques||0)},0);
+  document.getElementById('stAtivo').textContent=produtos.filter(p=>p.ativo).length;
+  document.getElementById('stDest').textContent=produtos.filter(p=>p.destaque).length;
+  document.getElementById('stClick').textContent=produtos.reduce((a,p)=>a+(Number(p.cliques)||0),0);
 
-  var lista=document.getElementById('lista');
+  const lista=document.getElementById('lista');
   if(!produtos.length){lista.innerHTML='<div class="empty">Nenhum produto cadastrado.</div>';return}
-  lista.innerHTML=produtos.map(function(p){
-    var tipoLabel=p.tipo==='dropshipping'?'Dropshipping':'Afiliado';
-    return '<div class="item">'+
-      '<img src="'+(p.imagem_url||'')+'" onerror="this.src=\'https://via.placeholder.com/56\'">'+
-      '<div class="item-info">'+
-        '<h4>'+p.nome+'</h4>'+
-        '<div class="price">R$ '+parseFloat(p.preco_atual||0).toFixed(2).replace('.',',')+'</div>'+
-        '<div class="loja">'+(p.loja_origem||'')+' • '+tipoLabel+'</div>'+
-      '</div>'+
-      '<div class="item-actions">'+
-        '<button onclick="editProd(\''+p.id+'\')">✏️</button>'+
-        '<button onclick="deleteProd(\''+p.id+'\')">🗑️</button>'+
-      '</div>'+
-    '</div>';
+  lista.innerHTML=produtos.map(p=>{
+    const tipoLabel=p.tipo==='dropshipping'?'Dropshipping':'Afiliado';
+    return `<div class="item">
+      <img src="${escapeHtml(p.imagem_url||'')}" onerror="this.src='https://via.placeholder.com/56'">
+      <div class="item-info"><h4>${escapeHtml(p.nome)}</h4><div class="price">${money(p.preco_atual)}</div><div class="loja">${escapeHtml(p.loja_origem||'')} • ${tipoLabel}</div></div>
+      <div class="item-actions"><button onclick="editProd('${String(p.id).replace(/'/g,"\\'")}')">✏️</button><button onclick="deleteProd('${String(p.id).replace(/'/g,"\\'")}')">🗑️</button></div>
+    </div>`;
   }).join('');
 }
 
 function renderDashboard(){
-  var pagos=pedidos.filter(function(o){return o.status_pedido==='pago'});
-  var totalVendas=pagos.reduce(function(a,o){return a+(o.valor||0)},0);
-  var totalLucro=pagos.reduce(function(a,o){return a+calcLucro(o)},0);
-  document.getElementById('dashVendas').textContent='R$ '+totalVendas.toFixed(2).replace('.',',');
+  const pagos=pedidos.filter(o=>o.status_pedido==='pago');
+  const totalVendas=pagos.reduce((a,o)=>a+(Number(o.valor)||0),0);
+  const totalLucro=pagos.reduce((a,o)=>a+calcLucro(o),0);
+  document.getElementById('dashVendas').textContent=money(totalVendas);
   document.getElementById('dashPedidos').textContent=pedidos.length;
-  document.getElementById('dashLucro').textContent='R$ '+totalLucro.toFixed(2).replace('.',',');
-  document.getElementById('dashTicket').textContent='R$ '+(pagos.length?(totalVendas/pagos.length).toFixed(2).replace('.',','):'0,00');
+  document.getElementById('dashLucro').textContent=money(totalLucro);
+  document.getElementById('dashTicket').textContent=money(pagos.length?totalVendas/pagos.length:0);
 
-  document.getElementById('dashPedidosBody').innerHTML=pedidos.length?pedidos.slice(0,5).map(function(o){
-    return '<tr><td>#'+o.id+'</td><td>'+(o.cliente_nome||'-')+'</td><td>'+(o.produto_nome||'-')+'</td>'+
-      '<td class="price">R$ '+(o.valor||0).toFixed(2).replace('.',',')+'</td>'+
-      '<td><span class="status '+statusClass(o.status_pedido)+'">'+statusLabel(o.status_pedido)+'</span></td></tr>';
-  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum pedido ainda</td></tr>';
+  document.getElementById('dashPedidosBody').innerHTML=pedidos.length?pedidos.slice(0,5).map(o=>
+    `<tr><td>#${escapeHtml(o.id)}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td class="price">${money(o.valor)}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td></tr>`
+  ).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum pedido ainda</td></tr>';
 
-  var baixos=produtos.filter(function(p){return (p.estoque||0)<5 && p.tipo==='dropshipping'});
-  document.getElementById('dashEstoqueBody').innerHTML=baixos.length?baixos.map(function(p){
-    return '<tr><td>'+p.nome+'</td><td>'+(p.loja_origem||'-')+'</td><td class="stock-low">'+(p.estoque||0)+'</td></tr>';
-  }).join(''):'<tr><td colspan="3" style="text-align:center;color:var(--muted)">Nenhum produto com estoque baixo</td></tr>';
+  const baixos=produtos.filter(p=>(Number(p.estoque)||0)<5&&p.tipo==='dropshipping');
+  document.getElementById('dashEstoqueBody').innerHTML=baixos.length?baixos.map(p=>
+    `<tr><td>${escapeHtml(p.nome)}</td><td>${escapeHtml(p.loja_origem||'-')}</td><td class="stock-low">${Number(p.estoque)||0}</td></tr>`
+  ).join(''):'<tr><td colspan="3" style="text-align:center;color:var(--muted)">Nenhum produto com estoque baixo</td></tr>';
 }
 
-// ===== PEDIDOS =====
 function filterOrders(f,el){
   filtroPedido=f;
-  var tabs=document.querySelectorAll('.tab');
-  for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');
-  if(el)el.classList.add('active');
-  renderOrders();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');renderOrders();
 }
 function renderOrders(){
-  var list=filtroPedido==='todos'?pedidos:pedidos.filter(function(o){return o.status_pedido===filtroPedido});
-  document.getElementById('ordersBody').innerHTML=list.length?list.map(function(o){
-    var data=o.criado_em?new Date(o.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
-    return '<tr><td>#'+o.id+'</td><td>'+data+'</td><td>'+(o.cliente_nome||'-')+'</td><td>'+(o.produto_nome||'-')+'</td>'+
-      '<td class="price">R$ '+(o.valor||0).toFixed(2).replace('.',',')+'</td>'+
-      '<td class="profit">R$ '+calcLucro(o).toFixed(2).replace('.',',')+'</td>'+
-      '<td><span class="status '+statusClass(o.status_pedido)+'">'+statusLabel(o.status_pedido)+'</span></td>'+
-      '<td><button onclick="verEndereco(\''+o.id+'\')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td>'+
-      '<td style="white-space:nowrap"><button onclick="marcarEnviado(\''+o.id+'\')" style="padding:6px 8px;border-radius:8px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-size:11px;margin-right:4px">🚚 Enviado</button><button onclick="marcarEntregue(\''+o.id+'\')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:11px">✅ Entregue</button></td></tr>';
+  const list=filtroPedido==='todos'?pedidos:pedidos.filter(o=>o.status_pedido===filtroPedido);
+  document.getElementById('ordersBody').innerHTML=list.length?list.map(o=>{
+    const data=o.criado_em?new Date(o.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+    return `<tr><td>#${escapeHtml(o.id)}</td><td>${data}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td class="price">${money(o.valor)}</td><td class="profit">${money(calcLucro(o))}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td><td><button onclick="verEndereco('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td><td style="white-space:nowrap"><button onclick="marcarEnviado('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-size:11px;margin-right:4px">🚚 Enviado</button><button onclick="marcarEntregue('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:11px">✅ Entregue</button></td></tr>`;
   }).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
 }
 
-function marcarEnviado(id){
-  var codigo=prompt('Código de rastreio (opcional):','');
-  if(codigo===null)return;
-  fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+id,{
-    method:'PATCH',
-    headers:getHeaders(),
-    body:JSON.stringify({status_pedido:'enviado',codigo_rastreio:codigo,atualizado_em:new Date().toISOString()})
-  }).then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Pedido marcado como enviado!',true);loadPedidos();})
-    .catch(function(e){toast('Erro: '+e.message,false)});
+async function marcarEnviado(id){
+  const codigo=prompt('Código de rastreio (opcional):','');if(codigo===null)return;
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers,body:JSON.stringify({status_pedido:'enviado',codigo_rastreio:codigo,atualizado_em:new Date().toISOString()})});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    toast('Pedido marcado como enviado!',true);loadPedidos();
+  }catch(e){toast('Erro: '+e.message,false)}
 }
-
-function marcarEntregue(id){
+async function marcarEntregue(id){
   if(!confirm('Marcar esse pedido como entregue?'))return;
-  fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+id,{
-    method:'PATCH',
-    headers:getHeaders(),
-    body:JSON.stringify({status_pedido:'entregue',atualizado_em:new Date().toISOString()})
-  }).then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Pedido marcado como entregue!',true);loadPedidos();})
-    .catch(function(e){toast('Erro: '+e.message,false)});
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers,body:JSON.stringify({status_pedido:'entregue',atualizado_em:new Date().toISOString()})});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    toast('Pedido marcado como entregue!',true);loadPedidos();
+  }catch(e){toast('Erro: '+e.message,false)}
 }
 function verEndereco(id){
-  var p=pedidos.find(function(x){return x.id==id});
-  if(!p)return;
-  var msg='Cliente: '+(p.cliente_nome||'-')+
-    '\nCPF: '+(p.cliente_cpf||'-')+
-    '\nTelefone: '+(p.cliente_telefone||'-')+
-    '\n\nEndereco: '+(p.cliente_endereco||'-')+', '+(p.cliente_numero||'-')+
-    (p.cliente_complemento?' - '+p.cliente_complemento:'')+
-    '\nBairro: '+(p.cliente_bairro||'-')+
-    '\nCidade/UF: '+(p.cliente_cidade||'-')+'/'+(p.cliente_estado||'-')+
-    '\nCEP: '+(p.cliente_cep||'-');
-  alert(msg);
+  const p=pedidos.find(x=>x.id==id);if(!p)return;
+  alert('Cliente: '+(p.cliente_nome||'-')+'\nCPF: '+(p.cliente_cpf||'-')+'\nTelefone: '+(p.cliente_telefone||'-')+'\n\nEndereco: '+(p.cliente_endereco||'-')+', '+(p.cliente_numero||'-')+(p.cliente_complemento?' - '+p.cliente_complemento:'')+'\nBairro: '+(p.cliente_bairro||'-')+'\nCidade/UF: '+(p.cliente_cidade||'-')+'/'+(p.cliente_estado||'-')+'\nCEP: '+(p.cliente_cep||'-'));
 }
 
-// ===== FORNECEDORES =====
 function renderSuppliers(){
-  document.getElementById('suppliersBody').innerHTML=fornecedoresMock.map(function(f){
-    return '<tr><td>'+f.nome+'</td><td>'+f.tipo+'</td><td>'+f.pedidos+'</td>'+
-      '<td>R$ '+f.total.toFixed(2).replace('.',',')+'</td><td>'+f.margem+'%</td>'+
-      '<td><span class="status status-'+f.status+'">'+f.status+'</span></td></tr>';
-  }).join('');
+  document.getElementById('suppliersBody').innerHTML=fornecedoresMock.map(f=>
+    `<tr><td>${escapeHtml(f.nome)}</td><td>${escapeHtml(f.tipo)}</td><td>${f.pedidos}</td><td>${money(f.total)}</td><td>${f.margem}%</td><td><span class="status status-${f.status}">${f.status}</span></td></tr>`
+  ).join('');
 }
 
-// ===== FORMULARIO =====
 function openForm(){
-  editando=null;
-  document.getElementById('formTitle').textContent='Novo Produto';
-  document.getElementById('pid').value='';
-  document.getElementById('pNome').value='';
-  document.getElementById('pLink').value='';
-  document.getElementById('pPreco').value='';
-  document.getElementById('pOld').value='';
-  document.getElementById('pImg').value='';
-  document.getElementById('pLoja').value='Mercado Livre';
-  document.getElementById('pCat').value='';
-  document.getElementById('pCusto').value='';
-  document.getElementById('pEstoque').value='';
-  document.getElementById('pTipo').value='afiliado';
-  document.getElementById('pPagamento').value='';
-  document.getElementById('pagamentoGroup').style.display='none';
-  document.getElementById('linkObrigLabel').style.display='inline';
-  document.getElementById('pDest').checked=false;
-  document.getElementById('pAtivo').checked=true;
+  editando=null;document.getElementById('formTitle').textContent='Novo Produto';
+  ['pid','pNome','pLink','pPreco','pOld','pImg','pCat','pCusto','pEstoque','pPagamento'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pLoja').value='Mercado Livre';document.getElementById('pTipo').value='afiliado';
+  document.getElementById('pagamentoGroup').style.display='none';document.getElementById('linkObrigLabel').style.display='inline';
+  document.getElementById('pDest').checked=false;document.getElementById('pAtivo').checked=true;
   document.getElementById('formModal').classList.add('on');
 }
-
 function closeForm(){document.getElementById('formModal').classList.remove('on')}
 
 function editProd(id){
-  var p=produtos.find(function(x){return x.id==id});
-  if(!p)return;
-  editando=id;
-  document.getElementById('formTitle').textContent='Editar Produto';
-  document.getElementById('pid').value=p.id;
-  document.getElementById('pNome').value=p.nome||'';
-  document.getElementById('pLink').value=p.link_afiliado||'';
-  document.getElementById('pPreco').value=p.preco_atual||'';
-  document.getElementById('pOld').value=p.preco_antigo||'';
-  document.getElementById('pImg').value=p.imagem_url||'';
-  document.getElementById('pLoja').value=p.loja_origem||'Mercado Livre';
-  document.getElementById('pCat').value=p.categoria||'';
-  document.getElementById('pCusto').value=p.custo||'';
-  document.getElementById('pEstoque').value=p.estoque||'';
-  document.getElementById('pTipo').value=p.tipo||'afiliado';
-  document.getElementById('pPagamento').value=p.link_pagamento||'';
-  document.getElementById('pagamentoGroup').style.display=(p.tipo==='dropshipping')?'block':'none';
-  document.getElementById('linkObrigLabel').style.display=(p.tipo==='dropshipping')?'none':'inline';
-  document.getElementById('pDest').checked=!!p.destaque;
-  document.getElementById('pAtivo').checked=p.ativo!==false;
+  const p=produtos.find(x=>x.id==id);if(!p)return;editando=id;
+  document.getElementById('formTitle').textContent='Editar Produto';document.getElementById('pid').value=p.id;
+  document.getElementById('pNome').value=p.nome||'';document.getElementById('pLink').value=p.link_afiliado||'';
+  document.getElementById('pPreco').value=p.preco_atual??'';document.getElementById('pOld').value=p.preco_antigo??'';
+  document.getElementById('pImg').value=p.imagem_url||'';document.getElementById('pLoja').value=p.loja_origem||'Mercado Livre';
+  document.getElementById('pCat').value=p.categoria||'';document.getElementById('pCusto').value=p.custo??'';document.getElementById('pEstoque').value=p.estoque??'';
+  document.getElementById('pTipo').value=p.tipo||'afiliado';document.getElementById('pPagamento').value=p.link_pagamento||'';
+  document.getElementById('pagamentoGroup').style.display=p.tipo==='dropshipping'?'block':'none';document.getElementById('linkObrigLabel').style.display=p.tipo==='dropshipping'?'none':'inline';
+  document.getElementById('pDest').checked=!!p.destaque;document.getElementById('pAtivo').checked=p.ativo!==false;
   document.getElementById('formModal').classList.add('on');
 }
-
 document.getElementById('pTipo').addEventListener('change',function(){
-  document.getElementById('pagamentoGroup').style.display=(this.value==='dropshipping')?'block':'none';
-  document.getElementById('linkObrigLabel').style.display=(this.value==='dropshipping')?'none':'inline';
+  document.getElementById('pagamentoGroup').style.display=this.value==='dropshipping'?'block':'none';
+  document.getElementById('linkObrigLabel').style.display=this.value==='dropshipping'?'none':'inline';
 });
 
-function deleteProd(id){
+async function deleteProd(id){
   if(!confirm('Excluir este produto?'))return;
-  fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+id,{method:'DELETE',headers:getHeaders()})
-    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Produto excluido!',true);loadProds();})
-    .catch(function(e){toast('Erro: '+e.message,false)});
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    toast('Produto excluido!',true);loadProds();
+  }catch(e){toast('Erro: '+e.message,false)}
 }
 
-function saveProd(){
-  var nome=document.getElementById('pNome').value.trim();
-  var link=document.getElementById('pLink').value.trim();
-  var preco=document.getElementById('pPreco').value;
-  var img=document.getElementById('pImg').value.trim();
-  var tipo=document.getElementById('pTipo').value;
+async function saveProd(){
+  const nome=document.getElementById('pNome').value.trim();
+  const link=document.getElementById('pLink').value.trim();
+  const preco=document.getElementById('pPreco').value;
+  const img=document.getElementById('pImg').value.trim();
+  const tipo=document.getElementById('pTipo').value;
   if(!nome||!preco||!img){toast('Preencha os campos obrigatorios (*)',false);return}
   if(tipo==='afiliado'&&!link){toast('Preencha o link do afiliado',false);return}
 
-  var body={
-    nome:nome,
-    link_afiliado:link,
-    preco_atual:parseFloat(preco),
+  const body={
+    nome,link_afiliado:link,preco_atual:parseFloat(preco),
     preco_antigo:document.getElementById('pOld').value?parseFloat(document.getElementById('pOld').value):null,
-    imagem_url:img,
-    loja_origem:document.getElementById('pLoja').value,
+    imagem_url:img,loja_origem:document.getElementById('pLoja').value,
     categoria:document.getElementById('pCat').value.trim(),
     custo:document.getElementById('pCusto').value?parseFloat(document.getElementById('pCusto').value):null,
     estoque:document.getElementById('pEstoque').value?parseInt(document.getElementById('pEstoque').value):null,
-    tipo:document.getElementById('pTipo').value,
-    link_pagamento:document.getElementById('pPagamento').value.trim(),
-    destaque:document.getElementById('pDest').checked,
-    ativo:document.getElementById('pAtivo').checked
+    tipo,link_pagamento:document.getElementById('pPagamento').value.trim(),
+    destaque:document.getElementById('pDest').checked,ativo:document.getElementById('pAtivo').checked
   };
 
-  var id=document.getElementById('pid').value;
-  var req;
-  if(id){
-    req=fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+id,{method:'PATCH',headers:getHeaders(),body:JSON.stringify(body)});
-  }else{
-    req=fetch(SUPABASE_URL+'/rest/v1/produtos',{method:'POST',headers:getHeaders(),body:JSON.stringify(body)});
-  }
-  req.then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Produto salvo!',true);closeForm();loadProds();})
-    .catch(function(e){toast('Erro ao salvar: '+e.message,false)});
+  try{
+    const headers=await getAuthHeaders();
+    const id=document.getElementById('pid').value;
+    const url=id?SUPABASE_URL+'/rest/v1/produtos?id=eq.'+encodeURIComponent(id):SUPABASE_URL+'/rest/v1/produtos';
+    const res=await fetch(url,{method:id?'PATCH':'POST',headers,body:JSON.stringify(body)});
+    if(!res.ok){
+      let msg='Erro '+res.status;
+      try{const e=await res.json();if(e.message)msg=e.message;}catch(_){}
+      throw new Error(msg);
+    }
+    toast('Produto salvo!',true);closeForm();loadProds();
+  }catch(e){toast('Erro ao salvar: '+e.message,false)}
 }
+
+/* Recupera sessão existente e monitora logout/expiração */
+(async function initAuth(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(session&&session.user.email&&session.user.email.toLowerCase()===ADMIN_EMAIL){
+    showAdmin();
+  }else if(session){
+    await supabaseClient.auth.signOut();
+  }
+  supabaseClient.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_OUT'){
+      document.getElementById('adminScreen').style.display='none';
+      document.getElementById('adminScreen').classList.remove('on');
+      document.getElementById('loginScreen').style.display='flex';
+    }
+  });
+})();
+
+document.getElementById('senhaInput').addEventListener('keypress',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('emailInput').addEventListener('keypress',e=>{if(e.key==='Enter')doLogin();});
 </script>
 </body>
 </html>
+
