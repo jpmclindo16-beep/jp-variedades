@@ -4,26 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0a0a">
-<title>JP Variedades</title>
+<meta name="description" content="JP Variedades - Os melhores achadinhos do Brasil com preço baixo. Ofertas da Shopee, Mercado Livre e Shein.">
+<meta property="og:title" content="JP Variedades">
+<meta property="og:description" content="Os melhores produtos do Brasil com o melhor preço 🇧🇷">
+<meta property="og:image" content="logo%20(2).png">
+<title>JP Variedades | Achadinhos e Ofertas</title>
 <style>
 :root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
 body.light{--bg:#f5f5f5;--card:#fff;--border:#ddd;--text:#1a1a1a;--muted:#666;--accent:#00c853;--accent-dark:#009624}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
 
-
 /* BANNER */
 .banner{background:linear-gradient(90deg,var(--accent-dark),var(--accent));color:#000;text-align:center;padding:10px;font-size:13px;font-weight:700}
-
 
 /* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-circle{width:44px;height:44px;border-radius:50%;background:url('logo%20(2).png') center/cover;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none}
+.logo-circle{width:44px;height:44px;border-radius:50%;background:url('logo%20(2).png') center/cover;cursor:pointer;user-select:none}
 .logo h1{font-size:16px}.logo p{font-size:12px;color:var(--muted)}
 .actions{display:flex;gap:8px;align-items:center}
-.btn-icon{width:36px;height:36px;border-radius:50%;border:none;background:var(--border);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-
+.btn-icon{width:36px;height:36px;border-radius:50%;border:none;background:var(--border);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;position:relative}
 
 /* SEARCH */
 .search{padding:12px 16px;position:relative}
@@ -36,27 +37,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .suggestion-item img{width:36px;height:36px;border-radius:6px;object-fit:cover}
 .suggestion-item span{font-size:13px;color:var(--text)}
 
-
 /* HERO */
 .hero{text-align:center;padding:20px 16px}
-.hero .big-logo{width:80px;height:80px;margin:0 auto 12px;border-radius:50%;background:url('logo%20(2).png') center/cover;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
-.hero h2{font-size:22px;margin-bottom:6px}.hero p{color:var(--muted);font-size:13px;max-width:300px;margin:0 auto 16px}
+.hero .big-logo{width:80px;height:80px;margin:0 auto 12px;border-radius:50%;background:url('logo%20(2).png') center/cover;cursor:pointer}
+.hero h2{font-size:22px;margin-bottom:6px}
+.hero p{color:var(--muted);font-size:13px;max-width:300px;margin:0 auto 16px}
 .stats{display:flex;justify-content:center;gap:12px}
 .stat{background:var(--card);padding:10px 16px;border-radius:10px;border:1px solid var(--border);text-align:center;min-width:80px}
 .stat b{font-size:16px;color:var(--accent)}.stat span{font-size:10px;color:var(--muted)}
 
-
-/* CATEGORIES */
+/* CATEGORIES + SORT */
 .cats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
-.cats button{padding:8px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+.cats button{padding:8px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
 .cats button.active{background:var(--accent);color:#000;border-color:var(--accent)}
 
+.sort-bar{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto}
+.sort-bar select{padding:8px 12px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px;outline:none}
 
 /* SECTION TITLE */
 .sec-title{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
 .sec-title span{background:var(--border);padding:4px 10px;border-radius:50px;font-size:11px;color:var(--muted)}
-
 
 /* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 100px}
@@ -68,7 +69,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .b-ml{background:#ffe600;color:#000}.b-sh{background:#ee4d2d;color:#fff}.b-disc{background:var(--accent);color:#000}
 .b-ds{background:#7c4dff;color:#fff}
 .b-best{position:absolute;top:6px;right:36px;padding:3px 8px;border-radius:50px;font-size:9px;font-weight:700;background:var(--danger);color:#fff}
-.fav{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,0.5);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.fav{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.5);color:#fff;cursor:pointer;font-size:14px}
 .fav.active{background:var(--danger)}
 .card-info{padding:10px}
 .card-title{font-size:12px;font-weight:600;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -76,39 +77,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card-old{text-decoration:line-through;color:var(--muted);font-size:11px;margin-left:6px}
 .card-discount{background:var(--accent);color:#000;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;margin-left:6px}
 .card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px}
-.ver{flex:1;padding:8px 0;border-radius:50px;border:none;background:var(--accent);color:#000;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:inline-block}
+.ver{flex:1;padding:8px 0;border-radius:50px;border:none;background:var(--accent);color:#000;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .share{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
 
+/* SKELETON */
+.skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--card) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{height:280px}
 
 /* EMPTY / LOADING */
-.empty{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1}
-.loading{text-align:center;padding:40px;color:var(--muted);grid-column:1/-1}
-
+.empty{text-align:center;padding:40px 20px;color:var(--muted);grid-column:1/-1;font-size:14px}
 
 /* FAV PAGE */
 .fav-page{display:none}.fav-page.active{display:block}
 
+/* WHATSAPP */
+.whatsapp-float{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 4px 12px rgba(37,211,102,.4);z-index:500}
 
-/* WHATSAPP FLOAT */
-.whatsapp-float{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 4px 12px rgba(37,211,102,0.4);z-index:500;transition:transform .2s}
-.whatsapp-float:active{transform:scale(.9)}
-
-
-/* TOAST */
+/* TOAST + HINT */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 18px;border-radius:50px;font-size:12px;border:1px solid var(--border);z-index:3000;display:none;white-space:nowrap}
 .toast.show{display:block}
-
-
-/* HINT */
 .hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;display:none;z-index:200}
 .hint.show{display:block}
+
+#cartBadge{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#000;font-size:10px;font-weight:800;border-radius:50%;min-width:16px;height:16px;display:none;align-items:center;justify-content:center;padding:0 3px}
 </style>
 </head>
 <body>
 
-
-<div class="banner">🔥 OFERTAS ATUALIZADAS HOJE - So na JP Variedades</div>
-
+<div class="banner">🔥 OFERTAS ATUALIZADAS HOJE - Só na JP Variedades</div>
 
 <div class="header">
   <div class="logo">
@@ -120,27 +117,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="actions">
     <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">🌙</button>
-    <a class="btn-icon" href="meus-pedidos.html" style="text-decoration:none" title="Meus Pedidos">📦</a>
-    <a class="btn-icon" href="carrinho.html" style="text-decoration:none;position:relative">🛒<span id="cartBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--accent);color:#000;font-size:10px;font-weight:800;border-radius:50%;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px">0</span></a>
+    <a class="btn-icon" href="meus-pedidos.html" title="Meus Pedidos">📦</a>
+    <a class="btn-icon" href="carrinho.html" title="Carrinho">
+      🛒<span id="cartBadge">0</span>
+    </a>
     <button class="btn-icon" onclick="shareSite()">📤</button>
   </div>
 </div>
 
-
-<div class="search"><input type="text" id="search" placeholder="Buscar achadinhos..." oninput="renderSuggestions()" onfocus="renderSuggestions()" autocomplete="off"><div id="suggestions" class="suggestions"></div></div>
-
+<div class="search">
+  <input type="text" id="search" placeholder="Buscar achadinhos..." oninput="renderSuggestions()" onfocus="renderSuggestions()" autocomplete="off">
+  <div id="suggestions" class="suggestions"></div>
+</div>
 
 <div id="mainPage">
   <div class="hero">
     <div class="big-logo" id="heroLogo"></div>
     <h2>JP_variedades</h2>
-    <p>Os melhores produtos do Brasil com o melhor preco 🇧🇷</p>
+    <p>Os melhores produtos do Brasil com o melhor preço 🇧🇷</p>
     <div class="stats">
       <div class="stat"><b>+15K</b><br><span>Clientes</span></div>
-      <div class="stat"><b>4.9/5</b><br><span>Avaliacao</span></div>
+      <div class="stat"><b>4.9/5</b><br><span>Avaliação</span></div>
       <div class="stat"><b>100%</b><br><span>Seguro</span></div>
     </div>
   </div>
+
   <div class="cats" id="cats">
     <button class="active" onclick="setCat('todos',this)">Todos</button>
     <button onclick="setCat('mercado-livre',this)">Mercado Livre</button>
@@ -148,192 +149,412 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button onclick="setCat('shein',this)">Shein</button>
     <button onclick="setCat('fav',this)">❤️ Favoritos</button>
   </div>
+
+  <div class="sort-bar">
+    <select id="sortSelect" onchange="render()">
+      <option value="recent">Mais recentes</option>
+      <option value="price-asc">Menor preço</option>
+      <option value="price-desc">Maior preço</option>
+      <option value="discount">Maior desconto</option>
+      <option value="bestseller">Mais vendidos</option>
+    </select>
+  </div>
+
   <div class="sec-title">🔥 MAIS CLICADOS HOJE <span id="vcount">0 produtos</span></div>
-  <div class="grid" id="grid"><div class="loading">Carregando produtos...</div></div>
+  <div class="grid" id="grid">
+    <!-- skeleton inicial -->
+    <div class="skel-card skeleton"></div>
+    <div class="skel-card skeleton"></div>
+    <div class="skel-card skeleton"></div>
+    <div class="skel-card skeleton"></div>
+  </div>
 </div>
 
-
 <div class="fav-page" id="favPage">
-  <div class="sec-title">❤️ Meus Favoritos <button class="btn-icon" onclick="backMain()" style="width:auto;padding:6px 12px;font-size:12px">← Voltar</button></div>
+  <div class="sec-title">
+    ❤️ Meus Favoritos
+    <button class="btn-icon" onclick="backMain()" style="width:auto;padding:6px 12px;font-size:12px">← Voltar</button>
+  </div>
   <div class="grid" id="favGrid"></div>
 </div>
 
-
-<!-- WHATSAPP FLOAT -->
-<a href="https://chat.whatsapp.com/HecxNkSIR464oTBVHkMIVf?s=cl&p=a&ilr=0" target="_blank" class="whatsapp-float" title="Entrar no grupo do WhatsApp">
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+<a href="https://chat.whatsapp.com/HecxNkSIR464oTBVHkMIVf?s=cl&p=a&ilr=0" target="_blank" class="whatsapp-float" title="Grupo WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
-
 
 <div class="hint" id="hint"></div>
 <div class="toast" id="toast"></div>
 
-
 <script>
-const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
-const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
+const SUPABASE_URL = 'https://ocheynyjboagfybazcsi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
+let products = [];
+let favorites = JSON.parse(localStorage.getItem('jp_fav') || '[]');
+let cat = 'todos';
 
-let products=[];
-let favorites=JSON.parse(localStorage.getItem('jp_fav')||'[]');
-let cat='todos';
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
+function fmt(p) {
+  return 'R$ ' + Number(p).toFixed(2).replace('.', ',');
+}
 
-function fmt(p){return'R$ '+p.toFixed(2).replace('.',',')}
-function disc(o,p){if(!o||o<=p)return'';return'-'+Math.round((o-p)/o*100)+'%'}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function disc(o, p) {
+  if (!o || o <= p) return '';
+  return '-' + Math.round((o - p) / o * 100) + '%';
+}
 
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
 
-async function loadProducts(){
-  try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?ativo=eq.true&order=created_at.desc',{
-      method:'GET',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Accept':'application/json'}
+async function loadProducts() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/produtos?ativo=eq.true&order=created_at.desc', {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Accept': 'application/json'
+      }
     });
-    if(!res.ok)throw new Error('Erro '+res.status);
-    const data=await res.json();
-    products=data.map(p=>({
-      id:p.id,
-      name:p.nome,
-      price:parseFloat(p.preco_atual||0),
-      oldPrice:parseFloat(p.preco_antigo||0)||null,
-      image:p.imagem_url||'https://via.placeholder.com/300x300?text=JP',
-      platform:p.loja_origem==='Mercado Livre'?'mercado-livre':(p.loja_origem==='Shopee'?'shopee':(p.loja_origem==='Shein'?'shein':'outro')),
-      bestseller:p.destaque||false,
-      link:p.link_afiliado,
-      categoria:p.categoria||'',
-      tipo:p.tipo||'afiliado',
-      paymentLink:p.link_pagamento||''
+    if (!res.ok) throw new Error('Erro ' + res.status);
+
+    const data = await res.json();
+    products = data.map(p => ({
+      id: p.id,
+      name: p.nome || 'Produto',
+      price: parseFloat(p.preco_atual || 0),
+      oldPrice: parseFloat(p.preco_antigo || 0) || null,
+      image: p.imagem_url || 'https://via.placeholder.com/300x300?text=JP',
+      platform: p.loja_origem === 'Mercado Livre' ? 'mercado-livre' :
+                p.loja_origem === 'Shopee' ? 'shopee' :
+                p.loja_origem === 'Shein' ? 'shein' : 'outro',
+      bestseller: !!p.destaque,
+      link: p.link_afiliado || '#',
+      categoria: p.categoria || '',
+      tipo: p.tipo || 'afiliado',
+      paymentLink: p.link_pagamento || ''
     }));
+
     render();
-  }catch(e){
-    document.getElementById('grid').innerHTML='<div class="empty">Erro ao carregar: '+e.message+'</div>';
+    updateCartBadge();
+  } catch (e) {
+    document.getElementById('grid').innerHTML = `<div class="empty">Erro ao carregar produtos.<br><small>${escapeHtml(e.message)}</small></div>`;
   }
 }
 
+function renderSuggestions() {
+  const box = document.getElementById('suggestions');
+  const q = document.getElementById('search').value.toLowerCase().trim();
 
-function renderSuggestions(){
-  const box=document.getElementById('suggestions');
-  const q=document.getElementById('search').value.toLowerCase().trim();
-  if(!q){box.classList.remove('show');box.innerHTML='';render();return}
-  const matches=products.filter(p=>p.name.toLowerCase().includes(q)).slice(0,6);
-  if(!matches.length){box.classList.remove('show');box.innerHTML=''}
-  else{
-    box.innerHTML=matches.map(p=>`<div class="suggestion-item" onclick="pickSuggestion('${p.id}')"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/40x40?text=JP'"><span>${p.name}</span></div>`).join('');
+  if (!q) {
+    box.classList.remove('show');
+    box.innerHTML = '';
+    render();
+    return;
+  }
+
+  const matches = products.filter(p => p.name.toLowerCase().includes(q)).slice(0, 6);
+
+  if (!matches.length) {
+    box.classList.remove('show');
+    box.innerHTML = '';
+  } else {
+    box.innerHTML = matches.map(p => `
+      <div class="suggestion-item" onclick="pickSuggestion('${p.id}')">
+        <img src="${escapeHtml(p.image)}" onerror="this.src='https://via.placeholder.com/40x40?text=JP'">
+        <span>${escapeHtml(p.name)}</span>
+      </div>
+    `).join('');
     box.classList.add('show');
   }
   render();
 }
 
-function pickSuggestion(id){
-  const p=products.find(p=>p.id==id);
-  if(!p)return;
-  document.getElementById('search').value=p.name;
+function pickSuggestion(id) {
+  const p = products.find(p => p.id == id);
+  if (!p) return;
+  document.getElementById('search').value = p.name;
   document.getElementById('suggestions').classList.remove('show');
   render();
 }
 
-document.addEventListener('click',function(e){
-  const box=document.getElementById('suggestions');
-  const input=document.getElementById('search');
-  if(box && input && !box.contains(e.target) && e.target!==input){box.classList.remove('show')}
+document.addEventListener('click', function (e) {
+  const box = document.getElementById('suggestions');
+  const input = document.getElementById('search');
+  if (box && input && !box.contains(e.target) && e.target !== input) {
+    box.classList.remove('show');
+  }
 });
 
-function render(){
-  let list=products;
-  if(cat=='mercado-livre')list=list.filter(p=>p.platform=='mercado-livre');
-  else if(cat=='shopee')list=list.filter(p=>p.platform=='shopee');
-  else if(cat=='shein')list=list.filter(p=>p.platform=='shein');
-  else if(cat=='fav')list=list.filter(p=>favorites.includes(p.id));
-  const q=document.getElementById('search').value.toLowerCase();
-  if(q)list=list.filter(p=>p.name.toLowerCase().includes(q));
-  document.getElementById('count').textContent=products.length;
-  document.getElementById('vcount').textContent=list.length+' produtos';
-  const g=document.getElementById('grid');
-  if(!list.length){g.innerHTML='<div class="empty">Nenhum produto encontrado</div>';return}
-  g.innerHTML=list.map(p=>{
-    const d=disc(p.oldPrice,p.price),f=favorites.includes(p.id);
-    const badge=p.tipo==='dropshipping'?'<span class="badge b-ds">Loja Propria</span>':(p.platform=='mercado-livre'?'<span class="badge b-ml">Mercado Livre</span>':p.platform=='shopee'?'<span class="badge b-sh">Shopee</span>':'<span class="badge b-disc">Oferta</span>');
-    const oldPrice=p.oldPrice?`<span class="card-old">${fmt(p.oldPrice)}</span>`:'';
-    const discount=d?`<span class="card-discount">${d}</span>`:'';
-    const buyLink=p.tipo==='dropshipping'?('checkout.html?id='+p.id):p.link;
-    const buyTarget=p.tipo==='dropshipping'?'_self':'_blank';
-    const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
-    const extraBtn=p.tipo==='dropshipping'?`<button class="share" onclick="event.stopPropagation();addToCart('${p.id}')" title="Adicionar ao carrinho">🛒</button>`:`<button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button>`;
-    return`<div class="card"><div class="card-img"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">${p.bestseller?'<span class="b-best">🔥 MAIS VENDIDO</span>':''}${badge}<button class="fav ${f?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${f?'❤️':'🤍'}</button></div><div class="card-info"><div class="card-title">${p.name}</div><div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px"><span class="card-price">${fmt(p.price)}</span>${oldPrice}${discount}</div><div class="card-foot"><a href="${buyLink}" target="${buyTarget}" class="ver" onclick="event.stopPropagation()">${buyLabel}</a>${extraBtn}</div></div></div>`
+function getSortedList(list) {
+  const sort = document.getElementById('sortSelect')?.value || 'recent';
+
+  if (sort === 'price-asc') return [...list].sort((a, b) => a.price - b.price);
+  if (sort === 'price-desc') return [...list].sort((a, b) => b.price - a.price);
+  if (sort === 'discount') {
+    return [...list].sort((a, b) => {
+      const da = a.oldPrice ? (a.oldPrice - a.price) / a.oldPrice : 0;
+      const db = b.oldPrice ? (b.oldPrice - b.price) / b.oldPrice : 0;
+      return db - da;
+    });
+  }
+  if (sort === 'bestseller') return [...list].sort((a, b) => (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0));
+  return list; // recent (já vem ordenado do banco)
+}
+
+function render() {
+  let list = products;
+
+  if (cat === 'mercado-livre') list = list.filter(p => p.platform === 'mercado-livre');
+  else if (cat === 'shopee') list = list.filter(p => p.platform === 'shopee');
+  else if (cat === 'shein') list = list.filter(p => p.platform === 'shein');
+  else if (cat === 'fav') list = list.filter(p => favorites.includes(p.id));
+
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  if (q) list = list.filter(p => p.name.toLowerCase().includes(q));
+
+  list = getSortedList(list);
+
+  document.getElementById('count').textContent = products.length;
+  document.getElementById('vcount').textContent = list.length + ' produtos';
+
+  const g = document.getElementById('grid');
+
+  if (!list.length) {
+    g.innerHTML = `<div class="empty">Nenhum produto encontrado 😕<br><small>Tente outra busca ou categoria</small></div>`;
+    return;
+  }
+
+  g.innerHTML = list.map(p => {
+    const d = disc(p.oldPrice, p.price);
+    const f = favorites.includes(p.id);
+    const badge = p.tipo === 'dropshipping'
+      ? '<span class="badge b-ds">Loja Própria</span>'
+      : p.platform === 'mercado-livre' ? '<span class="badge b-ml">Mercado Livre</span>'
+      : p.platform === 'shopee' ? '<span class="badge b-sh">Shopee</span>'
+      : '<span class="badge b-disc">Oferta</span>';
+
+    const oldPrice = p.oldPrice ? `<span class="card-old">${fmt(p.oldPrice)}</span>` : '';
+    const discount = d ? `<span class="card-discount">${d}</span>` : '';
+    const buyLink = p.tipo === 'dropshipping' ? ('checkout.html?id=' + p.id) : p.link;
+    const buyTarget = p.tipo === 'dropshipping' ? '_self' : '_blank';
+    const buyLabel = p.tipo === 'dropshipping' ? 'COMPRAR AGORA →' : 'VER OFERTA →';
+    const extraBtn = p.tipo === 'dropshipping'
+      ? `<button class="share" onclick="event.stopPropagation();addToCart('${p.id}')" title="Adicionar ao carrinho">🛒</button>`
+      : `<button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button>`;
+
+    return `
+      <div class="card">
+        <div class="card-img">
+          <img src="\( {escapeHtml(p.image)}" alt=" \){escapeHtml(p.name)}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">
+          ${p.bestseller ? '<span class="b-best">🔥 MAIS VENDIDO</span>' : ''}
+          ${badge}
+          <button class="fav \( {f ? 'active' : ''}" onclick="event.stopPropagation();toggleFav(' \){p.id}')">${f ? '❤️' : '🤍'}</button>
+        </div>
+        <div class="card-info">
+          <div class="card-title">${escapeHtml(p.name)}</div>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px">
+            <span class="card-price">${fmt(p.price)}</span>
+            \( {oldPrice} \){discount}
+          </div>
+          <div class="card-foot">
+            <a href="\( {escapeHtml(buyLink)}" target=" \){buyTarget}" class="ver" onclick="event.stopPropagation()">${buyLabel}</a>
+            ${extraBtn}
+          </div>
+        </div>
+      </div>
+    `;
   }).join('');
 }
 
+function renderFav() {
+  const list = products.filter(p => favorites.includes(p.id));
+  const g = document.getElementById('favGrid');
 
-function renderFav(){
-  const list=products.filter(p=>favorites.includes(p.id));
-  const g=document.getElementById('favGrid');
-  if(!list.length){g.innerHTML='<div class="empty">Voce ainda nao tem favoritos ❤️</div>';return}
-  g.innerHTML=list.map(p=>{
-    const buyLink=p.tipo==='dropshipping'?('checkout.html?id='+p.id):p.link;
-    const buyTarget=p.tipo==='dropshipping'?'_self':'_blank';
-    const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
-    return`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${buyLink}" target="${buyTarget}" class="ver">${buyLabel}</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`
+  if (!list.length) {
+    g.innerHTML = `<div class="empty">Você ainda não tem favoritos ❤️<br><small>Toque no coração dos produtos</small></div>`;
+    return;
+  }
+
+  g.innerHTML = list.map(p => {
+    const buyLink = p.tipo === 'dropshipping' ? ('checkout.html?id=' + p.id) : p.link;
+    const buyTarget = p.tipo === 'dropshipping' ? '_self' : '_blank';
+    const buyLabel = p.tipo === 'dropshipping' ? 'COMPRAR AGORA →' : 'VER OFERTA →';
+
+    return `
+      <div class="card">
+        <div class="card-img">
+          <img src="${escapeHtml(p.image)}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">
+          <button class="fav active" onclick="toggleFav('${p.id}')">❤️</button>
+        </div>
+        <div class="card-info">
+          <div class="card-title">${escapeHtml(p.name)}</div>
+          <div class="card-price">${fmt(p.price)}</div>
+          <div class="card-foot">
+            <a href="\( {escapeHtml(buyLink)}" target=" \){buyTarget}" class="ver">${buyLabel}</a>
+        <button class="share" onclick="shareProd('${p.id}')">📤</button>
+          </div>
+        </div>
+      </div>
+    `;
   }).join('');
 }
 
-
-function toggleFav(id){
-  const i=favorites.indexOf(id);
-  if(i>-1){favorites.splice(i,1);toast('Removido dos favoritos 💔');}else{favorites.push(id);toast('Adicionado aos favoritos ❤️');}
-  localStorage.setItem('jp_fav',JSON.stringify(favorites));render();renderFav();
+function toggleFav(id) {
+  const i = favorites.indexOf(id);
+  if (i > -1) {
+    favorites.splice(i, 1);
+    toast('Removido dos favoritos 💔');
+  } else {
+    favorites.push(id);
+    toast('Adicionado aos favoritos ❤️');
+  }
+  localStorage.setItem('jp_fav', JSON.stringify(favorites));
+  render();
+  renderFav();
 }
-function shareProd(id){const p=products.find(x=>x.id===id);if(p){navigator.clipboard.writeText(p.name+' - '+fmt(p.price)+' '+p.link);toast('Link copiado! 📋');}}
-function shareSite(){navigator.clipboard.writeText('🔥 JP_variedades - Os melhores achadinhos! '+location.href);toast('Link do site copiado! 📋');}
-function setCat(c,btn){cat=c;document.querySelectorAll('.cats button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
-function showFavorites(){document.getElementById('mainPage').style.display='none';document.getElementById('favPage').classList.add('active');renderFav();}
-function backMain(){document.getElementById('mainPage').style.display='block';document.getElementById('favPage').classList.remove('active');}
 
+function shareProd(id) {
+  const p = products.find(x => x.id == id);
+  if (p) {
+    navigator.clipboard.writeText(`${p.name} - \( {fmt(p.price)}\n \){p.link}`);
+    toast('Link copiado! 📋');
+  }
+}
 
-let pressCount=0;
-function setupLP(el){
+function shareSite() {
+  navigator.clipboard.writeText('🔥 JP_variedades - Os melhores achadinhos!\n' + location.href);
+  toast('Link do site copiado! 📋');
+}
+
+function setCat(c, btn) {
+  cat = c;
+  document.querySelectorAll('.cats button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function showFavorites() {
+  document.getElementById('mainPage').style.display = 'none';
+  document.getElementById('favPage').classList.add('active');
+  renderFav();
+}
+
+function backMain() {
+  document.getElementById('mainPage').style.display = 'block';
+  document.getElementById('favPage').classList.remove('active');
+}
+
+// ===== ADMIN SECRETO (segurar logo 7 vezes) =====
+let pressCount = 0;
+function setupLP(el) {
   let timer;
-  const start=()=>{timer=setTimeout(()=>{pressCount++;if(pressCount>=7){pressCount=0;document.getElementById('hint').textContent='🔐 Admin liberado!';document.getElementById('hint').classList.add('show');setTimeout(()=>{document.getElementById('hint').classList.remove('show');window.location.href='admin.html'},500)}else{document.getElementById('hint').textContent=pressCount+'/7...';document.getElementById('hint').classList.add('show');setTimeout(()=>document.getElementById('hint').classList.remove('show'),700)}},800)};
-  const end=()=>{clearTimeout(timer)};
-  el.addEventListener('mousedown',start);el.addEventListener('touchstart',start,{passive:false});el.addEventListener('mouseup',end);el.addEventListener('mouseleave',end);el.addEventListener('touchend',end);
+  const start = () => {
+    timer = setTimeout(() => {
+      pressCount++;
+      if (pressCount >= 7) {
+        pressCount = 0;
+        document.getElementById('hint').textContent = '🔐 Admin liberado!';
+        document.getElementById('hint').classList.add('show');
+        setTimeout(() => {
+          document.getElementById('hint').classList.remove('show');
+          window.location.href = 'admin.html';
+        }, 600);
+      } else {
+        document.getElementById('hint').textContent = pressCount + '/7...';
+        document.getElementById('hint').classList.add('show');
+        setTimeout(() => document.getElementById('hint').classList.remove('show'), 700);
+      }
+    }, 800);
+  };
+  const end = () => clearTimeout(timer);
+  el.addEventListener('mousedown', start);
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('mouseup', end);
+  el.addEventListener('mouseleave', end);
+  el.addEventListener('touchend', end);
 }
 setupLP(document.getElementById('adminTrigger'));
 setupLP(document.getElementById('heroLogo'));
 
-
-let dark=true;
-function toggleTheme(){
-  dark=!dark;
-  document.body.classList.toggle('light',!dark);
-  document.getElementById('themeBtn').textContent=dark?'🌙':'☀️';
-  localStorage.setItem('jp_theme',dark?'dark':'light');
+// ===== TEMA =====
+let dark = true;
+function toggleTheme() {
+  dark = !dark;
+  document.body.classList.toggle('light', !dark);
+  document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+  localStorage.setItem('jp_theme', dark ? 'dark' : 'light');
 }
-if(localStorage.getItem('jp_theme')==='light'){dark=false;document.body.classList.add('light');document.getElementById('themeBtn').textContent='☀️';}
-
+if (localStorage.getItem('jp_theme') === 'light') {
+  dark = false;
+  document.body.classList.add('light');
+  document.getElementById('themeBtn').textContent = '☀️';
+}
 
 // ===== CARRINHO =====
-function getCart(){try{return JSON.parse(localStorage.getItem('jp_cart')||'[]')}catch(e){return[]}}
-function saveCart(cart){localStorage.setItem('jp_cart',JSON.stringify(cart))}
-function updateCartBadge(){
-  const cart=getCart();
-  const total=cart.reduce(function(a,i){return a+i.qty},0);
-  const badge=document.getElementById('cartBadge');
-  if(!badge)return;
-  if(total>0){badge.textContent=total;badge.style.display='flex';}
-  else{badge.style.display='none';}
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem('jp_cart') || '[]');
+  } catch (e) {
+    return [];
+  }
 }
-function addToCart(id){
-  const p=products.find(function(x){return x.id==id});
-  if(!p)return;
-  const cart=getCart();
-  const existente=cart.find(function(i){return i.id==id});
-  if(existente){existente.qty+=1;}
-  else{cart.push({id:p.id,nome:p.name,preco:p.price,imagem:p.image,qty:1});}
-  saveCart(cart);
+
+function saveCart(cart) {
+  localStorage.setItem('jp_cart', JSON.stringify(cart));
   updateCartBadge();
+}
+
+function updateCartBadge() {
+  const cart = getCart();
+  const total = cart.reduce((a, i) => a + (i.qty || 1), 0);
+  const badge = document.getElementById('cartBadge');
+  if (!badge) return;
+  if (total > 0) {
+    badge.textContent = total;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function addToCart(id) {
+  const p = products.find(x => x.id == id);
+  if (!p) return;
+
+  const cart = getCart();
+  const existing = cart.find(i => i.id == id);
+
+  if (existing) {
+    existing.qty = (existing.qty || 1) + 1;
+  } else {
+    cart.push({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      image: p.image,
+      qty: 1
+    });
+  }
+
+  saveCart(cart);
   toast('Adicionado ao carrinho 🛒');
 }
 
+// Inicia
 loadProducts();
 updateCartBadge();
 </script>
