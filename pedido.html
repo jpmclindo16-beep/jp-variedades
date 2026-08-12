@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0a">
-<title>Meus Pedidos - JP Variedades</title>
+<title>Pedido - JP Variedades</title>
 <style>
 :root{--bg:#0a0a0a;--card:#141414;--border:#252525;--text:#fff;--muted:#999;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252;--warning:#ffc107}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -22,185 +22,244 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 .container{max-width:600px;margin:auto;padding:16px 16px 50px}
 
-/* IDENTIFICAR */
-.identify-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px}
-.identify-card h3{font-size:14px;margin-bottom:10px;color:var(--muted)}
-.identify-card p{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5}
-.field{margin-bottom:10px}
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
-.field input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;outline:none}
-.field input:focus{border-color:var(--accent)}
-.btn{width:100%;border:0;border-radius:12px;padding:14px;background:var(--accent);color:#000;font-size:15px;font-weight:800;cursor:pointer;text-align:center}
+.status-box{text-align:center;padding:28px 16px 20px;margin-bottom:16px}
+.status-icon{font-size:56px;margin-bottom:12px}
+.status-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.status-text{font-size:14px;color:var(--muted);line-height:1.5;max-width:340px;margin:0 auto}
 
-/* PEDIDO CARD */
-.pedido-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
-.pedido-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.pedido-id{font-size:12px;font-weight:700;color:var(--muted)}
-.pedido-status{font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px}
-.status-pago{background:rgba(0,230,118,.15);color:var(--accent)}
-.status-pendente{background:rgba(255,193,7,.15);color:var(--warning)}
-.status-enviado{background:rgba(0,150,255,.15);color:#4facfe}
-.status-entregue{background:rgba(0,230,118,.15);color:var(--accent)}
-.status-cancelado{background:rgba(255,82,82,.15);color:var(--danger)}
-.pedido-prod{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.4}
-.pedido-valor{color:var(--accent);font-size:15px;font-weight:800;margin-bottom:8px}
-.pedido-info{font-size:12px;color:var(--muted);line-height:1.6}
-.pedido-actions{display:flex;gap:8px;margin-top:12px}
-.pedido-actions a{flex:1;padding:10px;border-radius:10px;text-align:center;text-decoration:none;font-size:12px;font-weight:700}
-.btn-rastreio{background:var(--border);color:var(--text)}
-.btn-rastreio-active{background:var(--accent);color:#000}
+.aprovado .status-icon{color:var(--accent)}
+.aprovado .status-title{color:var(--accent)}
+.pendente .status-icon{color:var(--warning)}
+.pendente .status-title{color:var(--warning)}
+.erro .status-icon{color:var(--danger)}
+.erro .status-title{color:var(--danger)}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h3{font-size:14px;margin-bottom:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+
+/* PRODUTOS */
+.produto{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.produto:last-child{border-bottom:none}
+.produto img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:var(--border)}
+.produto .nome{font-size:14px;font-weight:700;line-height:1.35}
+.produto .preco{color:var(--accent);font-size:16px;font-weight:800;margin-top:4px}
+.produto .qty{font-size:12px;color:var(--muted)}
+
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-row span:first-child{color:var(--muted)}
+.info-row span:last-child{font-weight:600;max-width:60%;text-align:right}
+
+/* TRACKING */
+.tracking-steps{display:flex;flex-direction:column;gap:0;position:relative;padding-left:28px}
+.tracking-steps::before{content:'';position:absolute;left:10px;top:8px;bottom:8px;width:2px;background:var(--border)}
+.step{position:relative;padding-bottom:20px}
+.step:last-child{padding-bottom:0}
+.step-dot{position:absolute;left:-28px;top:2px;width:20px;height:20px;border-radius:50%;background:var(--border);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px}
+.step.active .step-dot{background:var(--accent);border-color:var(--accent);color:#000}
+.step.done .step-dot{background:var(--accent-dark);border-color:var(--accent-dark);color:#000}
+.step-title{font-size:13px;font-weight:700}
+.step-desc{font-size:12px;color:var(--muted);margin-top:2px}
+
+.btn{width:100%;border:0;border-radius:12px;padding:15px;background:var(--accent);color:#000;font-size:15px;font-weight:800;cursor:pointer;margin-top:6px;text-align:center;text-decoration:none;display:inline-block}
+.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);margin-top:10px}
+.whats-btn{width:100%;border:0;border-radius:12px;padding:15px;background:#25d366;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 
 .empty-state{text-align:center;padding:40px;color:var(--muted);font-size:14px}
-
-/* TOAST */
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:3000;display:none;white-space:nowrap}
-.toast.show{display:block}
 </style>
 </head>
 <body>
 
 <div id="loadingScreen">
   <div class="spinner"></div>
-  <div style="color:var(--muted);font-size:14px">Carregando...</div>
+  <div style="color:var(--muted);font-size:14px">Carregando pedido...</div>
 </div>
 
 <div class="header">
   <a href="index.html" class="voltar">←</a>
-  <div class="logo">📦 Meus Pedidos</div>
+  <div class="logo">JP_variedades ✓</div>
 </div>
 
 <div class="container">
 
-  <div id="identifyBox" class="identify-card">
-    <h3>🔐 Identifique-se</h3>
-    <p>Digite seu CPF ou telefone para ver todos os seus pedidos e acompanhar as entregas.</p>
-    <div class="field">
-      <label>CPF ou Telefone</label>
-      <input type="text" id="identificador" placeholder="000.000.000-00 ou (00) 00000-0000">
-    </div>
-    <button class="btn" onclick="buscarPedidos()">Buscar meus pedidos</button>
+  <div id="statusBox" class="status-box">
+    <div class="empty-state">Carregando pedido...</div>
   </div>
 
-  <div id="pedidosBox" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 style="font-size:15px">Seus pedidos</h3>
-      <button onclick="sair()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer">Sair</button>
+  <div id="conteudoPedido" style="display:none">
+
+    <div class="card">
+      <h3>📦 Produtos</h3>
+      <div id="produtosList"></div>
     </div>
-    <div id="pedidosList"></div>
+
+    <div class="card">
+      <h3>📍 Endereço de entrega</h3>
+      <div id="enderecoInfo"></div>
+    </div>
+
+    <div class="card">
+      <h3>🚚 Rastreamento</h3>
+      <div id="trackingInfo"></div>
+    </div>
+
+    <div class="card">
+      <h3>💳 Pagamento</h3>
+      <div id="pagamentoInfo"></div>
+    </div>
+
+    <a href="meus-pedidos.html" class="btn">📦 Ver todos os meus pedidos</a>
+    <a href="index.html" class="btn btn-outline">🏠 Voltar à loja</a>
+    <a href="https://chat.whatsapp.com/CNv0OTwmJkO0TBJZyQTG3r" target="_blank" class="whats-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Falar no grupo do WhatsApp
+    </a>
   </div>
 
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
 const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
+function getParam(n){return new URLSearchParams(location.search).get(n)}
 function fmt(p){return'R$ '+Number(p).toFixed(2).replace('.',',')}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 
-function limpar(v){return v.replace(/\D/g,'');}
-
-function getStatusClass(s){
-  if(s==='pago'||s==='entregue')return'status-pago';
-  if(s==='enviado')return'status-enviado';
-  if(s==='aguardando_pagamento'||s==='em_analise')return'status-pendente';
-  return'status-cancelado';
+function showStatus(tipo,titulo,texto){
+  const box=document.getElementById('statusBox');
+  box.className='status-box '+tipo;
+  let icone='';
+  if(tipo==='aprovado') icone='✅';
+  else if(tipo==='pendente') icone='⏳';
+  else if(tipo==='erro') icone='❌';
+  else if(tipo==='enviado') icone='🚚';
+  else if(tipo==='entregue') icone='🎉';
+  else icone='📋';
+  box.innerHTML=`<div class="status-icon">${icone}</div><div class="status-title">${titulo}</div><div class="status-text">${texto}</div>`;
 }
-function getStatusLabel(s){
-  const map={pago:'Pago ✅',aguardando_pagamento:'Aguardando ⏳',em_analise:'Em análise',enviado:'Enviado 🚚',entregue:'Entregue 🎉',cancelado:'Cancelado ❌',reembolsado:'Reembolsado'};
-  return map[s]||'Processando';
-}
 
-async function buscarPedidos(){
-  const val=document.getElementById('identificador').value.trim();
-  if(!val){toast('Digite seu CPF ou telefone');return}
-  const limpo=limpar(val);
-  if(limpo.length<10){toast('Identificador muito curto');return}
+function renderTracking(statusPedido,codigoRastreio){
+  const steps=[
+    {key:'pago',title:'Pagamento confirmado',desc:'Seu pagamento foi aprovado.'},
+    {key:'preparando',title:'Pedido em preparação',desc:'Estamos separando seus produtos.'},
+    {key:'enviado',title:'Pedido enviado',desc:'Seu pedido saiu para entrega.'},
+    {key:'entregue',title:'Entregue',desc:'Pedido entregue com sucesso!'}
+  ];
+  const statusMap={aguardando_pagamento:-1,pago:0,preparando:1,enviado:2,entregue:3,cancelado:-1,reembolsado:-1};
+  const idx=statusMap[statusPedido]!==undefined?statusMap[statusPedido]:-1;
 
-  document.getElementById('loadingScreen').classList.remove('hide');
-
-  try{
-    // Busca por CPF ou telefone
-    const url=SUPABASE_URL+'/rest/v1/pedidos?or=(cliente_cpf.eq.'+encodeURIComponent(limpo)+',cliente_telefone.eq.'+encodeURIComponent(limpo)+')&order=criado_em.desc';
-    const res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-    const dados=await res.json();
-
-    if(!dados || !dados.length){
-      toast('Nenhum pedido encontrado para esse CPF/telefone');
-      document.getElementById('loadingScreen').classList.add('hide');
-      return;
+  let html='<div class="tracking-steps">';
+  steps.forEach((s,i)=>{
+    let cls='';
+    if(i<idx) cls='done';
+    else if(i===idx) cls='active';
+    let check=i<idx?'✓':(i===idx?'●':'');
+    let extra='';
+    if(s.key==='enviado' && codigoRastreio){
+      extra=`<div style="margin-top:6px"><a href="https://linkrastreio.com.br/${codigoRastreio}" target="_blank" style="color:var(--accent);font-size:12px;font-weight:700;text-decoration:none">📮 Código: ${codigoRastreio}</a></div>`;
     }
-
-    // Salva identificador
-    localStorage.setItem('jp_identificador',val);
-
-    renderPedidos(dados);
-    document.getElementById('identifyBox').style.display='none';
-    document.getElementById('pedidosBox').style.display='block';
-    document.getElementById('loadingScreen').classList.add('hide');
-  }catch(e){
-    toast('Erro ao buscar pedidos');
-    document.getElementById('loadingScreen').classList.add('hide');
-  }
+    html+=`<div class="step ${cls}"><div class="step-dot">${check}</div><div class="step-title">${s.title}</div><div class="step-desc">${s.desc}</div>${extra}</div>`;
+  });
+  html+='</div>';
+  document.getElementById('trackingInfo').innerHTML=html;
 }
 
-function renderPedidos(lista){
-  const container=document.getElementById('pedidosList');
-  container.innerHTML=lista.map(p=>{
-    let nomeProd=p.produto_nome||'Produto';
-    try{
-      const items=typeof p.items==='string'?JSON.parse(p.items):p.items;
-      if(Array.isArray(items) && items.length){
-        nomeProd=items.map(x=>x.nome).join(', ');
-        if(nomeProd.length>60) nomeProd=nomeProd.substring(0,60)+'...';
-      }
-    }catch(e){}
+async function carregarPedido(){
+  const status=getParam('status')||getParam('collection_status')||'';
+  const extRef=getParam('external_reference')||'';
+  const paymentId=getParam('payment_id')||getParam('collection_id')||'';
 
-    const data=new Date(p.criado_em).toLocaleDateString('pt-BR');
-    const stClass=getStatusClass(p.status_pedido);
-    const stLabel=getStatusLabel(p.status_pedido);
-    const temRastreio=p.codigo_rastreio && p.status_pedido==='enviado';
+  // Tenta buscar pedido no Supabase por external_reference ou payment_id
+  let pedido=null;
+  try{
+    // Busca por external_reference primeiro
+    let url=SUPABASE_URL+'/rest/v1/pedidos?external_reference=eq.'+encodeURIComponent(extRef)+'&limit=1';
+    let res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    let dados=await res.json();
+    if(dados && dados.length){
+      pedido=dados[0];
+    }else if(paymentId){
+      // Tenta por mercado_pago_id
+      url=SUPABASE_URL+'/rest/v1/pedidos?mercado_pago_id=eq.'+encodeURIComponent(paymentId)+'&limit=1';
+      res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+      dados=await res.json();
+      if(dados && dados.length) pedido=dados[0];
+    }
+  }catch(e){}
 
-    return`<div class="pedido-card">
-      <div class="pedido-header">
-        <span class="pedido-id">#${p.external_reference||p.id}</span>
-        <span class="pedido-status ${stClass}">${stLabel}</span>
-      </div>
-      <div class="pedido-prod">${nomeProd}</div>
-      <div class="pedido-valor">${fmt(Number(p.valor||0))}</div>
-      <div class="pedido-info">
-        📅 ${data}<br>
-        👤 ${p.cliente_nome||'-'}<br>
-        📍 ${p.cliente_cidade||'-'} / ${p.cliente_estado||'-'}<br>
-        ${p.codigo_rastreio?'📮 Código: '+p.codigo_rastreio+'<br>':''}
-      </div>
-      <div class="pedido-actions">
-        ${temRastreio?`<a href="https://linkrastreio.com.br/${p.codigo_rastreio}" target="_blank" class="btn-rastreio-active">📮 Rastrear</a>`:`<span class="btn-rastreio" style="flex:1;padding:10px;border-radius:10px;text-align:center;font-size:12px;font-weight:700;color:var(--muted)">Sem rastreio ainda</span>`}
-        <a href="pedido.html?external_reference=${encodeURIComponent(p.external_reference||'')}" class="btn-rastreio">Ver detalhes</a>
-      </div>
-    </div>`;
-  }).join('');
-}
+  // Status visual baseado na URL ou no pedido
+  let st=status;
+  if(pedido && pedido.status_pedido) st=pedido.status_pedido==='pago'?'approved':(pedido.status_pedido==='aguardando_pagamento'?'pending':'other');
 
-function sair(){
-  localStorage.removeItem('jp_identificador');
-  document.getElementById('identifyBox').style.display='block';
-  document.getElementById('pedidosBox').style.display='none';
-  document.getElementById('identificador').value='';
-}
-
-// Auto-login se já tiver identificador
-window.addEventListener('load',()=>{
-  const saved=localStorage.getItem('jp_identificador');
-  if(saved){
-    document.getElementById('identificador').value=saved;
-    buscarPedidos();
+  if(st==='approved'||st==='sucesso'||st==='pago'){
+    showStatus('aprovado','Pagamento aprovado!','Seu pedido foi confirmado e está sendo preparado para envio. Você receberá atualizações por e-mail e pode acompanhar aqui.');
+  }else if(st==='pending'||st==='in_process'||st==='aguardando_pagamento'){
+    showStatus('pendente','Aguardando pagamento','Seu pedido foi reservado. Assim que o pagamento for confirmado, preparamos o envio. O Pix pode levar alguns minutos.');
+  }else if(st==='failure'||st==='rejected'||st==='cancelado'){
+    showStatus('erro','Pagamento não aprovado','Não se preocupe! Você pode tentar novamente ou escolher outra forma de pagamento.');
+  }else if(st==='enviado'){
+    showStatus('enviado','Pedido enviado!','Seu pedido já saiu para entrega. Use o código de rastreamento abaixo para acompanhar.');
+  }else if(st==='entregue'){
+    showStatus('entregue','Pedido entregue!','Obrigado por comprar na JP Variedades. Esperamos que goste!');
   }else{
-    document.getElementById('loadingScreen').classList.add('hide');
+    showStatus('','Obrigado pela compra!','Seu pedido foi registrado. Em breve você receberá atualizações sobre o status.');
   }
-});
+
+  document.getElementById('conteudoPedido').style.display='block';
+
+  // Produtos
+  const prodContainer=document.getElementById('produtosList');
+  if(pedido && pedido.items){
+    try{
+      const items=typeof pedido.items==='string'?JSON.parse(pedido.items):pedido.items;
+      if(Array.isArray(items) && items.length){
+        prodContainer.innerHTML=items.map(it=>`<div class="produto"><img src="${it.imagem||'https://via.placeholder.com/64'}" onerror="this.src='https://via.placeholder.com/64'"><div><div class="nome">${it.nome||'Produto'}</div><div class="preco">${fmt(Number(it.preco||0))} <span class="qty">x ${it.qty||1}</span></div></div></div>`).join('');
+      }else{
+        prodContainer.innerHTML=`<div class="produto"><img src="https://via.placeholder.com/64"><div><div class="nome">${pedido.produto_nome||'Produto'}</div><div class="preco">${fmt(Number(pedido.valor||0))}</div></div></div>`;
+      }
+    }catch(e){
+      prodContainer.innerHTML=`<div class="produto"><img src="https://via.placeholder.com/64"><div><div class="nome">${pedido.produto_nome||'Produto'}</div><div class="preco">${fmt(Number(pedido.valor||0))}</div></div></div>`;
+    }
+  }else{
+    prodContainer.innerHTML='<div style="color:var(--muted);font-size:13px">Detalhes do produto não disponíveis.</div>';
+  }
+
+  // Endereço
+  const endContainer=document.getElementById('enderecoInfo');
+  if(pedido){
+    const end=[pedido.cliente_endereco,pedido.cliente_numero,pedido.cliente_complemento].filter(Boolean).join(', ');
+    const cid=[pedido.cliente_cidade,pedido.cliente_estado].filter(Boolean).join(' / ');
+    endContainer.innerHTML=`
+      <div class="info-row"><span>Nome</span><span>${pedido.cliente_nome||'-'}</span></div>
+      <div class="info-row"><span>Telefone</span><span>${pedido.cliente_telefone||'-'}</span></div>
+      <div class="info-row"><span>Endereço</span><span>${end||'-'}</span></div>
+      <div class="info-row"><span>Bairro</span><span>${pedido.cliente_bairro||'-'}</span></div>
+      <div class="info-row"><span>Cidade/UF</span><span>${cid||'-'}</span></div>
+      <div class="info-row"><span>CEP</span><span>${pedido.cliente_cep||'-'}</span></div>
+    `;
+  }else{
+    endContainer.innerHTML='<div style="color:var(--muted);font-size:13px">Endereço não disponível.</div>';
+  }
+
+  // Tracking
+  const statusPedido=pedido?pedido.status_pedido:'aguardando_pagamento';
+  const codigoRastreio=pedido?pedido.codigo_rastreio:'';
+  renderTracking(statusPedido,codigoRastreio);
+
+  // Pagamento
+  const pagContainer=document.getElementById('pagamentoInfo');
+  pagContainer.innerHTML=`
+    <div class="info-row"><span>Forma de pagamento</span><span>Pix / Mercado Pago</span></div>
+    <div class="info-row"><span>ID do pagamento</span><span style="font-size:11px">${paymentId||pedido?.mercado_pago_id||'---'}</span></div>
+    <div class="info-row"><span>Código do pedido</span><span style="font-size:11px">${extRef||pedido?.external_reference||'---'}</span></div>
+    <div class="info-row"><span>Data</span><span>${new Date().toLocaleDateString('pt-BR')}</span></div>
+    <div class="info-row"><span>Status</span><span style="color:${st==='approved'||st==='pago'||st==='enviado'||st==='entregue'?'var(--accent)':(st==='pending'?'var(--warning)':'var(--danger)')}">${st==='approved'||st==='pago'?'Pago ✅':(st==='pending'?'Aguardando ⏳':(st==='enviado'?'Enviado 🚚':(st==='entregue'?'Entregue 🎉':'Processando')))}</span></div>
+  `;
+
+  document.getElementById('loadingScreen').classList.add('hide');
+}
+
+carregarPedido();
 </script>
 </body>
 </html>
