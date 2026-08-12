@@ -102,6 +102,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* HINT */
 .hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;display:none;z-index:200}
 .hint.show{display:block}
+
+/* CART SIDEBAR */
+#cartOverlay.on{display:block !important;opacity:1 !important}
+#cartSidebar.on{transform:translateX(0) !important}
 </style>
 </head>
 <body>
@@ -258,7 +262,7 @@ function render(){
     const buyLink=p.tipo==='dropshipping'?('checkout.html?id='+p.id):p.link;
     const buyTarget=p.tipo==='dropshipping'?'_self':'_blank';
     const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
-    return`<div class="card"><div class="card-img"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">${p.bestseller?'<span class="b-best">🔥 MAIS VENDIDO</span>':''}${badge}<button class="fav ${f?'active':''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${f?'❤️':'🤍'}</button></div><div class="card-info"><div class="card-title">${p.name}</div><div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px"><span class="card-price">${fmt(p.price)}</span>${oldPrice}${discount}</div><div class="card-foot"><a href="${buyLink}" target="${buyTarget}" class="ver" onclick="event.stopPropagation()">${buyLabel}</a><button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button></div></div></div>`
+    return`<div class="card"><div class="card-img"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">${p.bestseller?'<span class="b-best">🔥 MAIS VENDIDO</span>':''}${badge}<button class="fav" onclick="event.stopPropagation();addToCartById('${p.id}')" style="font-size:16px">🛒</button></div><div class="card-info"><div class="card-title">${p.name}</div><div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px"><span class="card-price">${fmt(p.price)}</span>${oldPrice}${discount}</div><div class="card-foot"><a href="${buyLink}" target="${buyTarget}" class="ver" onclick="event.stopPropagation()">${buyLabel}</a><button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button></div></div></div>`
   }).join('');
 }
 
@@ -271,7 +275,7 @@ function renderFav(){
     const buyLink=p.tipo==='dropshipping'?('checkout.html?id='+p.id):p.link;
     const buyTarget=p.tipo==='dropshipping'?'_self':'_blank';
     const buyLabel=p.tipo==='dropshipping'?'COMPRAR AGORA →':'VER OFERTA →';
-    return`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav active" onclick="toggleFav('${p.id}')">❤️</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${buyLink}" target="${buyTarget}" class="ver">${buyLabel}</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`
+    return`<div class="card"><div class="card-img"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'"><button class="fav" onclick="event.stopPropagation();addToCartById('${p.id}')" style="font-size:16px">🛒</button></div><div class="card-info"><div class="card-title">${p.name}</div><div class="card-price">${fmt(p.price)}</div><div class="card-foot"><a href="${buyLink}" target="${buyTarget}" class="ver">${buyLabel}</a><button class="share" onclick="shareProd('${p.id}')">📤</button></div></div></div>`
   }).join('');
 }
 
@@ -310,6 +314,13 @@ if(localStorage.getItem('jp_theme')==='light'){dark=false;document.body.classLis
 
 
 loadProducts();
-</script>
-</body>
-</html>
+
+// ===== CARRINHO =====
+function getCart(){return JSON.parse(localStorage.getItem('jp_carrinho')||'[]')}
+function saveCart(c){localStorage.setItem('jp_carrinho',JSON.stringify(c));updateCartBadge()}
+function updateCartBadge(){var c=getCart();var b=document.getElementById('cartBadge');if(!b)return;var total=c.reduce(function(s,x){return s+x.qty},0);b.textContent=total;b.style.display=total?'flex':'none'}
+function addToCartById(id){var p=products.find(function(x){return x.id==id});if(!p)return;addToCart(p)}
+function addToCart(p){var c=getCart();var idx=c.findIndex(function(x){return x.id===p.id});if(idx>=0){c[idx].qty++}else{c.push({id:p.id,nome:p.name,preco:p.price,imagem:p.image,qty:1,tipo:p.tipo})}saveCart(c);showToast(p.name+' adicionado ao carrinho! ✅')}
+function removeFromCart(id){var c=getCart().filter(function(x){return x.id!==id});saveCart(c);renderCartSidebar()}
+function updateQty(id,delta){var c=getCart();var idx=c.findIndex(function(x){return x.id===id});if(idx<0)return;c[idx].qty+=delta;if(c[idx].qty<=0){c.splice(idx,1)}saveCart(c);renderCartSidebar()}
+function renderCartSidebar(){var c=g
