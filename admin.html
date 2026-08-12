@@ -374,4 +374,204 @@ function loadProds(){
   log('Carregando produtos...');
   fetch(SUPABASE_URL+'/rest/v1/produtos?order=created_at.desc',{method:'GET',headers:getHeaders()})
     .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);return res.json()})
-    .then(function
+    .then(function(data){
+      produtos=data||[];
+      log('Produtos carregados: '+produtos.length);
+      renderProdutos();
+      renderDashboard();
+    })
+    .catch(function(e){
+      log('Erro: '+e.message);
+      toast('Erro ao carregar: '+e.message,false);
+      document.getElementById('lista').innerHTML='<div class="empty">Erro ao conectar.</div>';
+    });
+}
+
+function renderProdutos(){
+  document.getElementById('stTotal').textContent=produtos.length;
+  document.getElementById('stAtivo').textContent=produtos.filter(function(p){return p.ativo}).length;
+  document.getElementById('stDest').textContent=produtos.filter(function(p){return p.destaque}).length;
+  document.getElementById('stClick').textContent=produtos.reduce(function(a,p){return a+(p.cliques||0)},0);
+
+  var lista=document.getElementById('lista');
+  if(!produtos.length){lista.innerHTML='<div class="empty">Nenhum produto cadastrado.</div>';return}
+  lista.innerHTML=produtos.map(function(p){
+    var tipoLabel=p.tipo==='dropshipping'?'Dropshipping':'Afiliado';
+    return '<div class="item">'+
+      '<img src="'+(p.imagem_url||'')+'" onerror="this.src=\'https://via.placeholder.com/56\'">'+
+      '<div class="item-info">'+
+        '<h4>'+p.nome+'</h4>'+
+        '<div class="price">R$ '+parseFloat(p.preco_atual||0).toFixed(2).replace('.',',')+'</div>'+
+        '<div class="loja">'+(p.loja_origem||'')+' • '+tipoLabel+'</div>'+
+      '</div>'+
+      '<div class="item-actions">'+
+        '<button onclick="editProd(\''+p.id+'\')">✏️</button>'+
+        '<button onclick="deleteProd(\''+p.id+'\')">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderDashboard(){
+  var pagos=pedidos.filter(function(o){return o.status_pedido==='pago'});
+  var totalVendas=pagos.reduce(function(a,o){return a+(o.valor||0)},0);
+  var totalLucro=pagos.reduce(function(a,o){return a+calcLucro(o)},0);
+  document.getElementById('dashVendas').textContent='R$ '+totalVendas.toFixed(2).replace('.',',');
+  document.getElementById('dashPedidos').textContent=pedidos.length;
+  document.getElementById('dashLucro').textContent='R$ '+totalLucro.toFixed(2).replace('.',',');
+  document.getElementById('dashTicket').textContent='R$ '+(pagos.length?(totalVendas/pagos.length).toFixed(2).replace('.',','):'0,00');
+
+  document.getElementById('dashPedidosBody').innerHTML=pedidos.length?pedidos.slice(0,5).map(function(o){
+    return '<tr><td>#'+o.id+'</td><td>'+(o.cliente_nome||'-')+'</td><td>'+(o.produto_nome||'-')+'</td>'+
+      '<td class="price">R$ '+(o.valor||0).toFixed(2).replace('.',',')+'</td>'+
+      '<td><span class="status '+statusClass(o.status_pedido)+'">'+statusLabel(o.status_pedido)+'</span></td></tr>';
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum pedido ainda</td></tr>';
+
+  var baixos=produtos.filter(function(p){return (p.estoque||0)<5 && p.tipo==='dropshipping'});
+  document.getElementById('dashEstoqueBody').innerHTML=baixos.length?baixos.map(function(p){
+    return '<tr><td>'+p.nome+'</td><td>'+(p.loja_origem||'-')+'</td><td class="stock-low">'+(p.estoque||0)+'</td></tr>';
+  }).join(''):'<tr><td colspan="3" style="text-align:center;color:var(--muted)">Nenhum produto com estoque baixo</td></tr>';
+}
+
+// ===== PEDIDOS =====
+function filterOrders(f,el){
+  filtroPedido=f;
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');
+  if(el)el.classList.add('active');
+  renderOrders();
+}
+function renderOrders(){
+  var list=filtroPedido==='todos'?pedidos:pedidos.filter(function(o){return o.status_pedido===filtroPedido});
+  document.getElementById('ordersBody').innerHTML=list.length?list.map(function(o){
+    var data=o.criado_em?new Date(o.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+    return '<tr><td>#'+o.id+'</td><td>'+data+'</td><td>'+(o.cliente_nome||'-')+'</td><td>'+(o.produto_nome||'-')+'</td>'+
+      '<td class="price">R$ '+(o.valor||0).toFixed(2).replace('.',',')+'</td>'+
+      '<td class="profit">R$ '+calcLucro(o).toFixed(2).replace('.',',')+'</td>'+
+      '<td><span class="status '+statusClass(o.status_pedido)+'">'+statusLabel(o.status_pedido)+'</span></td>'+
+      '<td><button onclick="verEndereco(\''+o.id+'\')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td></tr>';
+  }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
+}
+
+function verEndereco(id){
+  var p=pedidos.find(function(x){return x.id==id});
+  if(!p)return;
+  var msg='Cliente: '+(p.cliente_nome||'-')+
+    '\nCPF: '+(p.cliente_cpf||'-')+
+    '\nTelefone: '+(p.cliente_telefone||'-')+
+    '\n\nEndereco: '+(p.cliente_endereco||'-')+', '+(p.cliente_numero||'-')+
+    (p.cliente_complemento?' - '+p.cliente_complemento:'')+
+    '\nBairro: '+(p.cliente_bairro||'-')+
+    '\nCidade/UF: '+(p.cliente_cidade||'-')+'/'+(p.cliente_estado||'-')+
+    '\nCEP: '+(p.cliente_cep||'-');
+  alert(msg);
+}
+
+// ===== FORNECEDORES =====
+function renderSuppliers(){
+  document.getElementById('suppliersBody').innerHTML=fornecedoresMock.map(function(f){
+    return '<tr><td>'+f.nome+'</td><td>'+f.tipo+'</td><td>'+f.pedidos+'</td>'+
+      '<td>R$ '+f.total.toFixed(2).replace('.',',')+'</td><td>'+f.margem+'%</td>'+
+      '<td><span class="status status-'+f.status+'">'+f.status+'</span></td></tr>';
+  }).join('');
+}
+
+// ===== FORMULARIO =====
+function openForm(){
+  editando=null;
+  document.getElementById('formTitle').textContent='Novo Produto';
+  document.getElementById('pid').value='';
+  document.getElementById('pNome').value='';
+  document.getElementById('pLink').value='';
+  document.getElementById('pPreco').value='';
+  document.getElementById('pOld').value='';
+  document.getElementById('pImg').value='';
+  document.getElementById('pLoja').value='Mercado Livre';
+  document.getElementById('pCat').value='';
+  document.getElementById('pCusto').value='';
+  document.getElementById('pEstoque').value='';
+  document.getElementById('pTipo').value='afiliado';
+  document.getElementById('pPagamento').value='';
+  document.getElementById('pagamentoGroup').style.display='none';
+  document.getElementById('linkObrigLabel').style.display='inline';
+  document.getElementById('pDest').checked=false;
+  document.getElementById('pAtivo').checked=true;
+  document.getElementById('formModal').classList.add('on');
+}
+
+function closeForm(){document.getElementById('formModal').classList.remove('on')}
+
+function editProd(id){
+  var p=produtos.find(function(x){return x.id==id});
+  if(!p)return;
+  editando=id;
+  document.getElementById('formTitle').textContent='Editar Produto';
+  document.getElementById('pid').value=p.id;
+  document.getElementById('pNome').value=p.nome||'';
+  document.getElementById('pLink').value=p.link_afiliado||'';
+  document.getElementById('pPreco').value=p.preco_atual||'';
+  document.getElementById('pOld').value=p.preco_antigo||'';
+  document.getElementById('pImg').value=p.imagem_url||'';
+  document.getElementById('pLoja').value=p.loja_origem||'Mercado Livre';
+  document.getElementById('pCat').value=p.categoria||'';
+  document.getElementById('pCusto').value=p.custo||'';
+  document.getElementById('pEstoque').value=p.estoque||'';
+  document.getElementById('pTipo').value=p.tipo||'afiliado';
+  document.getElementById('pPagamento').value=p.link_pagamento||'';
+  document.getElementById('pagamentoGroup').style.display=(p.tipo==='dropshipping')?'block':'none';
+  document.getElementById('linkObrigLabel').style.display=(p.tipo==='dropshipping')?'none':'inline';
+  document.getElementById('pDest').checked=!!p.destaque;
+  document.getElementById('pAtivo').checked=p.ativo!==false;
+  document.getElementById('formModal').classList.add('on');
+}
+
+document.getElementById('pTipo').addEventListener('change',function(){
+  document.getElementById('pagamentoGroup').style.display=(this.value==='dropshipping')?'block':'none';
+  document.getElementById('linkObrigLabel').style.display=(this.value==='dropshipping')?'none':'inline';
+});
+
+function deleteProd(id){
+  if(!confirm('Excluir este produto?'))return;
+  fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+id,{method:'DELETE',headers:getHeaders()})
+    .then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Produto excluido!',true);loadProds();})
+    .catch(function(e){toast('Erro: '+e.message,false)});
+}
+
+function saveProd(){
+  var nome=document.getElementById('pNome').value.trim();
+  var link=document.getElementById('pLink').value.trim();
+  var preco=document.getElementById('pPreco').value;
+  var img=document.getElementById('pImg').value.trim();
+  var tipo=document.getElementById('pTipo').value;
+  if(!nome||!preco||!img){toast('Preencha os campos obrigatorios (*)',false);return}
+  if(tipo==='afiliado'&&!link){toast('Preencha o link do afiliado',false);return}
+
+  var body={
+    nome:nome,
+    link_afiliado:link,
+    preco_atual:parseFloat(preco),
+    preco_antigo:document.getElementById('pOld').value?parseFloat(document.getElementById('pOld').value):null,
+    imagem_url:img,
+    loja_origem:document.getElementById('pLoja').value,
+    categoria:document.getElementById('pCat').value.trim(),
+    custo:document.getElementById('pCusto').value?parseFloat(document.getElementById('pCusto').value):null,
+    estoque:document.getElementById('pEstoque').value?parseInt(document.getElementById('pEstoque').value):null,
+    tipo:document.getElementById('pTipo').value,
+    link_pagamento:document.getElementById('pPagamento').value.trim(),
+    destaque:document.getElementById('pDest').checked,
+    ativo:document.getElementById('pAtivo').checked
+  };
+
+  var id=document.getElementById('pid').value;
+  var req;
+  if(id){
+    req=fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+id,{method:'PATCH',headers:getHeaders(),body:JSON.stringify(body)});
+  }else{
+    req=fetch(SUPABASE_URL+'/rest/v1/produtos',{method:'POST',headers:getHeaders(),body:JSON.stringify(body)});
+  }
+  req.then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Produto salvo!',true);closeForm();loadProds();})
+    .catch(function(e){toast('Erro ao salvar: '+e.message,false)});
+}
+</script>
+</body>
+</html>
