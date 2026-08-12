@@ -15,10 +15,8 @@ body.light{--bg:#f5f5f5;--card:#fff;--border:#ddd;--text:#1a1a1a;--muted:#666;--
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
 
-/* BANNER */
 .banner{background:linear-gradient(90deg,var(--accent-dark),var(--accent));color:#000;text-align:center;padding:10px;font-size:13px;font-weight:700}
 
-/* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-circle{width:44px;height:44px;border-radius:50%;background:url('logo%20(2).png') center/cover;cursor:pointer;user-select:none}
@@ -26,7 +24,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .actions{display:flex;gap:8px;align-items:center}
 .btn-icon{width:36px;height:36px;border-radius:50%;border:none;background:var(--border);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;position:relative}
 
-/* SEARCH */
 .search{padding:12px 16px;position:relative}
 .search input{width:100%;padding:12px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none}
 .search input::placeholder{color:var(--muted)}
@@ -37,7 +34,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .suggestion-item img{width:36px;height:36px;border-radius:6px;object-fit:cover}
 .suggestion-item span{font-size:13px;color:var(--text)}
 
-/* HERO */
 .hero{text-align:center;padding:20px 16px}
 .hero .big-logo{width:80px;height:80px;margin:0 auto 12px;border-radius:50%;background:url('logo%20(2).png') center/cover;cursor:pointer}
 .hero h2{font-size:22px;margin-bottom:6px}
@@ -46,7 +42,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .stat{background:var(--card);padding:10px 16px;border-radius:10px;border:1px solid var(--border);text-align:center;min-width:80px}
 .stat b{font-size:16px;color:var(--accent)}.stat span{font-size:10px;color:var(--muted)}
 
-/* CATEGORIES + SORT */
 .cats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cats button{padding:8px 16px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
@@ -55,11 +50,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sort-bar{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto}
 .sort-bar select{padding:8px 12px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px;outline:none}
 
-/* SECTION TITLE */
 .sec-title{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
 .sec-title span{background:var(--border);padding:4px 10px;border-radius:50px;font-size:11px;color:var(--muted)}
 
-/* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 100px}
 .card{background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--border);transition:transform .2s}
 .card:active{transform:scale(.98)}
@@ -80,21 +73,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ver{flex:1;padding:8px 0;border-radius:50px;border:none;background:var(--accent);color:#000;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .share{width:32px;height:32px;border-radius:50%;border:none;background:var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
 
-/* SKELETON */
 .skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--card) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .skel-card{height:280px}
 
-/* EMPTY / LOADING */
 .empty{text-align:center;padding:40px 20px;color:var(--muted);grid-column:1/-1;font-size:14px}
 
-/* FAV PAGE */
 .fav-page{display:none}.fav-page.active{display:block}
 
-/* WHATSAPP */
-.whatsapp-float{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 4px 12px rgba(37,211,102,.4);z-index:500}
+.whatsapp-float{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 12px rgba(37,211,102,.4);z-index:500}
 
-/* TOAST + HINT */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:10px 18px;border-radius:50px;font-size:12px;border:1px solid var(--border);z-index:3000;display:none;white-space:nowrap}
 .toast.show{display:block}
 .hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;display:none;z-index:200}
@@ -162,7 +150,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   <div class="sec-title">🔥 MAIS CLICADOS HOJE <span id="vcount">0 produtos</span></div>
   <div class="grid" id="grid">
-    <!-- skeleton inicial -->
     <div class="skel-card skeleton"></div>
     <div class="skel-card skeleton"></div>
     <div class="skel-card skeleton"></div>
@@ -207,14 +194,14 @@ function fmt(p) {
   return 'R$ ' + Number(p).toFixed(2).replace('.', ',');
 }
 
-function disc(o, p) {
-  if (!o || o <= p) return '';
-  return '-' + Math.round((o - p) / o * 100) + '%';
+function disc(oldP, currentP) {
+  if (!oldP || oldP <= currentP) return '';
+  return '-' + Math.round((oldP - currentP) / oldP * 100) + '%';
 }
 
-function toast(m) {
+function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = m;
+  t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
@@ -237,7 +224,7 @@ async function loadProducts() {
       name: p.nome || 'Produto',
       price: parseFloat(p.preco_atual || 0),
       oldPrice: parseFloat(p.preco_antigo || 0) || null,
-      image: p.imagem_url || 'https://via.placeholder.com/300x300?text=JP',
+      image: p.imagem_url || '',
       platform: p.loja_origem === 'Mercado Livre' ? 'mercado-livre' :
                 p.loja_origem === 'Shopee' ? 'shopee' :
                 p.loja_origem === 'Shein' ? 'shein' : 'outro',
@@ -274,7 +261,7 @@ function renderSuggestions() {
   } else {
     box.innerHTML = matches.map(p => `
       <div class="suggestion-item" onclick="pickSuggestion('${p.id}')">
-        <img src="${escapeHtml(p.image)}" onerror="this.src='https://via.placeholder.com/40x40?text=JP'">
+        <img src="${escapeHtml(p.image)}" onerror="this.src='https://via.placeholder.com/40x40/1a1a1a/00e676?text=JP'">
         <span>${escapeHtml(p.name)}</span>
       </div>
     `).join('');
@@ -312,7 +299,7 @@ function getSortedList(list) {
     });
   }
   if (sort === 'bestseller') return [...list].sort((a, b) => (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0));
-  return list; // recent (já vem ordenado do banco)
+  return list;
 }
 
 function render() {
@@ -340,35 +327,49 @@ function render() {
 
   g.innerHTML = list.map(p => {
     const d = disc(p.oldPrice, p.price);
-    const f = favorites.includes(p.id);
-    const badge = p.tipo === 'dropshipping'
-      ? '<span class="badge b-ds">Loja Própria</span>'
-      : p.platform === 'mercado-livre' ? '<span class="badge b-ml">Mercado Livre</span>'
-      : p.platform === 'shopee' ? '<span class="badge b-sh">Shopee</span>'
-      : '<span class="badge b-disc">Oferta</span>';
+    const isFav = favorites.includes(p.id);
 
-    const oldPrice = p.oldPrice ? `<span class="card-old">${fmt(p.oldPrice)}</span>` : '';
-    const discount = d ? `<span class="card-discount">${d}</span>` : '';
+    let badge = '';
+    if (p.tipo === 'dropshipping') {
+      badge = '<span class="badge b-ds">Loja Própria</span>';
+    } else if (p.platform === 'mercado-livre') {
+      badge = '<span class="badge b-ml">Mercado Livre</span>';
+    } else if (p.platform === 'shopee') {
+      badge = '<span class="badge b-sh">Shopee</span>';
+    } else {
+      badge = '<span class="badge b-disc">Oferta</span>';
+    }
+
+    const oldPriceHtml = p.oldPrice ? `<span class="card-old">${fmt(p.oldPrice)}</span>` : '';
+    const discountHtml = d ? `<span class="card-discount">${d}</span>` : '';
+
     const buyLink = p.tipo === 'dropshipping' ? ('checkout.html?id=' + p.id) : p.link;
     const buyTarget = p.tipo === 'dropshipping' ? '_self' : '_blank';
     const buyLabel = p.tipo === 'dropshipping' ? 'COMPRAR AGORA →' : 'VER OFERTA →';
+
     const extraBtn = p.tipo === 'dropshipping'
       ? `<button class="share" onclick="event.stopPropagation();addToCart('${p.id}')" title="Adicionar ao carrinho">🛒</button>`
       : `<button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button>`;
 
+    const imgSrc = p.image || 'https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades';
+
     return `
       <div class="card">
         <div class="card-img">
-          <img src="\( {escapeHtml(p.image)}" alt=" \){escapeHtml(p.name)}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">
+          <img src="${escapeHtml(imgSrc)}" 
+               alt="${escapeHtml(p.name)}" 
+               loading="lazy" 
+               onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades'">
           ${p.bestseller ? '<span class="b-best">🔥 MAIS VENDIDO</span>' : ''}
           ${badge}
-          <button class="fav \( {f ? 'active' : ''}" onclick="event.stopPropagation();toggleFav(' \){p.id}')">${f ? '❤️' : '🤍'}</button>
+          <button class="fav \( {isFav ? 'active' : ''}" onclick="event.stopPropagation();toggleFav(' \){p.id}')">${isFav ? '❤️' : '🤍'}</button>
         </div>
         <div class="card-info">
           <div class="card-title">${escapeHtml(p.name)}</div>
           <div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px">
             <span class="card-price">${fmt(p.price)}</span>
-            \( {oldPrice} \){discount}
+            ${oldPriceHtml}
+            ${discountHtml}
           </div>
           <div class="card-foot">
             <a href="\( {escapeHtml(buyLink)}" target=" \){buyTarget}" class="ver" onclick="event.stopPropagation()">${buyLabel}</a>
@@ -393,11 +394,12 @@ function renderFav() {
     const buyLink = p.tipo === 'dropshipping' ? ('checkout.html?id=' + p.id) : p.link;
     const buyTarget = p.tipo === 'dropshipping' ? '_self' : '_blank';
     const buyLabel = p.tipo === 'dropshipping' ? 'COMPRAR AGORA →' : 'VER OFERTA →';
+    const imgSrc = p.image || 'https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades';
 
     return `
       <div class="card">
         <div class="card-img">
-          <img src="${escapeHtml(p.image)}" onerror="this.src='https://via.placeholder.com/300x300?text=JP'">
+          <img src="${escapeHtml(imgSrc)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades'">
           <button class="fav active" onclick="toggleFav('${p.id}')">❤️</button>
         </div>
         <div class="card-info">
@@ -405,7 +407,7 @@ function renderFav() {
           <div class="card-price">${fmt(p.price)}</div>
           <div class="card-foot">
             <a href="\( {escapeHtml(buyLink)}" target=" \){buyTarget}" class="ver">${buyLabel}</a>
-        <button class="share" onclick="shareProd('${p.id}')">📤</button>
+            <button class="share" onclick="shareProd('${p.id}')">📤</button>
           </div>
         </div>
       </div>
@@ -430,7 +432,7 @@ function toggleFav(id) {
 function shareProd(id) {
   const p = products.find(x => x.id == id);
   if (p) {
-    navigator.clipboard.writeText(`${p.name} - \( {fmt(p.price)}\n \){p.link}`);
+    navigator.clipboard.writeText(p.name + ' - ' + fmt(p.price) + '\n' + p.link);
     toast('Link copiado! 📋');
   }
 }
@@ -458,7 +460,7 @@ function backMain() {
   document.getElementById('favPage').classList.remove('active');
 }
 
-// ===== ADMIN SECRETO (segurar logo 7 vezes) =====
+// Admin secreto
 let pressCount = 0;
 function setupLP(el) {
   let timer;
@@ -490,7 +492,7 @@ function setupLP(el) {
 setupLP(document.getElementById('adminTrigger'));
 setupLP(document.getElementById('heroLogo'));
 
-// ===== TEMA =====
+// Tema
 let dark = true;
 function toggleTheme() {
   dark = !dark;
@@ -504,7 +506,7 @@ if (localStorage.getItem('jp_theme') === 'light') {
   document.getElementById('themeBtn').textContent = '☀️';
 }
 
-// ===== CARRINHO =====
+// Carrinho
 function getCart() {
   try {
     return JSON.parse(localStorage.getItem('jp_cart') || '[]');
