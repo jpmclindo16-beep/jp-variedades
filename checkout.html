@@ -250,6 +250,7 @@ const SUPABASE_KEY =
 'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
 let produto = null;
+let itensCarrinho = null;
 
 function mostrarErro(msg){
   const box=document.getElementById('erro');
@@ -272,11 +273,19 @@ function preencherSalvos(){
   }catch(e){}
 }
 
+function getCart(){try{return JSON.parse(localStorage.getItem('jp_cart')||'[]')}catch(e){return[]}}
+
 async function carregarProduto(){
 
-  try{
+  const params=new URLSearchParams(location.search);
+  const modoCarrinho=params.get('cart')==='1';
 
-    const params=new URLSearchParams(location.search);
+  if(modoCarrinho){
+    await carregarCarrinho();
+    return;
+  }
+
+  try{
 
     const id=params.get('id');
 
@@ -353,6 +362,36 @@ async function carregarProduto(){
 
 }
 
+async function carregarCarrinho(){
+  try{
+    const cart=getCart();
+    if(!cart.length){
+      throw new Error('Seu carrinho está vazio.');
+    }
+
+    itensCarrinho=cart;
+
+    const total=cart.reduce(function(a,i){return a+(i.preco*i.qty)},0);
+
+    document.getElementById('produtoBox').innerHTML=cart.map(function(i){
+      return `<div class="produto" style="margin-bottom:12px">
+        <img src="${i.imagem||'https://via.placeholder.com/300'}" onerror="this.src='https://via.placeholder.com/300'">
+        <div>
+          <div class="nome">${i.nome} <span style="color:#999;font-weight:400">x${i.qty}</span></div>
+          <div class="preco">${dinheiro(i.preco*i.qty)}</div>
+        </div>
+      </div>`;
+    }).join('<hr style="border-color:#292929;margin:12px 0">');
+
+    document.getElementById('total').textContent=dinheiro(total);
+
+  }catch(e){
+    document.getElementById('produtoBox').innerHTML=
+      '<div class="loading">Não foi possível carregar o carrinho.</div>';
+    mostrarErro(e.message);
+  }
+}
+
 function validar(){
 
   const campos=[
@@ -387,7 +426,7 @@ function validar(){
 
 async function comprar(){
 
-  if(!produto){
+  if(!produto && !itensCarrinho){
     mostrarErro('Produto ainda não carregado.');
     return;
   }
@@ -427,6 +466,10 @@ async function comprar(){
 
     localStorage.setItem('jp_endereco', JSON.stringify(cliente));
 
+    const corpo=itensCarrinho
+      ? { itens: itensCarrinho.map(function(i){return {produto_id:i.id, quantidade:i.qty}}), cliente:cliente }
+      : { produto_id:produto.id, cliente:cliente };
+
     const resposta=await fetch(
       '/api/criar-pagamento',
       {
@@ -436,13 +479,7 @@ async function comprar(){
           'Content-Type':'application/json'
         },
 
-        body:JSON.stringify({
-
-          produto_id:produto.id,
-
-          cliente:cliente
-
-        })
+        body:JSON.stringify(corpo)
 
       }
     );
@@ -456,6 +493,10 @@ async function comprar(){
         'Não foi possível criar o pagamento.'
       );
 
+    }
+
+    if(itensCarrinho){
+      localStorage.removeItem('jp_cart');
     }
 
     if(resultado.init_point){
