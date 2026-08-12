@@ -184,7 +184,7 @@ tr:last-child td{border-bottom:none}
         <div class="tab" onclick="filterOrders('enviado',this)">Enviados</div>
       </div>
       <div class="card">
-        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th><th>Endereco</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+        <div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th><th>Endereco</th><th>Acoes</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
       </div>
     </div>
 
@@ -449,10 +449,31 @@ function renderOrders(){
       '<td class="price">R$ '+(o.valor||0).toFixed(2).replace('.',',')+'</td>'+
       '<td class="profit">R$ '+calcLucro(o).toFixed(2).replace('.',',')+'</td>'+
       '<td><span class="status '+statusClass(o.status_pedido)+'">'+statusLabel(o.status_pedido)+'</span></td>'+
-      '<td><button onclick="verEndereco(\''+o.id+'\')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td></tr>';
-  }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
+      '<td><button onclick="verEndereco(\''+o.id+'\')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td>'+
+      '<td style="white-space:nowrap"><button onclick="marcarEnviado(\''+o.id+'\')" style="padding:6px 8px;border-radius:8px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-size:11px;margin-right:4px">🚚 Enviado</button><button onclick="marcarEntregue(\''+o.id+'\')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:11px">✅ Entregue</button></td></tr>';
+  }).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
 }
 
+function marcarEnviado(id){
+  var codigo=prompt('Código de rastreio (opcional):','');
+  if(codigo===null)return;
+  fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+id,{
+    method:'PATCH',
+    headers:getHeaders(),
+    body:JSON.stringify({status_pedido:'enviado',codigo_rastreio:codigo,atualizado_em:new Date().toISOString()})
+  }).then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Pedido marcado como enviado!',true);loadPedidos();})
+    .catch(function(e){toast('Erro: '+e.message,false)});
+}
+
+function marcarEntregue(id){
+  if(!confirm('Marcar esse pedido como entregue?'))return;
+  fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+id,{
+    method:'PATCH',
+    headers:getHeaders(),
+    body:JSON.stringify({status_pedido:'entregue',atualizado_em:new Date().toISOString()})
+  }).then(function(res){if(!res.ok)throw new Error('Erro '+res.status);toast('Pedido marcado como entregue!',true);loadPedidos();})
+    .catch(function(e){toast('Erro: '+e.message,false)});
+}
 function verEndereco(id){
   var p=pedidos.find(function(x){return x.id==id});
   if(!p)return;
