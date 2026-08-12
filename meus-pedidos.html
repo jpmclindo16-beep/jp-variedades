@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>Meus Pedidos - JP Variedades</title>
+<style>
+:root{--bg:#0a0a0a;--card:#141414;--border:#252525;--text:#fff;--muted:#999;--accent:#00e676;--warning:#ffc107;--danger:#ff5252}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.voltar{color:var(--text);text-decoration:none;font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--border)}
+.logo{font-weight:800;font-size:16px}
+.container{max-width:600px;margin:auto;padding:20px 16px 50px}
+h2{font-size:20px;margin-bottom:6px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;outline:none;margin-bottom:12px}
+input:focus{border-color:var(--accent)}
+.btn{width:100%;border:0;border-radius:12px;padding:15px;background:var(--accent);color:#000;font-size:15px;font-weight:800;cursor:pointer}
+.pedido-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:14px;text-decoration:none;color:var(--text);display:block}
+.pedido-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pedido-card .nome{font-weight:700;font-size:14px}
+.pedido-card .data{color:var(--muted);font-size:12px}
+.pedido-card .valor{color:var(--accent);font-weight:800;font-size:15px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-top:6px}
+.b-pago{background:rgba(0,230,118,.15);color:var(--accent)}
+.b-pendente{background:rgba(255,193,7,.15);color:var(--warning)}
+.b-enviado{background:rgba(59,130,246,.15);color:#3b82f6}
+.b-entregue{background:rgba(0,230,118,.15);color:var(--accent)}
+.b-outro{background:rgba(255,82,82,.15);color:var(--danger)}
+.empty{text-align:center;color:var(--muted);padding:30px;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="voltar">←</a>
+  <div class="logo">JP_variedades ✓</div>
+</div>
+
+<div class="container">
+  <h2>📦 Meus Pedidos</h2>
+  <div class="sub">Digite o telefone que você usou na compra pra ver seus pedidos.</div>
+
+  <input type="tel" id="telefone" placeholder="Ex: 11999998888" inputmode="numeric">
+  <button class="btn" onclick="buscar()">Buscar meus pedidos</button>
+
+  <div id="resultado"></div>
+</div>
+
+<script>
+const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
+const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
+
+function fmt(p){return'R$ '+Number(p).toFixed(2).replace('.',',')}
+
+function badge(status){
+  const map={
+    pago:['b-pago','Pago'],
+    aguardando_pagamento:['b-pendente','Aguardando pagamento'],
+    em_analise:['b-pendente','Em análise'],
+    enviado:['b-enviado','Enviado'],
+    entregue:['b-entregue','Entregue'],
+    cancelado:['b-outro','Cancelado'],
+    reembolsado:['b-outro','Reembolsado']
+  };
+  const [cls,label]=map[status]||['b-outro',status||'-'];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+async function buscar(){
+  const tel=document.getElementById('telefone').value.replace(/\D/g,'');
+  const resultado=document.getElementById('resultado');
+  if(!tel){resultado.innerHTML='<div class="empty">Digite um telefone válido.</div>';return}
+
+  resultado.innerHTML='<div class="empty">Buscando...</div>';
+
+  try{
+    const url=SUPABASE_URL+'/rest/v1/pedidos?cliente_telefone=eq.'+encodeURIComponent(tel)+'&order=criado_em.desc';
+    const res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const dados=await res.json();
+
+    if(!dados||!dados.length){
+      resultado.innerHTML='<div class="empty">Nenhum pedido encontrado com esse telefone.</div>';
+      return;
+    }
+
+    resultado.innerHTML=dados.map(function(p){
+      const data=p.criado_em?new Date(p.criado_em).toLocaleDateString('pt-BR'):'-';
+      return `<a class="pedido-card" href="pedido.html?external_reference=${encodeURIComponent(p.referencia||'')}">
+        <div class="top"><span class="nome">${p.produto_nome||'Produto'}</span><span class="valor">${fmt(p.valor||0)}</span></div>
+        <div class="data">Pedido em ${data}</div>
+        ${badge(p.status_pedido)}
+      </a>`;
+    }).join('');
+  }catch(e){
+    resultado.innerHTML='<div class="empty">Erro ao buscar pedidos. Tenta de novo.</div>';
+  }
+}
+
+document.getElementById('telefone').addEventListener('keypress',function(e){
+  if(e.key==='Enter') buscar();
+});
+</script>
+</body>
+</html>
