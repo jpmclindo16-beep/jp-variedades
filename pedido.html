@@ -157,7 +157,7 @@ async function carregarPedido(){
 
   let pedido=null;
   try{
-    let url=SUPABASE_URL+'/rest/v1/pedidos?external_reference=eq.'+encodeURIComponent(extRef)+'&limit=1';
+    let url=SUPABASE_URL+'/rest/v1/pedidos?referencia=eq.'+encodeURIComponent(extRef)+'&limit=1';
     let res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     let dados=await res.json();
     if(dados && dados.length){pedido=dados[0];}
@@ -233,7 +233,7 @@ async function carregarPedido(){
   pagContainer.innerHTML=`
     <div class="info-row"><span>Forma de pagamento</span><span>Pix / Mercado Pago</span></div>
     <div class="info-row"><span>ID do pagamento</span><span style="font-size:11px">${paymentId||pedido?.mercado_pago_id||'---'}</span></div>
-    <div class="info-row"><span>Código do pedido</span><span style="font-size:11px">${extRef||pedido?.external_reference||'---'}</span></div>
+    <div class="info-row"><span>Código do pedido</span><span style="font-size:11px">${extRef||pedido?.referencia||'---'}</span></div>
     <div class="info-row"><span>Data</span><span>${new Date().toLocaleDateString('pt-BR')}</span></div>
     <div class="info-row"><span>Status</span><span style="color:${statusColor}">${statusLabel}</span></div>
   `;
