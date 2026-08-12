@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -9,48 +9,36 @@
 :root{--bg:#0a0a0a;--card:#141414;--border:#252525;--text:#fff;--muted:#999;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252;--warning:#ffc107}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-
-/* LOADING */
 #loadingScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
 #loadingScreen.hide{opacity:0;pointer-events:none}
 .spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
 .header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
 .voltar{color:var(--text);text-decoration:none;font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--border)}
 .logo{font-weight:800;font-size:16px}
-
 .container{max-width:600px;margin:auto;padding:16px 16px 50px}
-
 .status-box{text-align:center;padding:28px 16px 20px;margin-bottom:16px}
 .status-icon{font-size:56px;margin-bottom:12px}
 .status-title{font-size:22px;font-weight:800;margin-bottom:6px}
 .status-text{font-size:14px;color:var(--muted);line-height:1.5;max-width:340px;margin:0 auto}
-
 .aprovado .status-icon{color:var(--accent)}
 .aprovado .status-title{color:var(--accent)}
 .pendente .status-icon{color:var(--warning)}
 .pendente .status-title{color:var(--warning)}
 .erro .status-icon{color:var(--danger)}
 .erro .status-title{color:var(--danger)}
-
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
 .card h3{font-size:14px;margin-bottom:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-
-/* PRODUTOS */
 .produto{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
 .produto:last-child{border-bottom:none}
 .produto img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:var(--border)}
 .produto .nome{font-size:14px;font-weight:700;line-height:1.35}
 .produto .preco{color:var(--accent);font-size:16px;font-weight:800;margin-top:4px}
 .produto .qty{font-size:12px;color:var(--muted)}
-
 .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
 .info-row:last-child{border-bottom:none}
 .info-row span:first-child{color:var(--muted)}
 .info-row span:last-child{font-weight:600;max-width:60%;text-align:right}
-
-/* TRACKING */
 .tracking-steps{display:flex;flex-direction:column;gap:0;position:relative;padding-left:28px}
 .tracking-steps::before{content:'';position:absolute;left:10px;top:8px;bottom:8px;width:2px;background:var(--border)}
 .step{position:relative;padding-bottom:20px}
@@ -60,11 +48,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .step.done .step-dot{background:var(--accent-dark);border-color:var(--accent-dark);color:#000}
 .step-title{font-size:13px;font-weight:700}
 .step-desc{font-size:12px;color:var(--muted);margin-top:2px}
-
 .btn{width:100%;border:0;border-radius:12px;padding:15px;background:var(--accent);color:#000;font-size:15px;font-weight:800;cursor:pointer;margin-top:6px;text-align:center;text-decoration:none;display:inline-block}
 .btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);margin-top:10px}
 .whats-btn{width:100%;border:0;border-radius:12px;padding:15px;background:#25d366;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-
 .empty-state{text-align:center;padding:40px;color:var(--muted);font-size:14px}
 </style>
 </head>
@@ -169,17 +155,13 @@ async function carregarPedido(){
   const extRef=getParam('external_reference')||'';
   const paymentId=getParam('payment_id')||getParam('collection_id')||'';
 
-  // Tenta buscar pedido no Supabase por external_reference ou payment_id
   let pedido=null;
   try{
-    // Busca por external_reference primeiro
     let url=SUPABASE_URL+'/rest/v1/pedidos?external_reference=eq.'+encodeURIComponent(extRef)+'&limit=1';
     let res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     let dados=await res.json();
-    if(dados && dados.length){
-      pedido=dados[0];
-    }else if(paymentId){
-      // Tenta por mercado_pago_id
+    if(dados && dados.length){pedido=dados[0];}
+    else if(paymentId){
       url=SUPABASE_URL+'/rest/v1/pedidos?mercado_pago_id=eq.'+encodeURIComponent(paymentId)+'&limit=1';
       res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
       dados=await res.json();
@@ -187,7 +169,6 @@ async function carregarPedido(){
     }
   }catch(e){}
 
-  // Status visual baseado na URL ou no pedido
   let st=status;
   if(pedido && pedido.status_pedido) st=pedido.status_pedido==='pago'?'approved':(pedido.status_pedido==='aguardando_pagamento'?'pending':'other');
 
@@ -207,7 +188,6 @@ async function carregarPedido(){
 
   document.getElementById('conteudoPedido').style.display='block';
 
-  // Produtos
   const prodContainer=document.getElementById('produtosList');
   if(pedido && pedido.items){
     try{
@@ -224,7 +204,6 @@ async function carregarPedido(){
     prodContainer.innerHTML='<div style="color:var(--muted);font-size:13px">Detalhes do produto não disponíveis.</div>';
   }
 
-  // Endereço
   const endContainer=document.getElementById('enderecoInfo');
   if(pedido){
     const end=[pedido.cliente_endereco,pedido.cliente_numero,pedido.cliente_complemento].filter(Boolean).join(', ');
@@ -241,19 +220,19 @@ async function carregarPedido(){
     endContainer.innerHTML='<div style="color:var(--muted);font-size:13px">Endereço não disponível.</div>';
   }
 
-  // Tracking
   const statusPedido=pedido?pedido.status_pedido:'aguardando_pagamento';
   const codigoRastreio=pedido?pedido.codigo_rastreio:'';
   renderTracking(statusPedido,codigoRastreio);
 
-  // Pagamento
   const pagContainer=document.getElementById('pagamentoInfo');
+  const statusColor=st==='approved'||st==='pago'||st==='enviado'||st==='entregue'?'var(--accent)':(st==='pending'?'var(--warning)':'var(--danger)');
+  const statusLabel=st==='approved'||st==='pago'?'Pago ✅':(st==='pending'?'Aguardando ⏳':(st==='enviado'?'Enviado 🚚':(st==='entregue'?'Entregue 🎉':'Processando')));
   pagContainer.innerHTML=`
     <div class="info-row"><span>Forma de pagamento</span><span>Pix / Mercado Pago</span></div>
     <div class="info-row"><span>ID do pagamento</span><span style="font-size:11px">${paymentId||pedido?.mercado_pago_id||'---'}</span></div>
     <div class="info-row"><span>Código do pedido</span><span style="font-size:11px">${extRef||pedido?.external_reference||'---'}</span></div>
     <div class="info-row"><span>Data</span><span>${new Date().toLocaleDateString('pt-BR')}</span></div>
-    <div class="info-row"><span>Status</span><span style="color:${st==='approved'||st==='pago'||st==='enviado'||st==='entregue'?'var(--accent)':(st==='pending'?'var(--warning)':'var(--danger)')}">${st==='approved'||st==='pago'?'Pago ✅':(st==='pending'?'Aguardando ⏳':(st==='enviado'?'Enviado 🚚':(st==='entregue'?'Entregue 🎉':'Processando')))}</span></div>
+    <div class="info-row"><span>Status</span><span style="color:${statusColor}">${statusLabel}</span></div>
   `;
 
   document.getElementById('loadingScreen').classList.add('hide');
