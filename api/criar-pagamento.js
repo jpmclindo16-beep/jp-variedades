@@ -12,11 +12,15 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { produto_id, cliente } = req.body || {};
+    const { produto_id, itens, cliente } = req.body || {};
 
-    if (!produto_id) {
+    const listaItens = Array.isArray(itens) && itens.length
+      ? itens
+      : (produto_id ? [{ produto_id: produto_id, quantidade: 1 }] : []);
+
+    if (!listaItens.length) {
       return res.status(400).json({
-        error: "Produto não informado"
+        error: "Nenhum produto informado"
       });
     }
 
@@ -35,60 +39,77 @@ module.exports = async (req, res) => {
       });
     }
 
-    const produtoResponse = await fetch(
-      `${supabaseUrl}/rest/v1/produtos?id=eq.${encodeURIComponent(produto_id)}&ativo=eq.true&limit=1`,
-      {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`
+    const mpItems = [];
+    const itensMetadata = [];
+
+    for (const it of listaItens) {
+      const produtoResponse = await fetch(
+        `${supabaseUrl}/rest/v1/produtos?id=eq.${encodeURIComponent(it.produto_id)}&ativo=eq.true&limit=1`,
+        {
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`
+          }
         }
+      );
+
+      if (!produtoResponse.ok) {
+        throw new Error("Erro ao consultar produto");
       }
-    );
 
-    if (!produtoResponse.ok) {
-      throw new Error("Erro ao consultar produto");
-    }
+      const produtos = await produtoResponse.json();
 
-    const produtos = await produtoResponse.json();
+      if (!produtos.length) {
+        return res.status(404).json({
+          error: "Produto não encontrado"
+        });
+      }
 
-    if (!produtos.length) {
-      return res.status(404).json({
-        error: "Produto não encontrado"
+      const produto = produtos[0];
+
+      if (
+        produto.tipo &&
+        produto.tipo.toLowerCase() !== "dropshipping"
+      ) {
+        return res.status(400).json({
+          error: "Um dos produtos não é de dropshipping"
+        });
+      }
+
+      const preco = Number(produto.preco_atual);
+
+      if (!preco || preco <= 0) {
+        return res.status(400).json({
+          error: "Preço de um dos produtos é inválido"
+        });
+      }
+
+      const quantidade = Math.max(1, parseInt(it.quantidade) || 1);
+
+      mpItems.push({
+        id: String(produto.id),
+        title: String(produto.nome).substring(0, 256),
+        quantity: quantidade,
+        unit_price: preco,
+        currency_id: "BRL"
       });
-    }
 
-    const produto = produtos[0];
-
-    if (
-      produto.tipo &&
-      produto.tipo.toLowerCase() !== "dropshipping"
-    ) {
-      return res.status(400).json({
-        error: "Este produto não é de dropshipping"
-      });
-    }
-
-    const preco = Number(produto.preco_atual);
-
-    if (!preco || preco <= 0) {
-      return res.status(400).json({
-        error: "Preço do produto inválido"
+      itensMetadata.push({
+        id: String(produto.id),
+        nome: produto.nome,
+        preco: preco,
+        imagem: produto.imagem_url || "",
+        qty: quantidade
       });
     }
 
     const preference = new Preference(client);
 
+    const primeiroProdutoId = listaItens[0].produto_id;
+
     const resultado = await preference.create({
       body: {
-        items: [
-          {
-            id: String(produto.id),
-            title: String(produto.nome).substring(0, 256),
-            quantity: 1,
-            unit_price: preco,
-            currency_id: "BRL"
-          }
-        ],
+        items: mpItems,
 
         payer: {
           name: cliente.nome,
@@ -99,7 +120,7 @@ module.exports = async (req, res) => {
 
         back_urls: {
           success: `${process.env.SITE_URL}/pedido.html?status=sucesso`,
-          failure: `${process.env.SITE_URL}/checkout.html?id=${encodeURIComponent(produto.id)}&status=erro`,
+          failure: `${process.env.SITE_URL}/checkout.html?id=${encodeURIComponent(primeiroProdutoId)}&status=erro`,
           pending: `${process.env.SITE_URL}/pedido.html?status=pendente`
         },
 
@@ -109,10 +130,11 @@ module.exports = async (req, res) => {
           `${process.env.SITE_URL}/api/pagamento-webhook`,
 
         external_reference:
-          `JP-${produto.id}-${Date.now()}`,
+          `JP-${primeiroProdutoId}-${Date.now()}`,
 
         metadata: {
-          produto_id: String(produto.id),
+          produto_id: String(primeiroProdutoId),
+          itens: JSON.stringify(itensMetadata),
           cliente_nome: cliente.nome,
           cliente_cpf: cliente.cpf || "",
           cliente_telefone: cliente.telefone,
