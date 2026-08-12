@@ -108,9 +108,22 @@ module.exports = async (req, res) => {
         ? Number(metadata.produto_id)
         : null;
 
+    let itensPedido = null;
     let produtoNome = "Produto";
 
-    if (produtoId) {
+    if (metadata.itens) {
+      try {
+        itensPedido = JSON.parse(metadata.itens);
+      } catch (e) {
+        itensPedido = null;
+      }
+    }
+
+    if (itensPedido && itensPedido.length > 1) {
+      produtoNome = itensPedido.length + " itens";
+    } else if (itensPedido && itensPedido.length === 1) {
+      produtoNome = itensPedido[0].nome || "Produto";
+    } else if (produtoId) {
       const produtoResponse = await fetch(
         `${supabaseUrl}/rest/v1/produtos?id=eq.${encodeURIComponent(produtoId)}&limit=1`,
         {
@@ -167,8 +180,9 @@ module.exports = async (req, res) => {
     const dadosPedido = {
       produto_id: produtoId,
       produto_nome: produtoNome,
-      quantidade: 1,
+      quantidade: itensPedido ? itensPedido.reduce(function(a,i){return a+(i.qty||1)},0) : 1,
       valor: Number(pagamento.transaction_amount || 0),
+      items: itensPedido,
 
       cliente_nome:
         metadata.cliente_nome ||
@@ -295,4 +309,3 @@ module.exports = async (req, res) => {
     });
   }
 };
-        
