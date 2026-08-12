@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR" style="background:#0a0a0a">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Carrinho - JP Variedades</title>
+<style>
+:root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.voltar{color:var(--text);text-decoration:none;font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--border)}
+.titulo{font-weight:800;font-size:16px}
+.container{max-width:600px;margin:auto;padding:16px;padding-bottom:120px}
+.item{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
+.item img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:var(--border);flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-info .nome{font-size:13px;font-weight:700;line-height:1.35;margin-bottom:4px}
+.item-info .preco{color:var(--accent);font-weight:800;font-size:15px}
+.qty-box{display:flex;align-items:center;gap:8px}
+.qty-box button{width:28px;height:28px;border-radius:8px;border:none;background:var(--border);color:var(--text);font-size:16px;font-weight:700;cursor:pointer}
+.qty-box span{min-width:18px;text-align:center;font-weight:700}
+.remove-btn{background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:4px 8px}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty a{color:var(--accent);text-decoration:none;font-weight:700}
+.resumo{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:16px;max-width:600px;margin:auto}
+.resumo .linha{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:4px}
+.resumo .total{display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin-bottom:12px}
+.resumo .total span:last-child{color:var(--accent)}
+.btn{width:100%;border:0;border-radius:12px;padding:15px;background:var(--accent);color:#000;font-size:15px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;display:block}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="voltar">←</a>
+  <div class="titulo">🛒 Meu Carrinho</div>
+</div>
+
+<div class="container" id="container">
+  <div class="empty">Carregando...</div>
+</div>
+
+<script>
+function fmt(p){return'R$ '+Number(p).toFixed(2).replace('.',',')}
+function getCart(){try{return JSON.parse(localStorage.getItem('jp_cart')||'[]')}catch(e){return[]}}
+function saveCart(cart){localStorage.setItem('jp_cart',JSON.stringify(cart))}
+
+function render(){
+  const cart=getCart();
+  const container=document.getElementById('container');
+
+  if(!cart.length){
+    container.innerHTML='<div class="empty">Seu carrinho está vazio.<br><br><a href="index.html">← Voltar para a loja</a></div>';
+    removerResumo();
+    return;
+  }
+
+  container.innerHTML=cart.map(function(i){
+    return `<div class="item">
+      <img src="${i.imagem}" onerror="this.src='https://via.placeholder.com/64'">
+      <div class="item-info">
+        <div class="nome">${i.nome}</div>
+        <div class="preco">${fmt(i.preco)}</div>
+      </div>
+      <div class="qty-box">
+        <button onclick="alterarQtd('${i.id}',-1)">-</button>
+        <span>${i.qty}</span>
+        <button onclick="alterarQtd('${i.id}',1)">+</button>
+      </div>
+      <button class="remove-btn" onclick="removerItem('${i.id}')">🗑️</button>
+    </div>`;
+  }).join('');
+
+  renderResumo(cart);
+}
+
+function alterarQtd(id,delta){
+  const cart=getCart();
+  const item=cart.find(function(i){return i.id==id});
+  if(!item)return;
+  item.qty+=delta;
+  if(item.qty<=0){
+    removerItem(id);
+    return;
+  }
+  saveCart(cart);
+  render();
+}
+
+function removerItem(id){
+  let cart=getCart();
+  cart=cart.filter(function(i){return i.id!=id});
+  saveCart(cart);
+  render();
+}
+
+function removerResumo(){
+  const r=document.getElementById('resumo');
+  if(r)r.remove();
+}
+
+function renderResumo(cart){
+  removerResumo();
+  const total=cart.reduce(function(a,i){return a+(i.preco*i.qty)},0);
+  const div=document.createElement('div');
+  div.id='resumo';
+  div.className='resumo';
+  div.innerHTML=`
+    <div class="linha"><span>Itens</span><span>${cart.reduce(function(a,i){return a+i.qty},0)}</span></div>
+    <div class="total"><span>Total</span><span>${fmt(total)}</span></div>
+    <a href="checkout.html?cart=1" class="btn">Finalizar Compra →</a>
+  `;
+  document.body.appendChild(div);
+}
+
+render();
+</script>
+</body>
+</html>
