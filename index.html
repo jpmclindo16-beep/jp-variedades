@@ -362,7 +362,7 @@ function render() {
                onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades'">
           ${p.bestseller ? '<span class="b-best">🔥 MAIS VENDIDO</span>' : ''}
           ${badge}
-          <button class="fav \( {isFav ? 'active' : ''}" onclick="event.stopPropagation();toggleFav(' \){p.id}')">${isFav ? '❤️' : '🤍'}</button>
+          <button class="fav ${isFav ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${isFav ? '❤️' : '🤍'}</button>
         </div>
         <div class="card-info">
           <div class="card-title">${escapeHtml(p.name)}</div>
@@ -372,7 +372,7 @@ function render() {
             ${discountHtml}
           </div>
           <div class="card-foot">
-            <a href="\( {escapeHtml(buyLink)}" target=" \){buyTarget}" class="ver" onclick="event.stopPropagation()">${buyLabel}</a>
+            <a href="${escapeHtml(buyLink)}" target="${buyTarget}" class="ver" onclick="event.stopPropagation()">${buyLabel}</a>
             ${extraBtn}
           </div>
         </div>
@@ -404,9 +404,9 @@ function renderFav() {
         </div>
         <div class="card-info">
           <div class="card-title">${escapeHtml(p.name)}</div>
-          <div class="card-price">${fmt(p.price)}</div>
+   <div class="card-price">${fmt(p.price)}</div>
           <div class="card-foot">
-            <a href="\( {escapeHtml(buyLink)}" target=" \){buyTarget}" class="ver">${buyLabel}</a>
+            <a href="${escapeHtml(buyLink)}" target="${buyTarget}" class="ver">${buyLabel}</a>
             <button class="share" onclick="shareProd('${p.id}')">📤</button>
           </div>
         </div>
@@ -545,9 +545,9 @@ function addToCart(id) {
   } else {
     cart.push({
       id: p.id,
-      name: p.name,
-      price: p.price,
-      image: p.image,
+      nome: p.name,
+      preco: p.price,
+      imagem: p.image,
       qty: 1
     });
   }
