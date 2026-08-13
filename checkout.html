@@ -442,7 +442,7 @@ async function comprar(){
 
     nome:document.getElementById('nome').value.trim(),
 
-    cpf:document.getElementById('cpf').value.trim(),
+    cpf:document.getElementById('cpf').value.replace(/\D/g,''),
 
     telefone:document.getElementById('telefone').value.trim(),
 
