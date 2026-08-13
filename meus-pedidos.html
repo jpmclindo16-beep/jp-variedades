@@ -46,6 +46,12 @@ input:focus{border-color:var(--accent)}
   <input type="tel" id="telefone" placeholder="Ex: 11999998888" inputmode="numeric">
   <button class="btn" onclick="buscar()">Buscar meus pedidos</button>
 
+  <div style="text-align:center;color:var(--muted);font-size:12px;margin:16px 0">— ou —</div>
+
+  <div class="sub" style="margin-bottom:8px">Mudou de número? Busque pelo seu CPF.</div>
+  <input type="text" id="cpfBusca" placeholder="Ex: 000.000.000-00" inputmode="numeric">
+  <button class="btn" style="background:transparent;border:1px solid var(--accent);color:var(--accent)" onclick="buscarPorCpf()">Buscar por CPF</button>
+
   <div id="resultado"></div>
 </div>
 
@@ -69,20 +75,17 @@ function badge(status){
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
-async function buscar(){
-  const tel=document.getElementById('telefone').value.replace(/\D/g,'');
+async function buscarPor(campo,valor){
   const resultado=document.getElementById('resultado');
-  if(!tel){resultado.innerHTML='<div class="empty">Digite um telefone válido.</div>';return}
-
   resultado.innerHTML='<div class="empty">Buscando...</div>';
 
   try{
-    const url=SUPABASE_URL+'/rest/v1/pedidos?cliente_telefone=eq.'+encodeURIComponent(tel)+'&order=criado_em.desc';
+    const url=SUPABASE_URL+'/rest/v1/pedidos?'+campo+'=eq.'+encodeURIComponent(valor)+'&order=criado_em.desc';
     const res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     const dados=await res.json();
 
     if(!dados||!dados.length){
-      resultado.innerHTML='<div class="empty">Nenhum pedido encontrado com esse telefone.</div>';
+      resultado.innerHTML='<div class="empty">Nenhum pedido encontrado.</div>';
       return;
     }
 
@@ -99,9 +102,31 @@ async function buscar(){
   }
 }
 
+function buscar(){
+  const tel=document.getElementById('telefone').value.replace(/\D/g,'');
+  if(!tel){document.getElementById('resultado').innerHTML='<div class="empty">Digite um telefone válido.</div>';return}
+  buscarPor('cliente_telefone',tel);
+}
+
+function buscarPorCpf(){
+  const cpf=document.getElementById('cpfBusca').value.replace(/\D/g,'');
+  if(!cpf){document.getElementById('resultado').innerHTML='<div class="empty">Digite um CPF válido.</div>';return}
+  buscarPor('cliente_cpf',cpf);
+}
+
 document.getElementById('telefone').addEventListener('keypress',function(e){
   if(e.key==='Enter') buscar();
 });
+
+(function preencherAutomatico(){
+  try{
+    const salvo=JSON.parse(localStorage.getItem('jp_endereco')||'null');
+    if(salvo && salvo.telefone){
+      document.getElementById('telefone').value=salvo.telefone;
+      buscar();
+    }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
