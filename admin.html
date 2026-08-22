@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0a0a">
-<title>Admin - JP Variedades</title>
+<title>Admin - JP Shoppew</title>
 <style>
 :root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -58,7 +58,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
 
 <div class="login" id="loginScreen">
   <div class="login-logo">JP</div>
-  <h1>JP Variedades</h1>
+  <h1>JP Shoppew</h1>
   <p>Painel Administrativo</p>
   <input type="email" id="emailInput" placeholder="E-mail do administrador" autocomplete="username" inputmode="email">
   <input type="password" id="senhaInput" placeholder="Senha" autocomplete="current-password">
@@ -115,7 +115,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
         <tr><td><b>📦 Melhor Envio</b><br><small style="color:var(--muted)">Frete</small></td><td><span class="status status-pendente"><span class="status-dot" style="background:#f59e0b"></span>Nao conectado</span></td></tr>
       </tbody></table></div></div></div>
       <div class="card"><div class="card-header"><div class="card-title">🏪 Loja</div></div><div class="card-body"><div class="table-wrap"><table><tbody>
-        <tr><td style="width:50%;color:var(--muted)">Nome da Loja</td><td><b>JP Variedades</b></td></tr><tr><td style="color:var(--muted)">URL</td><td>jp-variedades.vercel.app</td></tr><tr><td style="color:var(--muted)">Taxa de Lucro</td><td>35%</td></tr><tr><td style="color:var(--muted)">Frete Gratis acima de</td><td>R$ 99,00</td></tr>
+        <tr><td style="width:50%;color:var(--muted)">Nome da Loja</td><td><b>JP Shoppew</b></td></tr><tr><td style="color:var(--muted)">URL</td><td>jp-variedades.vercel.app</td></tr><tr><td style="color:var(--muted)">Taxa de Lucro</td><td>35%</td></tr><tr><td style="color:var(--muted)">Frete Gratis acima de</td><td>R$ 99,00</td></tr>
       </tbody></table></div></div></div>
     </div>
   </div>
@@ -129,7 +129,11 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
     <div class="form-group"><label>Link do afiliado <span id="linkObrigLabel">*</span></label><input type="url" id="pLink" placeholder="https://meli.la/..."></div>
     <div class="form-row"><div class="form-group"><label>Preco atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01" min="0"></div><div class="form-group"><label>Preco de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01" min="0"></div></div>
     <div class="form-group"><label>URL da imagem *</label><input type="url" id="pImg" placeholder="https://..."></div>
-    <div class="form-row"><div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div><div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia"></div></div>
+    <div class="form-row"><div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div><div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia, Eletrônicos, Casa"></div></div>
+    <div class="form-group"><label>Descrição do produto</label><textarea id="pDescricao" rows="5" placeholder="Descreva o produto, benefícios, características e informações importantes..."></textarea></div>
+    <div class="form-group"><label>Opções / tamanhos disponíveis</label><textarea id="pTamanhos" rows="3" placeholder="Ex.: P, M, G, GG
+Ou: Preto, Branco, Azul
+Ou: 127V, 220V"></textarea></div>
     <div class="form-row"><div class="form-group"><label>Custo R$ (fornecedor)</label><input type="number" id="pCusto" placeholder="30.00" step="0.01" min="0"></div><div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1" min="0"></div></div>
     <div class="form-group"><label>Tipo</label><select id="pTipo"><option value="afiliado">Afiliado (link externo)</option><option value="dropshipping">Dropshipping (pagamento proprio)</option></select></div>
     <div class="form-group" id="pagamentoGroup" style="display:none"><label>Link de Pagamento (Mercado Pago)</label><input type="url" id="pPagamento" placeholder="https://mpago.la/..."></div>
@@ -373,7 +377,7 @@ function renderSuppliers(){
 
 function openForm(){
   editando=null;document.getElementById('formTitle').textContent='Novo Produto';
-  ['pid','pNome','pLink','pPreco','pOld','pImg','pCat','pCusto','pEstoque','pPagamento'].forEach(id=>document.getElementById(id).value='');
+  ['pid','pNome','pLink','pPreco','pOld','pImg','pCat','pDescricao','pTamanhos','pCusto','pEstoque','pPagamento'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('pLoja').value='Mercado Livre';document.getElementById('pTipo').value='afiliado';
   document.getElementById('pagamentoGroup').style.display='none';document.getElementById('linkObrigLabel').style.display='inline';
   document.getElementById('pDest').checked=false;document.getElementById('pAtivo').checked=true;
@@ -387,7 +391,7 @@ function editProd(id){
   document.getElementById('pNome').value=p.nome||'';document.getElementById('pLink').value=p.link_afiliado||'';
   document.getElementById('pPreco').value=p.preco_atual??'';document.getElementById('pOld').value=p.preco_antigo??'';
   document.getElementById('pImg').value=p.imagem_url||'';document.getElementById('pLoja').value=p.loja_origem||'Mercado Livre';
-  document.getElementById('pCat').value=p.categoria||'';document.getElementById('pCusto').value=p.custo??'';document.getElementById('pEstoque').value=p.estoque??'';
+  document.getElementById('pCat').value=p.categoria||'';document.getElementById('pDescricao').value=p.descricao||'';document.getElementById('pTamanhos').value=p.tamanhos||'';document.getElementById('pCusto').value=p.custo??'';document.getElementById('pEstoque').value=p.estoque??'';
   document.getElementById('pTipo').value=p.tipo||'afiliado';document.getElementById('pPagamento').value=p.link_pagamento||'';
   document.getElementById('pagamentoGroup').style.display=p.tipo==='dropshipping'?'block':'none';document.getElementById('linkObrigLabel').style.display=p.tipo==='dropshipping'?'none':'inline';
   document.getElementById('pDest').checked=!!p.destaque;document.getElementById('pAtivo').checked=p.ativo!==false;
