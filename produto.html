@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR" style="background:#0a0a0a">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Produto - JP Variedades</title>
+<style>
+:root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.voltar{color:var(--text);text-decoration:none;font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--border)}
+.titulo{font-weight:800;font-size:16px}
+.container{max-width:600px;margin:auto;padding-bottom:110px}
+.img-box{width:100%;aspect-ratio:1;background:var(--card)}
+.img-box img{width:100%;height:100%;object-fit:cover}
+.badge-row{padding:12px 16px 0;display:flex;gap:6px}
+.badge{padding:4px 10px;border-radius:50px;font-size:11px;font-weight:700}
+.b-ds{background:#7c4dff;color:#fff}
+.b-best{background:var(--danger);color:#fff}
+.info-block{padding:12px 16px}
+.nome{font-size:18px;font-weight:700;line-height:1.4;margin-bottom:8px}
+.preco-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.preco{font-size:26px;font-weight:800;color:var(--accent)}
+.preco-old{text-decoration:line-through;color:var(--muted);font-size:14px}
+.desconto{background:var(--accent);color:#000;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+.rating-row{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;margin-top:6px}
+.stars{color:#ffc107}
+.section{padding:16px;border-top:8px solid var(--bg);background:var(--card)}
+.section h3{font-size:14px;margin-bottom:10px;color:var(--muted)}
+.desc-text{font-size:13px;line-height:1.6;color:#ddd;white-space:pre-wrap}
+.tamanhos{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.tam-btn{padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;font-weight:700;cursor:pointer}
+.tam-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.avaliacao-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.avaliacao-item:last-child{border-bottom:none}
+.av-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.av-nome{font-weight:700;font-size:13px}
+.av-data{color:var(--muted);font-size:11px}
+.av-comentario{font-size:13px;color:#ddd;margin-top:4px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;outline:none;font-family:inherit}
+.star-select{display:flex;gap:6px;font-size:24px;margin-bottom:12px}
+.star-select span{cursor:pointer;color:var(--border)}
+.star-select span.active{color:#ffc107}
+.btn{width:100%;border:0;border-radius:12px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.btn-primary{background:var(--accent);color:#000}
+.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);margin-top:8px}
+.footer-fixo{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:12px 16px;max-width:600px;margin:auto;display:flex;gap:8px}
+.footer-fixo .btn{margin:0}
+.empty{text-align:center;color:var(--muted);padding:30px;font-size:13px}
+.loading{text-align:center;color:var(--muted);padding:60px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="voltar">←</a>
+  <div class="titulo">JP_variedades ✓</div>
+</div>
+
+<div class="container" id="container">
+  <div class="loading">Carregando produto...</div>
+</div>
+
+<script>
+const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
+const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
+
+let produto=null;
+let tamanhoSelecionado=null;
+let notaSelecionada=0;
+
+function fmt(p){return'R$ '+Number(p).toFixed(2).replace('.',',')}
+function disc(o,p){if(!o||o<=p)return'';return'-'+Math.round((o-p)/o*100)+'%'}
+function getParam(n){return new URLSearchParams(location.search).get(n)}
+function getCart(){try{return JSON.parse(localStorage.getItem('jp_cart')||'[]')}catch(e){return[]}}
+function saveCart(cart){localStorage.setItem('jp_cart',JSON.stringify(cart))}
+
+function estrelas(nota){
+  let html='';
+  for(let i=1;i<=5;i++){
+    html+=i<=Math.round(nota)?'★':'☆';
+  }
+  return html;
+}
+
+async function carregarProduto(){
+  const id=getParam('id');
+  if(!id){
+    document.getElementById('container').innerHTML='<div class="empty">Produto não informado.</div>';
+    return;
+  }
+
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos?id=eq.'+encodeURIComponent(id)+'&limit=1',{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const dados=await res.json();
+    if(!dados.length){
+      document.getElementById('container').innerHTML='<div class="empty">Produto não encontrado.</div>';
+      return;
+    }
+    produto=dados[0];
+    renderProduto();
+    carregarAvaliacoes();
+  }catch(e){
+    document.getElementById('container').innerHTML='<div class="empty">Erro ao carregar produto.</div>';
+  }
+}
+
+function renderProduto(){
+  const p=produto;
+  const badge=p.tipo==='dropshipping'?'<span class="badge b-ds">Loja Própria</span>':'';
+  const best=p.destaque?'<span class="badge b-best">🔥 MAIS VENDIDO</span>':'';
+  const d=disc(p.preco_antigo,p.preco_atual);
+  const tamanhos=(p.tamanhos||'').split(',').map(function(t){return t.trim()}).filter(Boolean);
+
+  let tamanhosHtml='';
+  if(tamanhos.length){
+    tamanhosHtml=`
+      <div class="section">
+        <h3>Escolha o tamanho</h3>
+        <div class="tamanhos" id="tamanhosBox">
+          ${tamanhos.map(function(t){return `<button class="tam-btn" onclick="selecionarTamanho('${t}',this)">${t}</button>`}).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  const descricaoHtml=p.descricao?`
+    <div class="section">
+      <h3>Descrição</h3>
+      <div class="desc-text">${p.descricao}</div>
+    </div>
+  `:'';
+
+  document.getElementById('container').innerHTML=`
+    <div class="img-box"><img src="${p.imagem_url||''}" onerror="this.src='https://via.placeholder.com/600'"></div>
+    <div class="badge-row">${badge}${best}</div>
+    <div class="info-block">
+      <div class="nome">${p.nome}</div>
+      <div class="preco-row">
+        <span class="preco">${fmt(p.preco_atual)}</span>
+        ${p.preco_antigo?`<span class="preco-old">${fmt(p.preco_antigo)}</span>`:''}
+        ${d?`<span class="desconto">${d}</span>`:''}
+      </div>
+      <div class="rating-row" id="ratingRow">Carregando avaliações...</div>
+    </div>
+
+    ${tamanhosHtml}
+    ${descricaoHtml}
+
+    <div class="section">
+      <h3>Avaliações</h3>
+      <div id="avaliacoesLista"><div class="empty">Carregando...</div></div>
+    </div>
+
+    <div class="section">
+      <h3>Deixe sua avaliação</h3>
+      <div class="star-select" id="starSelect">
+        <span onclick="selecionarNota(1)">★</span>
+        <span onclick="selecionarNota(2)">★</span>
+        <span onclick="selecionarNota(3)">★</span>
+        <span onclick="selecionarNota(4)">★</span>
+        <span onclick="selecionarNota(5)">★</span>
+      </div>
+      <div class="form-group">
+        <label>Seu nome</label>
+        <input type="text" id="avNome" placeholder="Como devemos te chamar">
+      </div>
+      <div class="form-group">
+        <label>Comentário</label>
+        <textarea id="avComentario" rows="3" placeholder="O que achou do produto?"></textarea>
+      </div>
+      <button class="btn btn-outline" onclick="enviarAvaliacao()">Enviar avaliação</button>
+    </div>
+  `;
+
+  const footer=document.createElement('div');
+  footer.className='footer-fixo';
+
+  if(p.tipo==='dropshipping'){
+    footer.innerHTML=`
+      <button class="btn btn-outline" style="flex:1" onclick="adicionarAoCarrinho()">🛒 Carrinho</button>
+      <button class="btn btn-primary" style="flex:2" onclick="comprarAgora()">COMPRAR AGORA →</button>
+    `;
+  }else{
+    footer.innerHTML=`<a href="${p.link_afiliado}" target="_blank" class="btn btn-primary">VER OFERTA →</a>`;
+  }
+  document.body.appendChild(footer);
+}
+
+function selecionarTamanho(t,el){
+  tamanhoSelecionado=t;
+  document.querySelectorAll('.tam-btn').forEach(function(b){b.classList.remove('active')});
+  el.classList.add('active');
+}
+
+function precisaTamanho(){
+  return (produto.tamanhos||'').split(',').map(function(t){return t.trim()}).filter(Boolean).length>0;
+}
+
+function adicionarAoCarrinho(){
+  if(precisaTamanho() && !tamanhoSelecionado){
+    alert('Escolha um tamanho antes de adicionar ao carrinho.');
+    return;
+  }
+  const cart=getCart();
+  const chaveId=tamanhoSelecionado?(produto.id+'-'+tamanhoSelecionado):produto.id;
+  const existente=cart.find(function(i){return i.id==chaveId});
+  if(existente){existente.qty+=1;}
+  else{
+    cart.push({
+      id:chaveId,
+      produtoId:produto.id,
+      nome:produto.nome+(tamanhoSelecionado?(' (Tam. '+tamanhoSelecionado+')'):''),
+      preco:produto.preco_atual,
+      imagem:produto.imagem_url,
+      tamanho:tamanhoSelecionado,
+      qty:1
+    });
+  }
+  saveCart(cart);
+  alert('Adicionado ao carrinho!');
+}
+
+function comprarAgora(){
+  if(precisaTamanho() && !tamanhoSelecionado){
+    alert('Escolha um tamanho antes de comprar.');
+    return;
+  }
+  let url='checkout.html?id='+produto.id;
+  if(tamanhoSelecionado) url+='&tamanho='+encodeURIComponent(tamanhoSelecionado);
+  location.href=url;
+}
+
+async function carregarAvaliacoes(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/avaliacoes?produto_id=eq.'+encodeURIComponent(produto.id)+'&order=criado_em.desc',{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const dados=await res.json();
+
+    const lista=document.getElementById('avaliacoesLista');
+    const ratingRow=document.getElementById('ratingRow');
+
+    if(!dados||!dados.length){
+      lista.innerHTML='<div class="empty">Nenhuma avaliação ainda. Seja o primeiro a avaliar!</div>';
+      ratingRow.innerHTML='Sem avaliações ainda';
+      return;
+    }
+
+    const media=dados.reduce(function(a,r){return a+(r.nota||0)},0)/dados.length;
+    ratingRow.innerHTML=`<span class="stars">${estrelas(media)}</span> ${media.toFixed(1)} (${dados.length} avaliação${dados.length>1?'ões':''})`;
+
+    lista.innerHTML=dados.map(function(r){
+      const data=r.criado_em?new Date(r.criado_em).toLocaleDateString('pt-BR'):'';
+      return `<div class="avaliacao-item">
+        <div class="av-header">
+          <span class="av-nome">${r.nome_cliente||'Cliente'}</span>
+          <span class="av-data">${data}</span>
+        </div>
+        <span class="stars">${estrelas(r.nota||0)}</span>
+        <div class="av-comentario">${r.comentario||''}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('avaliacoesLista').innerHTML='<div class="empty">Erro ao carregar avaliações.</div>';
+  }
+}
+
+function selecionarNota(n){
+  notaSelecionada=n;
+  document.querySelectorAll('#starSelect span').forEach(function(s,i){
+    s.classList.toggle('active',i<n);
+  });
+}
+
+async function enviarAvaliacao(){
+  const nome=document.getElementById('avNome').value.trim();
+  const comentario=document.getElementById('avComentario').value.trim();
+
+  if(!notaSelecionada){alert('Escolha quantas estrelas quer dar.');return}
+  if(!nome){alert('Digite seu nome.');return}
+  if(!comentario){alert('Escreva um comentário.');return}
+
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/avaliacoes',{
+      method:'POST',
+      headers:{
+        'apikey':SUPABASE_KEY,
+        'Authorization':'Bearer '+SUPABASE_KEY,
+        'Content-Type':'application/json',
+        'Prefer':'return=minimal'
+      },
+      body:JSON.stringify({
+        produto_id:produto.id,
+        nome_cliente:nome,
+        nota:notaSelecionada,
+        comentario:comentario
+      })
+    });
+
+    if(!res.ok) throw new Error('Erro ao enviar');
+
+    alert('Avaliação enviada, obrigado!');
+    document.getElementById('avNome').value='';
+    document.getElementById('avComentario').value='';
+    notaSelecionada=0;
+    document.querySelectorAll('#starSelect span').forEach(function(s){s.classList.remove('active')});
+    carregarAvaliacoes();
+  }catch(e){
+    alert('Não foi possível enviar sua avaliação. Tenta de novo.');
+  }
+}
+
+carregarProduto();
+</script>
+</body>
+</html>
