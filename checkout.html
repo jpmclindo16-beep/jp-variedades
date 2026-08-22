@@ -475,8 +475,8 @@ async function comprar(){
     localStorage.setItem('jp_endereco', JSON.stringify(cliente));
 
     const corpo=itensCarrinho
-      ? { itens: itensCarrinho.map(function(i){return {produto_id:(i.produtoId||i.id), quantidade:i.qty, tamanho:i.tamanho||null}}), cliente:cliente }
-      : { produto_id:produto.id, cliente:cliente, tamanho:(window.tamanhoEscolhidoAtual||null) };
+      ? { itens: itensCarrinho.map(function(i){return {produto_id:(i.produtoId||i.id), quantidade:i.qty, tamanho:i.tamanho||null, opcoes:i.opcoes||i.tamanho||null}}), cliente:cliente }
+      : { produto_id:produto.id, cliente:cliente, tamanho:(window.tamanhoEscolhidoAtual||null), opcoes:(window.tamanhoEscolhidoAtual||null) };
 
     const resposta=await fetch(
       '/api/criar-pagamento',
