@@ -123,16 +123,50 @@ function renderProduto(){
   const badge=p.tipo==='dropshipping'?'<span class="badge b-ds">Loja Própria</span>':'';
   const best=p.destaque?'<span class="badge b-best">🔥 MAIS VENDIDO</span>':'';
   const d=disc(p.preco_antigo,p.preco_atual);
-  const tamanhos=(p.tamanhos||'').split(',').map(function(t){return t.trim()}).filter(Boolean);
 
-  let tamanhosHtml='';
-  if(tamanhos.length){
-    tamanhosHtml=`
+  function escaparHtml(v){
+    return String(v||'').replace(/[&<>"']/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function parseOpcoes(v){
+    const linhas=String(v||'').split(/\n/).map(function(x){return x.trim()}).filter(Boolean);
+    const grupos=[];
+    linhas.forEach(function(linha){
+      const m=linha.match(/^([^:=]+)\s*[:=]\s*(.+)$/);
+      if(m){
+        const nome=m[1].trim();
+        const valores=m[2].split(',').map(function(x){return x.trim()}).filter(Boolean);
+        if(valores.length) grupos.push({nome:nome,valores:valores});
+      }else{
+        const valores=linha.split(',').map(function(x){return x.trim()}).filter(Boolean);
+        if(valores.length) grupos.push({nome:'Opção',valores:valores});
+      }
+    });
+    return grupos;
+  }
+
+  let opcoesSelecionadas={};
+  const gruposOpcoes=parseOpcoes(p.tamanhos);
+
+  let opcoesHtml='';
+  if(gruposOpcoes.length){
+    opcoesHtml=`
       <div class="section">
-        <h3>Escolha uma opção / tamanho</h3>
-        <div class="tamanhos" id="tamanhosBox">
-          ${tamanhos.map(function(t){return `<button class="tam-btn" onclick="selecionarTamanho('${t}',this)">${t}</button>`}).join('')}
-        </div>
+        <h3>Escolha as opções</h3>
+        ${gruposOpcoes.map(function(g,gi){
+          return `<div style="margin-bottom:14px">
+            <div style="font-size:13px;font-weight:800;margin-bottom:8px">${escaparHtml(g.nome)}</div>
+            <div class="tamanhos">
+              ${g.valores.map(function(v){
+                const safe=String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+                return `<button type="button" class="tam-btn opc-btn" data-grupo="${gi}" onclick="selecionarOpcao(${gi},'${safe}',this)">${escaparHtml(v)}</button>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+        <div id="opcoesResumo" style="font-size:12px;color:var(--muted);margin-top:4px">Selecione as opções para continuar.</div>
       </div>
     `;
   }
@@ -164,7 +198,7 @@ function renderProduto(){
       <div class="rating-row" id="ratingRow">Carregando avaliações...</div>
     </div>
 
-    ${tamanhosHtml}
+    ${opcoesHtml}
     ${descricaoHtml}
 
     <div class="section">
@@ -207,55 +241,73 @@ function renderProduto(){
   document.body.appendChild(footer);
 }
 
-function selecionarTamanho(t,el){
-  tamanhoSelecionado=t;
-  document.querySelectorAll('.tam-btn').forEach(function(b){b.classList.remove('active')});
+function selecionarOpcao(grupo,valor,el){
+  opcoesSelecionadas[grupo]=valor;
+  document.querySelectorAll('.opc-btn[data-grupo="'+grupo+'"]').forEach(function(b){b.classList.remove('active')});
   el.classList.add('active');
+
+  const resumo=document.getElementById('opcoesResumo');
+  if(resumo){
+    const partes=gruposOpcoes.map(function(g,i){
+      return opcoesSelecionadas[i] ? (g.nome+': '+opcoesSelecionadas[i]) : null;
+    }).filter(Boolean);
+    resumo.textContent=partes.length ? partes.join(' | ') : 'Selecione as opções para continuar.';
+  }
 }
 
-function trocarFoto(i){
-  const fotos=getFotos(produto&&produto.imagem_url);
-  if(!fotos[i])return;
-  const img=document.getElementById('fotoPrincipal');
-  if(img)img.src=fotos[i];
-  document.querySelectorAll('.mini-foto').forEach(function(b,n){b.classList.toggle('active',n===i)});
+function opcoesObrigatorias(){
+  return gruposOpcoes.length>0;
 }
 
-function precisaTamanho(){
-  return (produto.tamanhos||'').split(',').map(function(t){return t.trim()}).filter(Boolean).length>0;
+function todasOpcoesEscolhidas(){
+  return gruposOpcoes.every(function(g,i){return !!opcoesSelecionadas[i]});
+}
+
+function textoOpcoes(){
+  return gruposOpcoes.map(function(g,i){
+    return opcoesSelecionadas[i] ? (g.nome+': '+opcoesSelecionadas[i]) : null;
+  }).filter(Boolean).join(' | ');
 }
 
 function adicionarAoCarrinho(){
-  if(precisaTamanho() && !tamanhoSelecionado){
-    alert('Escolha uma opção antes de adicionar ao carrinho.');
+  if(opcoesObrigatorias() && !todasOpcoesEscolhidas()){
+    alert('Escolha todas as opções do produto antes de adicionar ao carrinho.');
     return;
   }
+
+  const escolha=textoOpcoes();
   const cart=getCart();
-  const chaveId=tamanhoSelecionado?(produto.id+'-'+tamanhoSelecionado):produto.id;
+  const chaveId=escolha ? (produto.id+'-'+escolha) : produto.id;
   const existente=cart.find(function(i){return i.id==chaveId});
-  if(existente){existente.qty+=1;}
-  else{
+
+  if(existente){
+    existente.qty+=1;
+  }else{
     cart.push({
       id:chaveId,
       produtoId:produto.id,
-      nome:produto.nome+(tamanhoSelecionado?(' (Tam. '+tamanhoSelecionado+')'):''),
+      nome:produto.nome+(escolha?(' — '+escolha):''),
       preco:produto.preco_atual,
       imagem:produto.imagem_url,
-      tamanho:tamanhoSelecionado,
+      tamanho:escolha||null,
+      opcoes:opcoesSelecionadas,
       qty:1
     });
   }
+
   saveCart(cart);
   alert('Adicionado ao carrinho!');
 }
 
 function comprarAgora(){
-  if(precisaTamanho() && !tamanhoSelecionado){
-    alert('Escolha uma opção antes de comprar.');
+  if(opcoesObrigatorias() && !todasOpcoesEscolhidas()){
+    alert('Escolha todas as opções do produto antes de comprar.');
     return;
   }
+
   let url='checkout.html?id='+produto.id;
-  if(tamanhoSelecionado) url+='&tamanho='+encodeURIComponent(tamanhoSelecionado);
+  const escolha=textoOpcoes();
+  if(escolha) url+='&opcoes='+encodeURIComponent(escolha);
   location.href=url;
 }
 
