@@ -128,7 +128,10 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
     <div class="form-group"><label>Nome do produto *</label><input type="text" id="pNome" placeholder="Ex: Creatina 1kg"></div>
     <div class="form-group"><label>Link do afiliado <span id="linkObrigLabel">*</span></label><input type="url" id="pLink" placeholder="https://meli.la/..."></div>
     <div class="form-row"><div class="form-group"><label>Preco atual R$ *</label><input type="number" id="pPreco" placeholder="59.90" step="0.01" min="0"></div><div class="form-group"><label>Preco de R$</label><input type="number" id="pOld" placeholder="239.90" step="0.01" min="0"></div></div>
-    <div class="form-group"><label>URL da imagem *</label><input type="url" id="pImg" placeholder="https://..."></div>
+    <div class="form-group"><label>URLs das fotos do produto *</label><textarea id="pImg" rows="5" placeholder="Cole uma URL por linha:
+https://...foto1.webp
+https://...foto2.webp
+https://...foto3.webp"></textarea><small style="color:#999;display:block;margin-top:5px">A primeira URL será a foto principal. Você pode colocar várias fotos, uma URL por linha.</small></div>
     <div class="form-row"><div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div><div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia, Eletrônicos, Casa"></div></div>
     <div class="form-group"><label>Descrição do produto</label><textarea id="pDescricao" rows="5" placeholder="Descreva o produto, benefícios, características e informações importantes..."></textarea></div>
     <div class="form-group"><label>Opções / tamanhos disponíveis</label><textarea id="pTamanhos" rows="3" placeholder="Ex.: P, M, G, GG
