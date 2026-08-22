@@ -234,7 +234,8 @@ button:disabled{
 
     <div class="info">
       🔒 Pagamento processado pelo Mercado Pago.<br>
-      Seus dados são utilizados para processar e entregar o pedido.
+      Seus dados são utilizados para processar e entregar o pedido.<br>
+      <a href="politica-de-troca.html" style="color:inherit;text-decoration:underline">Política de Troca e Devolução</a>
     </div>
 
   </div>
@@ -323,6 +324,8 @@ async function carregarProduto(){
       throw new Error('Este produto não é de dropshipping.');
     }
 
+    const tamanhoEscolhido=params.get('tamanho')||'';
+
     const preco=Number(produto.preco_atual||0);
 
     document.getElementById('produtoBox').innerHTML=`
@@ -337,7 +340,7 @@ async function carregarProduto(){
         <div>
 
           <div class="nome">
-            ${produto.nome || 'Produto'}
+            ${produto.nome || 'Produto'}${tamanhoEscolhido?(' - Tam. '+tamanhoEscolhido):''}
           </div>
 
           <div class="preco">
@@ -348,6 +351,10 @@ async function carregarProduto(){
 
       </div>
     `;
+
+    if(tamanhoEscolhido){
+      window.tamanhoEscolhidoAtual=tamanhoEscolhido;
+    }
 
     document.getElementById('total').textContent=dinheiro(preco);
 
@@ -467,8 +474,8 @@ async function comprar(){
     localStorage.setItem('jp_endereco', JSON.stringify(cliente));
 
     const corpo=itensCarrinho
-      ? { itens: itensCarrinho.map(function(i){return {produto_id:i.id, quantidade:i.qty}}), cliente:cliente }
-      : { produto_id:produto.id, cliente:cliente };
+      ? { itens: itensCarrinho.map(function(i){return {produto_id:(i.produtoId||i.id), quantidade:i.qty, tamanho:i.tamanho||null}}), cliente:cliente }
+      : { produto_id:produto.id, cliente:cliente, tamanho:(window.tamanhoEscolhidoAtual||null) };
 
     const resposta=await fetch(
       '/api/criar-pagamento',
