@@ -223,23 +223,6 @@ button:disabled{
     <label>Estado</label>
     <input id="estado" type="text" maxlength="2" placeholder="UF">
 
-    <label>Tipo de entrega</label>
-    <select id="tipoEntrega" onchange="atualizarEntrega()">
-      <option value="local">🚚 Entrega local</option>
-      <option value="retirada">📍 Retirada combinada</option>
-    </select>
-
-    <div id="regiaoEntregaBox">
-      <label>Região de entrega</label>
-      <select id="regiaoEntrega">
-        <option value="aracaju">Aracaju - SE</option>
-        <option value="sao-cristovao">São Cristóvão - Rosa Elze / Eduardo Gomes e proximidades</option>
-        <option value="socorro">Nossa Senhora do Socorro - áreas próximas de Aracaju</option>
-        <option value="proximidades-aracaju">Outras áreas próximas de Aracaju</option>
-      </select>
-      <div style="font-size:12px;color:#999;margin-top:5px">A disponibilidade e a taxa de entrega serão confirmadas conforme o endereço informado.</div>
-    </div>
-
     <div class="resumo">
       <span>Total</span>
       <span class="total" id="total">R$ 0,00</span>
@@ -341,7 +324,7 @@ async function carregarProduto(){
       throw new Error('Este produto não é de dropshipping.');
     }
 
-    const tamanhoEscolhido=params.get('tamanho')||'';
+    const tamanhoEscolhido=params.get('opcoes') || params.get('tamanho') || '';
 
     const preco=Number(produto.preco_atual||0);
 
@@ -357,7 +340,7 @@ async function carregarProduto(){
         <div>
 
           <div class="nome">
-            ${produto.nome || 'Produto'}${tamanhoEscolhido?(' - Tam. '+tamanhoEscolhido):''}
+            ${produto.nome || 'Produto'}${tamanhoEscolhido?(' — '+tamanhoEscolhido):''}
           </div>
 
           <div class="preco">
@@ -374,7 +357,6 @@ async function carregarProduto(){
     }
 
     document.getElementById('total').textContent=dinheiro(preco);
-    atualizarEntrega();
 
   }catch(e){
 
@@ -417,11 +399,6 @@ async function carregarCarrinho(){
   }
 }
 
-function atualizarEntrega(){
-  const tipo=document.getElementById('tipoEntrega').value;
-  document.getElementById('regiaoEntregaBox').style.display=tipo==='local'?'block':'none';
-}
-
 function validar(){
 
   const campos=[
@@ -451,32 +428,6 @@ function validar(){
 
   }
 
-  const tipoEntrega=document.getElementById('tipoEntrega').value;
-  const regiaoEntrega=document.getElementById('regiaoEntrega').value;
-  const cidade=document.getElementById('cidade').value.trim().toLowerCase();
-  const estado=document.getElementById('estado').value.trim().toUpperCase();
-  if(tipoEntrega==='local'){
-    if(estado && estado!=='SE'){
-      mostrarErro('A entrega local está disponível apenas em Sergipe.');
-      document.getElementById('estado').focus();
-      return false;
-    }
-    if(regiaoEntrega==='aracaju' && cidade && !cidade.includes('aracaju')){
-      mostrarErro('Para esta região, informe Aracaju como cidade.');
-      document.getElementById('cidade').focus();
-      return false;
-    }
-    if(regiaoEntrega==='sao-cristovao' && cidade && !cidade.includes('são cristóvão') && !cidade.includes('sao cristovao')){
-      mostrarErro('Para esta região, informe São Cristóvão como cidade.');
-      document.getElementById('cidade').focus();
-      return false;
-    }
-    if(regiaoEntrega==='socorro' && cidade && !cidade.includes('socorro')){
-      mostrarErro('Para esta região, informe Nossa Senhora do Socorro como cidade.');
-      document.getElementById('cidade').focus();
-      return false;
-    }
-  }
   return true;
 }
 
@@ -516,8 +467,6 @@ async function comprar(){
 
     estado:document.getElementById('estado').value.trim().toUpperCase(),
 
-    tipo_entrega:document.getElementById('tipoEntrega').value,
-    regiao_entrega:document.getElementById('regiaoEntrega').value
 
   };
 
