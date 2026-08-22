@@ -75,6 +75,8 @@ const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
 let produto=null;
 let tamanhoSelecionado=null;
+let opcoesSelecionadas={};
+let gruposOpcoes=[];
 let notaSelecionada=0;
 function getFotos(v){
   return String(v||'').split(/[\n,]+/).map(function(x){return x.trim()}).filter(Boolean);
@@ -140,15 +142,18 @@ function renderProduto(){
         const valores=m[2].split(',').map(function(x){return x.trim()}).filter(Boolean);
         if(valores.length) grupos.push({nome:nome,valores:valores});
       }else{
-        const valores=linha.split(',').map(function(x){return x.trim()}).filter(Boolean);
+        let valores=linha.split(/[,;|]+/).map(function(x){return x.trim()}).filter(Boolean);
+        if(valores.length===1 && /\s+/.test(valores[0])){
+          valores=valores[0].split(/\s+/).map(function(x){return x.trim()}).filter(Boolean);
+        }
         if(valores.length) grupos.push({nome:'Opção',valores:valores});
       }
     });
     return grupos;
   }
 
-  let opcoesSelecionadas={};
-  const gruposOpcoes=parseOpcoes(p.tamanhos);
+  opcoesSelecionadas={};
+  gruposOpcoes=parseOpcoes(p.tamanhos);
 
   let opcoesHtml='';
   if(gruposOpcoes.length){
@@ -160,8 +165,8 @@ function renderProduto(){
             <div style="font-size:13px;font-weight:800;margin-bottom:8px">${escaparHtml(g.nome)}</div>
             <div class="tamanhos">
               ${g.valores.map(function(v){
-                const safe=String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-                return `<button type="button" class="tam-btn opc-btn" data-grupo="${gi}" onclick="selecionarOpcao(${gi},'${safe}',this)">${escaparHtml(v)}</button>`;
+                const safe=JSON.stringify(String(v));
+                return `<button type="button" class="tam-btn opc-btn" data-grupo="${gi}" onclick='selecionarOpcao(${gi},${safe},this)'>${escaparHtml(v)}</button>`;
               }).join('')}
             </div>
           </div>`;
@@ -297,6 +302,7 @@ function adicionarAoCarrinho(){
 
   saveCart(cart);
   alert('Adicionado ao carrinho!');
+  location.href='checkout.html';
 }
 
 function comprarAgora(){
