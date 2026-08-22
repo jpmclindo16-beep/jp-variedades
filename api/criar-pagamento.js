@@ -12,11 +12,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { produto_id, itens, cliente } = req.body || {};
+    const { produto_id, itens, cliente, tamanho } = req.body || {};
 
     const listaItens = Array.isArray(itens) && itens.length
       ? itens
-      : (produto_id ? [{ produto_id: produto_id, quantidade: 1 }] : []);
+      : (produto_id ? [{ produto_id: produto_id, quantidade: 1, tamanho: tamanho || null }] : []);
 
     if (!listaItens.length) {
       return res.status(400).json({
@@ -85,10 +85,14 @@ module.exports = async (req, res) => {
       }
 
       const quantidade = Math.max(1, parseInt(it.quantidade) || 1);
+      const tamanhoItem = it.tamanho || null;
+      const tituloComTamanho = tamanhoItem
+        ? `${produto.nome} (Tam. ${tamanhoItem})`
+        : produto.nome;
 
       mpItems.push({
         id: String(produto.id),
-        title: String(produto.nome).substring(0, 256),
+        title: String(tituloComTamanho).substring(0, 256),
         quantity: quantidade,
         unit_price: preco,
         currency_id: "BRL"
@@ -99,6 +103,7 @@ module.exports = async (req, res) => {
         nome: produto.nome,
         preco: preco,
         imagem: produto.imagem_url || "",
+        tamanho: tamanhoItem,
         qty: quantidade
       });
     }
