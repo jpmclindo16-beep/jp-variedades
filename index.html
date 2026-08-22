@@ -283,6 +283,19 @@ function renderSuggestions() {
   render();
 }
 
+function firstImage(v) {
+  if (Array.isArray(v)) return v.map(x => String(x).trim()).filter(Boolean)[0] || '';
+  const s = String(v || '').trim();
+  if (!s) return '';
+  try {
+    if (s[0] === '[') {
+      const arr = JSON.parse(s);
+      if (Array.isArray(arr)) return arr.map(x => String(x).trim()).filter(Boolean)[0] || '';
+    }
+  } catch(e) {}
+  return s.split(/[\n,]+/).map(x => x.trim()).filter(Boolean)[0] || '';
+}
+
 function pickSuggestion(id) {
   const p = products.find(p => p.id == id);
   if (!p) return;
@@ -380,7 +393,7 @@ function render() {
           <img src="${escapeHtml(imgSrc)}" 
                alt="${escapeHtml(p.name)}" 
                loading="lazy" 
-               onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades'">
+               onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Shoppew'">
           ${p.bestseller ? '<span class="b-best">🔥 MAIS VENDIDO</span>' : ''}
           ${badge}
           <button class="fav ${isFav ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${isFav ? '❤️' : '🤍'}</button>
@@ -420,7 +433,7 @@ function renderFav() {
     return `
       <div class="card">
         <div class="card-img">
-          <img src="${escapeHtml(imgSrc)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades'">
+          <img src="${escapeHtml(imgSrc)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Shoppew'">
           <button class="fav active" onclick="toggleFav('${p.id}')">❤️</button>
         </div>
         <div class="card-info">
@@ -583,3 +596,5 @@ updateCartBadge();
 </script>
 </body>
 </html>
+
+ 
