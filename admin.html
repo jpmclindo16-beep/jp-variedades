@@ -84,7 +84,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
         <div class="stat"><b id="dashLucro">R$ 0</b><span>Lucro</span></div>
         <div class="stat"><b id="dashTicket">R$ 0</b><span>Ticket Medio</span></div>
       </div>
-      <div class="card"><div class="card-header"><div class="card-title">📦 Pedidos Recentes</div></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div></div>
+      <div class="card"><div class="card-header"><div class="card-title">📦 Pedidos Recentes</div></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Opções escolhidas</th><th>Total</th><th>Status</th></tr></thead><tbody id="dashPedidosBody"></tbody></table></div></div></div>
       <div class="card"><div class="card-header"><div class="card-title">⚠️ Estoque Baixo</div></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Fornecedor</th><th>Estoque</th></tr></thead><tbody id="dashEstoqueBody"></tbody></table></div></div></div>
     </div>
 
@@ -99,7 +99,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
     <div class="page" id="page-pedidos">
       <div class="page-title">Pedidos</div>
       <div class="tabs"><div class="tab active" onclick="filterOrders('todos',this)">Todos</div><div class="tab" onclick="filterOrders('pago',this)">Pagos</div><div class="tab" onclick="filterOrders('aguardando_pagamento',this)">Pendentes</div><div class="tab" onclick="filterOrders('enviado',this)">Enviados</div></div>
-      <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Lucro</th><th>Status</th><th>Endereco</th><th>Acoes</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div></div>
+      <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Produto</th><th>Opções escolhidas</th><th>Total</th><th>Lucro</th><th>Status</th><th>Endereco</th><th>Acoes</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div></div>
     </div>
 
     <div class="page" id="page-fornecedores">
@@ -134,9 +134,13 @@ https://...foto2.webp
 https://...foto3.webp"></textarea><small style="color:#999;display:block;margin-top:5px">A primeira URL será a foto principal. Você pode colocar várias fotos, uma URL por linha.</small></div>
     <div class="form-row"><div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div><div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia, Eletrônicos, Casa"></div></div>
     <div class="form-group"><label>Descrição do produto</label><textarea id="pDescricao" rows="5" placeholder="Descreva o produto, benefícios, características e informações importantes..."></textarea></div>
-    <div class="form-group"><label>Opções / tamanhos disponíveis</label><textarea id="pTamanhos" rows="3" placeholder="Ex.: P, M, G, GG
-Ou: Preto, Branco, Azul
-Ou: 127V, 220V"></textarea></div>
+    <div class="form-group"><label>Opções do produto</label><textarea id="pTamanhos" rows="5" placeholder="Ex. roupa:
+Tamanho: P, M, G, GG
+Cor: Preto, Branco
+
+Ex. carregador:
+Tipo: Tipo C, V8
+Comprimento: 1m, 2m"></textarea><small style="color:#999;display:block;margin-top:5px">Use uma linha por opção. Formato: Nome da opção: valor 1, valor 2. O cliente deverá escolher as opções antes de comprar.</small></div>
     <div class="form-row"><div class="form-group"><label>Custo R$ (fornecedor)</label><input type="number" id="pCusto" placeholder="30.00" step="0.01" min="0"></div><div class="form-group"><label>Estoque</label><input type="number" id="pEstoque" placeholder="10" step="1" min="0"></div></div>
     <div class="form-group"><label>Tipo</label><select id="pTipo"><option value="afiliado">Afiliado (link externo)</option><option value="dropshipping">Dropshipping (pagamento proprio)</option></select></div>
     <div class="form-group" id="pagamentoGroup" style="display:none"><label>Link de Pagamento (Mercado Pago)</label><input type="url" id="pPagamento" placeholder="https://mpago.la/..."></div>
@@ -327,7 +331,7 @@ function renderDashboard(){
   document.getElementById('dashTicket').textContent=money(pagos.length?totalVendas/pagos.length:0);
 
   document.getElementById('dashPedidosBody').innerHTML=pedidos.length?pedidos.slice(0,5).map(o=>
-    `<tr><td>#${escapeHtml(o.id)}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td class="price">${money(o.valor)}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td></tr>`
+    `<tr><td>#${escapeHtml(o.id)}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td style="min-width:170px">${escapeHtml(o.tamanho||'-')}</td><td class="price">${money(o.valor)}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td></tr>`
   ).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted)">Nenhum pedido ainda</td></tr>';
 
   const baixos=produtos.filter(p=>(Number(p.estoque)||0)<5&&p.tipo==='dropshipping');
@@ -345,8 +349,8 @@ function renderOrders(){
   const list=filtroPedido==='todos'?pedidos:pedidos.filter(o=>o.status_pedido===filtroPedido);
   document.getElementById('ordersBody').innerHTML=list.length?list.map(o=>{
     const data=o.criado_em?new Date(o.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
-    return `<tr><td>#${escapeHtml(o.id)}</td><td>${data}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td class="price">${money(o.valor)}</td><td class="profit">${money(calcLucro(o))}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td><td><button onclick="verEndereco('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td><td style="white-space:nowrap"><button onclick="marcarEnviado('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-size:11px;margin-right:4px">🚚 Enviado</button><button onclick="marcarEntregue('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:11px">✅ Entregue</button></td></tr>`;
-  }).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
+    return `<tr><td>#${escapeHtml(o.id)}</td><td>${data}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td style="min-width:170px">${escapeHtml(o.tamanho||'-')}</td><td class="price">${money(o.valor)}</td><td class="profit">${money(calcLucro(o))}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td><td><button onclick="verEndereco('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td><td style="white-space:nowrap"><button onclick="marcarEnviado('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-size:11px;margin-right:4px">🚚 Enviado</button><button onclick="marcarEntregue('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:11px">✅ Entregue</button></td></tr>`;
+  }).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
 }
 
 async function marcarEnviado(id){
@@ -369,7 +373,7 @@ async function marcarEntregue(id){
 }
 function verEndereco(id){
   const p=pedidos.find(x=>x.id==id);if(!p)return;
-  alert('Cliente: '+(p.cliente_nome||'-')+'\nCPF: '+(p.cliente_cpf||'-')+'\nTelefone: '+(p.cliente_telefone||'-')+'\n\nEndereco: '+(p.cliente_endereco||'-')+', '+(p.cliente_numero||'-')+(p.cliente_complemento?' - '+p.cliente_complemento:'')+'\nBairro: '+(p.cliente_bairro||'-')+'\nCidade/UF: '+(p.cliente_cidade||'-')+'/'+(p.cliente_estado||'-')+'\nCEP: '+(p.cliente_cep||'-'));
+  alert('Cliente: '+(p.cliente_nome||'-')+'\nCPF: '+(p.cliente_cpf||'-')+'\nTelefone: '+(p.cliente_telefone||'-')+'\nOpções escolhidas: '+(p.tamanho||'-')+'\n\nEndereco: '+(p.cliente_endereco||'-')+', '+(p.cliente_numero||'-')+(p.cliente_complemento?' - '+p.cliente_complemento:'')+'\nBairro: '+(p.cliente_bairro||'-')+'\nCidade/UF: '+(p.cliente_cidade||'-')+'/'+(p.cliente_estado||'-')+'\nCEP: '+(p.cliente_cep||'-'));
 }
 
 function renderSuppliers(){
@@ -429,6 +433,8 @@ async function saveProd(){
     preco_antigo:document.getElementById('pOld').value?parseFloat(document.getElementById('pOld').value):null,
     imagem_url:img,loja_origem:document.getElementById('pLoja').value,
     categoria:document.getElementById('pCat').value.trim(),
+    descricao:document.getElementById('pDescricao').value.trim(),
+    tamanhos:document.getElementById('pTamanhos').value.trim(),
     custo:document.getElementById('pCusto').value?parseFloat(document.getElementById('pCusto').value):null,
     estoque:document.getElementById('pEstoque').value?parseInt(document.getElementById('pEstoque').value):null,
     tipo,link_pagamento:document.getElementById('pPagamento').value.trim(),
