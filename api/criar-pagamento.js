@@ -1,4 +1,5 @@
-const { MercadoPagoConfig, Preference } = require("mercadopago");
+      
+    const { MercadoPagoConfig, Preference } = require("mercadopago");
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN
@@ -87,7 +88,7 @@ module.exports = async (req, res) => {
       const quantidade = Math.max(1, parseInt(it.quantidade) || 1);
       const tamanhoItem = it.tamanho || null;
       const tituloComTamanho = tamanhoItem
-        ? `${produto.nome} (Tam. ${tamanhoItem})`
+        ? `${produto.nome} (Opções: ${tamanhoItem})`
         : produto.nome;
 
       mpItems.push({
@@ -104,6 +105,7 @@ module.exports = async (req, res) => {
         preco: preco,
         imagem: produto.imagem_url || "",
         tamanho: tamanhoItem,
+        opcoes: tamanhoItem,
         qty: quantidade
       });
     }
