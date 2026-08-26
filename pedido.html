@@ -155,19 +155,22 @@ async function carregarPedido(){
   const extRef=getParam('external_reference')||'';
   const paymentId=getParam('payment_id')||getParam('collection_id')||'';
 
-  let pedido=null;
+  let itensPedido=[];
   try{
-    let url=SUPABASE_URL+'/rest/v1/pedidos?referencia=eq.'+encodeURIComponent(extRef)+'&limit=1';
+    let url=SUPABASE_URL+'/rest/v1/pedidos?referencia=eq.'+encodeURIComponent(extRef)+'&order=id.asc';
     let res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     let dados=await res.json();
-    if(dados && dados.length){pedido=dados[0];}
+    if(dados && dados.length){itensPedido=dados;}
     else if(paymentId){
-      url=SUPABASE_URL+'/rest/v1/pedidos?mercado_pago_id=eq.'+encodeURIComponent(paymentId)+'&limit=1';
+      url=SUPABASE_URL+'/rest/v1/pedidos?mercado_pago_id=eq.'+encodeURIComponent(paymentId)+'&order=id.asc';
       res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
       dados=await res.json();
-      if(dados && dados.length) pedido=dados[0];
+      if(dados && dados.length) itensPedido=dados;
     }
   }catch(e){}
+
+  const pedido=itensPedido.length?itensPedido[0]:null;
+  const valorTotal=itensPedido.reduce(function(a,i){return a+Number(i.valor||0)},0);
 
   let st=status;
   if(pedido && pedido.status_pedido){
@@ -192,17 +195,10 @@ async function carregarPedido(){
   document.getElementById('conteudoPedido').style.display='block';
 
   const prodContainer=document.getElementById('produtosList');
-  if(pedido && pedido.items){
-    try{
-      const items=typeof pedido.items==='string'?JSON.parse(pedido.items):pedido.items;
-      if(Array.isArray(items) && items.length){
-        prodContainer.innerHTML=items.map(it=>`<div class="produto"><img src="${it.imagem||'https://via.placeholder.com/64'}" onerror="this.src='https://via.placeholder.com/64'"><div><div class="nome">${it.nome||'Produto'}</div><div class="preco">${fmt(Number(it.preco||0))} <span class="qty">x ${it.qty||1}</span></div></div></div>`).join('');
-      }else{
-        prodContainer.innerHTML=`<div class="produto"><img src="https://via.placeholder.com/64"><div><div class="nome">${pedido.produto_nome||'Produto'}</div><div class="preco">${fmt(Number(pedido.valor||0))}</div></div></div>`;
-      }
-    }catch(e){
-      prodContainer.innerHTML=`<div class="produto"><img src="https://via.placeholder.com/64"><div><div class="nome">${pedido.produto_nome||'Produto'}</div><div class="preco">${fmt(Number(pedido.valor||0))}</div></div></div>`;
-    }
+  if(itensPedido.length){
+    prodContainer.innerHTML=itensPedido.map(function(it){
+      return `<div class="produto"><img src="https://via.placeholder.com/64" onerror="this.src='https://via.placeholder.com/64'"><div><div class="nome">${it.produto_nome||'Produto'}${it.tamanho?(' — '+it.tamanho):''}</div><div class="preco">${fmt(Number(it.valor||0))} <span class="qty">x ${it.quantidade||1}</span></div></div></div>`;
+    }).join('');
   }else{
     prodContainer.innerHTML='<div style="color:var(--muted);font-size:13px">Detalhes do produto não disponíveis.</div>';
   }
@@ -234,6 +230,7 @@ async function carregarPedido(){
     <div class="info-row"><span>Forma de pagamento</span><span>Pix / Mercado Pago</span></div>
     <div class="info-row"><span>ID do pagamento</span><span style="font-size:11px">${paymentId||pedido?.mercado_pago_id||'---'}</span></div>
     <div class="info-row"><span>Código do pedido</span><span style="font-size:11px">${extRef||pedido?.referencia||'---'}</span></div>
+    <div class="info-row"><span>Total</span><span>${fmt(valorTotal)}</span></div>
     <div class="info-row"><span>Data</span><span>${new Date().toLocaleDateString('pt-BR')}</span></div>
     <div class="info-row"><span>Status</span><span style="color:${statusColor}">${statusLabel}</span></div>
   `;
