@@ -313,8 +313,9 @@ function renderProdutos(){
   if(!produtos.length){lista.innerHTML='<div class="empty">Nenhum produto cadastrado.</div>';return}
   lista.innerHTML=produtos.map(p=>{
     const tipoLabel=p.tipo==='dropshipping'?'Dropshipping':'Afiliado';
+    const primeiraFoto=(p.imagem_url||'').split(/[\n,]+/)[0]?.trim()||'';
     return `<div class="item">
-      <img src="${escapeHtml(p.imagem_url||'')}" onerror="this.src='https://via.placeholder.com/56'">
+      <img src="${escapeHtml(primeiraFoto)}" onerror="this.src='https://via.placeholder.com/56'">
       <div class="item-info"><h4>${escapeHtml(p.nome)}</h4><div class="price">${money(p.preco_atual)}</div><div class="loja">${escapeHtml(p.loja_origem||'')} • ${tipoLabel}</div></div>
       <div class="item-actions"><button onclick="editProd('${String(p.id).replace(/'/g,"\\'")}')">✏️</button><button onclick="deleteProd('${String(p.id).replace(/'/g,"\\'")}')">🗑️</button></div>
     </div>`;
@@ -349,12 +350,12 @@ function renderOrders(){
   const list=filtroPedido==='todos'?pedidos:pedidos.filter(o=>o.status_pedido===filtroPedido);
   document.getElementById('ordersBody').innerHTML=list.length?list.map(o=>{
     const data=o.criado_em?new Date(o.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
-    return `<tr><td>#${escapeHtml(o.id)}</td><td>${data}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td style="min-width:170px">${escapeHtml(o.tamanho||'-')}</td><td class="price">${money(o.valor)}</td><td class="profit">${money(calcLucro(o))}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td><td><button onclick="verEndereco('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td><td style="white-space:nowrap"><button onclick="marcarEnviado('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-size:11px;margin-right:4px">🚚 Enviado</button><button onclick="marcarEntregue('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:11px">✅ Entregue</button></td></tr>`;
+    return `<tr><td>#${escapeHtml(o.id)}</td><td>${data}</td><td>${escapeHtml(o.cliente_nome||'-')}</td><td>${escapeHtml(o.produto_nome||'-')}</td><td style="min-width:170px">${escapeHtml(o.tamanho||'-')}</td><td class="price">${money(o.valor)}</td><td class="profit">${money(calcLucro(o))}</td><td><span class="status ${statusClass(o.status_pedido)}">${statusLabel(o.status_pedido)}</span></td><td><button onclick="verEndereco('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--border);color:var(--text);cursor:pointer">📍 Ver</button></td><td style="white-space:nowrap"><button onclick="marcarEnviado('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-size:11px;margin-right:4px;margin-bottom:4px">🚚 Enviado</button><button onclick="marcarEntregue('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#000;cursor:pointer;font-size:11px;margin-right:4px;margin-bottom:4px">✅ Entregue</button><button onclick="marcarReembolsado('${String(o.id).replace(/'/g,"\\'")}')" style="padding:6px 8px;border-radius:8px;border:none;background:var(--danger);color:#fff;cursor:pointer;font-size:11px">↩️ Cancelar</button></td></tr>`;
   }).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--muted)">Nenhum pedido encontrado</td></tr>';
 }
 
 async function marcarEnviado(id){
-  const codigo=prompt('Código de rastreio (opcional):','');if(codigo===null)return;
+  let codigo=prompt('Código de rastreio (opcional, pode deixar em branco):','');if(codigo===null)codigo='';
   try{
     const headers=await getAuthHeaders();
     const res=await fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers,body:JSON.stringify({status_pedido:'enviado',codigo_rastreio:codigo,atualizado_em:new Date().toISOString()})});
@@ -369,6 +370,15 @@ async function marcarEntregue(id){
     const res=await fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers,body:JSON.stringify({status_pedido:'entregue',atualizado_em:new Date().toISOString()})});
     if(!res.ok)throw new Error('Erro '+res.status);
     toast('Pedido marcado como entregue!',true);loadPedidos();
+  }catch(e){toast('Erro: '+e.message,false)}
+}
+async function marcarReembolsado(id){
+  if(!confirm('Marcar esse pedido como cancelado/reembolsado? Lembre de fazer o reembolso real no painel do Mercado Pago também.'))return;
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/pedidos?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers,body:JSON.stringify({status_pedido:'reembolsado',atualizado_em:new Date().toISOString()})});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    toast('Pedido marcado como reembolsado!',true);loadPedidos();
   }catch(e){toast('Erro: '+e.message,false)}
 }
 function verEndereco(id){
