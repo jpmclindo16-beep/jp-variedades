@@ -13,8 +13,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .voltar{color:var(--text);text-decoration:none;font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--border)}
 .titulo{font-weight:800;font-size:16px}
 .container{max-width:600px;margin:auto;padding-bottom:110px}
-.img-box{width:100%;aspect-ratio:1;background:var(--card)}
-.img-box img{width:100%;height:100%;object-fit:cover}
+.img-box{width:100%;aspect-ratio:1;background:var(--card);position:relative;overflow:hidden;touch-action:pan-y}
+.img-track{display:flex;height:100%;transition:transform .3s ease}
+.img-slide{flex:0 0 100%;height:100%}
+.img-slide img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.img-dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:6px}
+.img-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4)}
+.img-dots span.active{background:var(--accent);width:18px;border-radius:4px}
+.img-arrow{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5}
+.img-arrow.left{left:8px}.img-arrow.right{right:8px}
 .galeria-fotos{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;background:var(--card)}
 .mini-foto{width:64px;height:64px;flex:0 0 64px;padding:0;border:2px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg);cursor:pointer}
 .mini-foto.active{border-color:var(--accent)}
@@ -74,10 +81,13 @@ const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
 const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
 let produto=null;
-let tamanhoSelecionado=null;
 let opcoesSelecionadas={};
 let gruposOpcoes=[];
 let notaSelecionada=0;
+let fotosAtual=[];
+let indiceFotoAtual=0;
+let touchStartX=null;
+
 function getFotos(v){
   return String(v||'').split(/[\n,]+/).map(function(x){return x.trim()}).filter(Boolean);
 }
@@ -183,14 +193,32 @@ function renderProduto(){
     </div>
   `:'';
 
-  const fotos=getFotos(p.imagem_url);
-  const fotoPrincipal=fotos[0]||'https://via.placeholder.com/600';
-  const galeriaHtml=fotos.length>1 ? `
-    <div class="galeria-fotos">${fotos.map(function(url,i){return `<button type="button" class="mini-foto ${i===0?'active':''}" onclick="trocarFoto(${i})"><img src="${url}" onerror="this.style.opacity='.35'"></button>`}).join('')}</div>
+  fotosAtual=getFotos(p.imagem_url);
+  if(!fotosAtual.length) fotosAtual=['https://via.placeholder.com/600'];
+  indiceFotoAtual=0;
+
+  const slidesHtml=fotosAtual.map(function(url){
+    return `<div class="img-slide"><img src="${url}" onerror="this.src='https://via.placeholder.com/600'"></div>`;
+  }).join('');
+
+  const dotsHtml=fotosAtual.length>1
+    ? `<div class="img-dots" id="imgDots">${fotosAtual.map(function(_,i){return `<span class="${i===0?'active':''}"></span>`}).join('')}</div>`
+    : '';
+
+  const setasHtml=fotosAtual.length>1
+    ? `<button class="img-arrow left" onclick="fotoAnterior()">‹</button><button class="img-arrow right" onclick="proximaFoto()">›</button>`
+    : '';
+
+  const galeriaHtml=fotosAtual.length>1 ? `
+    <div class="galeria-fotos">${fotosAtual.map(function(url,i){return `<button type="button" class="mini-foto ${i===0?'active':''}" onclick="trocarFoto(${i})"><img src="${url}" onerror="this.style.opacity='.35'"></button>`}).join('')}</div>
   ` : '';
 
   document.getElementById('container').innerHTML=`
-    <div class="img-box"><img id="fotoPrincipal" src="${fotoPrincipal}" onerror="this.src='https://via.placeholder.com/600'"></div>
+    <div class="img-box" id="imgBox">
+      <div class="img-track" id="imgTrack">${slidesHtml}</div>
+      ${dotsHtml}
+      ${setasHtml}
+    </div>
     ${galeriaHtml}
     <div class="badge-row">${badge}${best}</div>
     <div class="info-block">
@@ -244,6 +272,37 @@ function renderProduto(){
     footer.innerHTML=`<a href="${p.link_afiliado}" target="_blank" class="btn btn-primary">VER OFERTA →</a>`;
   }
   document.body.appendChild(footer);
+
+  configurarSwipe();
+}
+
+function irParaFoto(i){
+  if(i<0) i=fotosAtual.length-1;
+  if(i>=fotosAtual.length) i=0;
+  indiceFotoAtual=i;
+  const track=document.getElementById('imgTrack');
+  if(track) track.style.transform='translateX(-'+(i*100)+'%)';
+  document.querySelectorAll('#imgDots span').forEach(function(d,di){d.classList.toggle('active',di===i)});
+  document.querySelectorAll('.mini-foto').forEach(function(m,mi){m.classList.toggle('active',mi===i)});
+}
+function trocarFoto(i){irParaFoto(i)}
+function proximaFoto(){irParaFoto(indiceFotoAtual+1)}
+function fotoAnterior(){irParaFoto(indiceFotoAtual-1)}
+
+function configurarSwipe(){
+  const box=document.getElementById('imgBox');
+  if(!box) return;
+  box.addEventListener('touchstart',function(e){
+    touchStartX=e.touches[0].clientX;
+  },{passive:true});
+  box.addEventListener('touchend',function(e){
+    if(touchStartX===null) return;
+    const dx=e.changedTouches[0].clientX-touchStartX;
+    if(Math.abs(dx)>40){
+      if(dx<0) proximaFoto(); else fotoAnterior();
+    }
+    touchStartX=null;
+  },{passive:true});
 }
 
 function selecionarOpcao(grupo,valor,el){
@@ -293,7 +352,7 @@ function adicionarAoCarrinho(){
       produtoId:produto.id,
       nome:produto.nome+(escolha?(' — '+escolha):''),
       preco:produto.preco_atual,
-      imagem:produto.imagem_url,
+      imagem:fotosAtual[0],
       tamanho:escolha||null,
       opcoes:opcoesSelecionadas,
       qty:1
