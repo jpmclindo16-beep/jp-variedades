@@ -23,7 +23,7 @@ async function enviarEmailVenda(pedidosCriados) {
   const totalGeral = pedidosCriados.reduce(function (a, p) { return a + Number(p.valor || 0); }, 0);
 
   const html = `
-    <h2>🎉 Nova venda na JP Variedades!</h2>
+    <h2>🎉 Nova venda na JP Shoppew!</h2>
     <ul>${itensHtml}</ul>
     <p><strong>Total:</strong> R$ ${totalGeral.toFixed(2).replace(".", ",")}</p>
     <hr>
@@ -44,7 +44,7 @@ async function enviarEmailVenda(pedidosCriados) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        from: "JP Variedades <onboarding@resend.dev>",
+        from: "JP Shoppew <onboarding@resend.dev>",
         to: [emailDestino],
         subject: `Nova venda: ${pedidosCriados.length} item(ns)`,
         html: html
