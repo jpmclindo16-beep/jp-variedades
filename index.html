@@ -102,22 +102,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
-<div class="banner">🔥 OFERTAS ATUALIZADAS HOJE - Só na JP Shoppew</div>
+<div class="banner">🔥 FRETE GRÁTIS em compras acima de R$ 99 | Só hoje</div>
 
 <div class="header">
   <div class="logo">
     <div class="logo-circle" id="adminTrigger"></div>
     <div>
       <h1>JP Shoppew ✓</h1>
-      <p>@jp_variedades • <span id="count">0</span> produtos</p>
+      <p>@jp.shoppew • <span id="count">0</span> produtos</p>
     </div>
   </div>
   <div class="actions">
-    <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <a class="btn-icon" href="meus-pedidos.html" title="Meus Pedidos">📦</a>
     <a class="btn-icon" href="carrinho.html" title="Carrinho">
       🛒<span id="cartBadge">0</span>
     </a>
+    <button class="btn-icon" id="themeBtn" onclick="toggleTheme()" title="Alternar tema">🌙</button>
     <button class="btn-icon" onclick="shareSite()">📤</button>
   </div>
 </div>
@@ -133,10 +133,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <h2>JP Shoppew</h2>
     <p>Os melhores produtos do Brasil com o melhor preço 🇧🇷</p>
     <div class="stats">
-      <div class="stat"><b>+15K</b><br><span>Clientes</span></div>
+      <div class="stat"><b>Milhares</b><br><span>Clientes Satisfeitos</span></div>
       <div class="stat"><b>4.9/5</b><br><span>Avaliação</span></div>
       <div class="stat"><b>100%</b><br><span>Seguro</span></div>
     </div>
+  </div>
+
+  <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;padding:0 16px 12px;font-size:11px;color:var(--muted)">
+    <span style="background:var(--card);border:1px solid var(--border);border-radius:50px;padding:6px 12px">✅ Compra Segura</span>
+    <span style="background:var(--card);border:1px solid var(--border);border-radius:50px;padding:6px 12px">🚚 Entrega p/ Brasil</span>
+    <span style="background:var(--card);border:1px solid var(--border);border-radius:50px;padding:6px 12px">🔄 Troca Garantida</span>
+    <span style="background:var(--card);border:1px solid var(--border);border-radius:50px;padding:6px 12px">💳 Pagamento Protegido</span>
   </div>
 
   <div class="cats" id="cats">
@@ -164,7 +171,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="skel-card skeleton"></div>
     <div class="skel-card skeleton"></div>
   </div>
-  <div style="text-align:center;padding:20px 16px 100px;color:var(--muted);font-size:12px">
+  <div style="text-align:center;padding:20px 16px 100px;color:var(--muted);font-size:12px;line-height:2">
+    <div style="margin-bottom:10px">
+      <a href="https://chat.whatsapp.com/HecxNkSIR464oTBVHkMIVf?s=cl&p=a&ilr=0" target="_blank" style="color:var(--muted);text-decoration:none">📱 WhatsApp</a>
+      &nbsp;•&nbsp;
+      <a href="https://instagram.com/jp.shoppew" target="_blank" style="color:var(--muted);text-decoration:none">📷 @jp.shoppew</a>
+    </div>
+    <div style="margin-bottom:10px">
+      <strong style="color:var(--text)">Perguntas frequentes:</strong><br>
+      Como comprar? Escolha o produto e finalize pelo site com Pix ou cartão.<br>
+      Quanto tempo demora a entrega? Depende da região, acompanhe em "Meus Pedidos".<br>
+      É seguro? Sim, pagamentos processados pelo Mercado Pago.
+    </div>
     <a href="politica-de-troca.html" style="color:var(--muted);text-decoration:underline">Política de Troca e Devolução</a>
   </div>
 </div>
@@ -219,39 +237,52 @@ function toast(msg) {
 }
 
 async function loadProducts() {
+  const grid = document.getElementById('grid');
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/produtos?ativo=eq.true&order=created_at.desc', {
-      method: 'GET',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Accept': 'application/json'
-      }
-    });
-    if (!res.ok) throw new Error('Erro ' + res.status);
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Accept': 'application/json'
+    };
+
+    // Tenta com created_at; se a coluna não existir, tenta novamente sem ela.
+    const baseUrl = SUPABASE_URL + '/rest/v1/produtos?ativo=eq.true&select=*';
+    let res = await fetch(baseUrl + '&order=created_at.desc', { method:'GET', headers });
+    if (!res.ok) res = await fetch(baseUrl, { method:'GET', headers });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error('Supabase ' + res.status + ': ' + body.slice(0, 180));
+    }
 
     const data = await res.json();
-    products = data.map(p => ({
-      id: p.id,
-      name: p.nome || 'Produto',
-      price: parseFloat(p.preco_atual || 0),
-      oldPrice: parseFloat(p.preco_antigo || 0) || null,
-      image: p.imagem_url || '',
-      platform: p.loja_origem === 'Mercado Livre' ? 'mercado-livre' :
-                p.loja_origem === 'Shopee' ? 'shopee' :
-                p.loja_origem === 'Shein' ? 'shein' : 'outro',
-      bestseller: !!p.destaque,
-      link: p.link_afiliado || '#',
-      categoria: p.categoria || '',
-      tipo: p.tipo || 'afiliado',
-      paymentLink: p.link_pagamento || '',
-      tamanhos: p.tamanhos || ''
-    }));
+    products = (Array.isArray(data) ? data : []).map(p => {
+      const imageValue = p.imagem_url || p.imagem || p.image_url || '';
+      const image = String(imageValue).split(/[\n,]+/).map(x => x.trim()).filter(Boolean)[0] || '';
+      const loja = String(p.loja_origem || p.loja || '').toLowerCase();
+      return {
+        id: p.id,
+        name: p.nome || p.name || 'Produto',
+        price: parseFloat(p.preco_atual ?? p.preco ?? p.price ?? 0) || 0,
+        oldPrice: parseFloat(p.preco_antigo ?? p.preco_de ?? p.old_price ?? 0) || null,
+        image,
+        platform: loja.includes('mercado') ? 'mercado-livre' :
+                  loja.includes('shopee') ? 'shopee' :
+                  loja.includes('shein') ? 'shein' : 'outro',
+        bestseller: p.destaque === true || p.destaque === 'true' || p.destaque === 1,
+        link: p.link_afiliado || p.link || '#',
+        categoria: p.categoria || '',
+        tipo: p.tipo || 'afiliado',
+        paymentLink: p.link_pagamento || '',
+        tamanhos: p.tamanhos || ''
+      };
+    });
 
     render();
     updateCartBadge();
   } catch (e) {
-    document.getElementById('grid').innerHTML = `<div class="empty">Erro ao carregar produtos.<br><small>${escapeHtml(e.message)}</small></div>`;
+    console.error('Erro ao carregar produtos:', e);
+    grid.innerHTML = `<div class="empty">Não foi possível carregar os produtos.<br><small>${escapeHtml(e.message)}</small><br><br>Verifique a tabela "produtos" e as permissões do Supabase.</div>`;
   }
 }
 
@@ -281,19 +312,6 @@ function renderSuggestions() {
     box.classList.add('show');
   }
   render();
-}
-
-function firstImage(v) {
-  if (Array.isArray(v)) return v.map(x => String(x).trim()).filter(Boolean)[0] || '';
-  const s = String(v || '').trim();
-  if (!s) return '';
-  try {
-    if (s[0] === '[') {
-      const arr = JSON.parse(s);
-      if (Array.isArray(arr)) return arr.map(x => String(x).trim()).filter(Boolean)[0] || '';
-    }
-  } catch(e) {}
-  return s.split(/[\n,]+/).map(x => x.trim()).filter(Boolean)[0] || '';
 }
 
 function pickSuggestion(id) {
@@ -360,8 +378,7 @@ function render() {
       badge = '<span class="badge b-ds">Loja Própria</span>';
     } else if (p.platform === 'mercado-livre') {
       badge = '<span class="badge b-ml">Mercado Livre</span>';
-    } else if (p.platform === 'shopee') {
-      badge = '<span class="badge b-sh">Shopee</span>';
+   badge = '<span class="badge b-sh">Shopee</span>';
     } else {
       badge = '<span class="badge b-disc">Oferta</span>';
     }
@@ -372,12 +389,12 @@ function render() {
     const temTamanho = (p.tamanhos||'').split(',').map(function(s){return s.trim()}).filter(Boolean).length>0;
 
     const buyLink = p.tipo === 'dropshipping'
-      ? (temTamanho ? ('produto.html?id=' + p.id) : ('produto.html?id=' + p.id))
-      : ('produto.html?id=' + p.id);
-    const buyTarget = '_self';
+      ? (temTamanho ? ('produto.html?id=' + p.id) : ('checkout.html?id=' + p.id))
+      : p.link;
+    const buyTarget = p.tipo === 'dropshipping' ? '_self' : '_blank';
     const buyLabel = p.tipo === 'dropshipping'
-      ? (temTamanho ? 'VER OPÇÕES →' : 'VER DETALHES →')
-      : 'VER DETALHES →';
+      ? (temTamanho ? 'VER OPÇÕES →' : 'COMPRAR AGORA →')
+      : 'GARANTIR OFERTA →';
 
     const extraBtn = p.tipo === 'dropshipping'
       ? (temTamanho
@@ -385,7 +402,7 @@ function render() {
           : `<button class="share" onclick="event.stopPropagation();addToCart('${p.id}')" title="Adicionar ao carrinho">🛒</button>`)
       : `<button class="share" onclick="event.stopPropagation();shareProd('${p.id}')">📤</button>`;
 
-    const imgSrc = firstImage(p.image) || 'https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Shoppew';
+    const imgSrc = p.image || 'https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades';
 
     return `
       <div class="card" onclick="location.href='produto.html?id=${p.id}'">
@@ -393,10 +410,10 @@ function render() {
           <img src="${escapeHtml(imgSrc)}" 
                alt="${escapeHtml(p.name)}" 
                loading="lazy" 
-               onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Shoppew'">
+               onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades'">
           ${p.bestseller ? '<span class="b-best">🔥 MAIS VENDIDO</span>' : ''}
           ${badge}
- <button class="fav ${isFav ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${isFav ? '❤️' : '🤍'}</button>
+          <button class="fav ${isFav ? 'active' : ''}" onclick="event.stopPropagation();toggleFav('${p.id}')">${isFav ? '❤️' : '🤍'}</button>
         </div>
         <div class="card-info">
           <div class="card-title">${escapeHtml(p.name)}</div>
@@ -425,15 +442,15 @@ function renderFav() {
   }
 
   g.innerHTML = list.map(p => {
-    const buyLink = 'produto.html?id=' + p.id;
-    const buyTarget = '_self';
-    const buyLabel = p.tipo === 'dropshipping' ? 'VER DETALHES →' : 'VER DETALHES →';
-    const imgSrc = firstImage(p.image) || 'https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Shoppew';
+    const buyLink = p.tipo === 'dropshipping' ? ('checkout.html?id=' + p.id) : p.link;
+    const buyTarget = p.tipo === 'dropshipping' ? '_self' : '_blank';
+    const buyLabel = p.tipo === 'dropshipping' ? 'COMPRAR AGORA →' : 'GARANTIR OFERTA →';
+    const imgSrc = p.image || 'https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades';
 
     return `
       <div class="card">
         <div class="card-img">
-          <img src="${escapeHtml(imgSrc)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Shoppew'">
+          <img src="${escapeHtml(imgSrc)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x300/1a1a1a/00e676?text=JP+Variedades'">
           <button class="fav active" onclick="toggleFav('${p.id}')">❤️</button>
         </div>
         <div class="card-info">
@@ -527,18 +544,17 @@ setupLP(document.getElementById('adminTrigger'));
 setupLP(document.getElementById('heroLogo'));
 
 // Tema
-let dark = true;
+let dark = localStorage.getItem('jp_theme') !== 'light';
+if (!dark) document.body.classList.add('light');
 function toggleTheme() {
   dark = !dark;
   document.body.classList.toggle('light', !dark);
-  document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = dark ? '🌙' : '☀️';
   localStorage.setItem('jp_theme', dark ? 'dark' : 'light');
 }
-if (localStorage.getItem('jp_theme') === 'light') {
-  dark = false;
-  document.body.classList.add('light');
-  document.getElementById('themeBtn').textContent = '☀️';
-}
+const themeBtnInit = document.getElementById('themeBtn');
+if (themeBtnInit) themeBtnInit.textContent = dark ? '🌙' : '☀️';
 
 // Carrinho
 function getCart() {
