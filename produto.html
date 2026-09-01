@@ -6,28 +6,12 @@
 <meta name="theme-color" content="#0a0a0a" id="themeColorMeta">
 <title>Produto - JP Variedades</title>
 <style>
-:root{
---bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;
---accent:#00e676;--accent-dark:#00c853;--danger:#ff5252;--input-bg:#0a0a0a;
-}
-body.light{
---bg:#fff;--card:#f5f5f5;--border:#dedede;--text:#111;--muted:#666;
---accent:#00a85a;--accent-dark:#008f4d;--danger:#e53935;--input-bg:#fff;
-}
-body.light .desc-text,body.light .av-comentario{color:#333}
-body.light .img-arrow{background:rgba(0,0,0,.35);color:#fff}
-body.light .img-dots span{background:rgba(0,0,0,.25)}
-body.light .img-dots span.active{background:var(--accent)}
-body.light .desconto{color:#000}
-body.light .btn-outline{background:transparent}
-body.light .section{border-top-color:var(--bg)}
-body.light{--bg:#f5f5f5;--card:#fff;--border:#ddd;--text:#1a1a1a;--muted:#666;--accent:#00c853;--accent-dark:#009624}
+:root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .header{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .voltar{color:var(--text);text-decoration:none;font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--border)}
-.titulo{font-weight:800;font-size:16px;flex:1}
-.tema-btn{width:36px;height:36px;border:0;border-radius:50%;background:var(--border);color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.titulo{font-weight:800;font-size:16px}
 .container{max-width:600px;margin:auto;padding-bottom:110px}
 .img-box{width:100%;aspect-ratio:1;background:var(--card)}
 .img-box img{width:100%;height:100%;object-fit:cover}
@@ -57,7 +41,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .av-comentario{font-size:13px;color:#ddd;margin-top:4px}
 .form-group{margin-bottom:12px}
 .form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:14px;outline:none;font-family:inherit}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;outline:none;font-family:inherit}
 .star-select{display:flex;gap:6px;font-size:24px;margin-bottom:12px}
 .star-select span{cursor:pointer;color:var(--border)}
 .star-select span.active{color:#ffc107}
@@ -68,14 +52,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .footer-fixo .btn{margin:0}
 .empty{text-align:center;color:var(--muted);padding:30px;font-size:13px}
 .loading{text-align:center;color:var(--muted);padding:60px}
+
+body.light{--bg:#f5f5f5;--card:#fff;--border:#ddd;--text:#111;--muted:#666}
+body.light .desc-text{color:#444}
+body.light .av-comentario{color:#444}
+body.light .tam-btn{background:#f5f5f5}
+body.light .img-box{background:#fff}
 </style>
 </head>
 <body>
 
 <div class="header">
   <a href="index.html" class="voltar">←</a>
-  <div class="titulo">JP Shoppew ✓</div>
-  <button class="tema-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Alternar tema">🌙</button>
+  <div class="titulo">JP_variedades ✓</div>
 </div>
 
 <div class="container" id="container">
@@ -90,26 +79,6 @@ let produto=null;
 let tamanhoSelecionado=null;
 let notaSelecionada=0;
 
-// Tema compartilhado com todas as páginas da loja.
-// O index.html grava "dark" ou "light" em localStorage; esta página usa a mesma preferência.
-let dark = localStorage.getItem('jp_theme') !== 'light';
-
-function aplicarTema(){
-  document.body.classList.toggle('light', !dark);
-  const btn=document.getElementById('themeBtn');
-  if(btn) btn.textContent=dark?'🌙':'☀️';
-  const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content', dark?'#0a0a0a':'#f5f5f5');
-}
-
-function toggleTheme(){
-  dark=!dark;
-  localStorage.setItem('jp_theme', dark?'dark':'light');
-  aplicarTema();
-}
-
-aplicarTema();
-
 function fmt(p){return'R$ '+Number(p).toFixed(2).replace('.',',')}
 function disc(o,p){if(!o||o<=p)return'';return'-'+Math.round((o-p)/o*100)+'%'}
 function getParam(n){return new URLSearchParams(location.search).get(n)}
@@ -123,24 +92,6 @@ function estrelas(nota){
   }
   return html;
 }
-
-// Tema da loja: usa a mesma preferência salva pela página inicial.
-function aplicarTema(){
-  const tema=localStorage.getItem('jp_theme') || 'dark';
-  const claro=tema==='light';
-  document.body.classList.toggle('light',claro);
-  const btn=document.getElementById('themeBtn');
-  if(btn) btn.textContent=claro?'☀️':'🌙';
-  const meta=document.getElementById('themeColorMeta');
-  if(meta) meta.setAttribute('content',claro?'#ffffff':'#0a0a0a');
-}
-function toggleTheme(){
-  const temaAtual=localStorage.getItem('jp_theme') || 'dark';
-  localStorage.setItem('jp_theme',temaAtual==='light'?'dark':'light');
-  aplicarTema();
-}
-// Aplica imediatamente ao abrir a página do produto.
-aplicarTema();
 
 async function carregarProduto(){
   const id=getParam('id');
@@ -371,13 +322,6 @@ async function enviarAvaliacao(){
     alert('Não foi possível enviar sua avaliação. Tenta de novo.');
   }
 }
-
-window.addEventListener('storage',function(e){
-  if(e.key==='jp_theme'){
-    dark=e.newValue!=='light';
-    aplicarTema();
-  }
-});
 
 carregarProduto();
 </script>
