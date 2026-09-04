@@ -10,8 +10,8 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const MATT_WORD = process.env.ML_MATT_WORD;
 const MATT_TOOL = process.env.ML_MATT_TOOL;
 
-const TERMOS_BUSCA = ['fone de ouvido bluetooth', 'echo dot', 'kit ferramentas'];
-const DESCONTO_MINIMO = 20;
+const TERMOS_BUSCA = ['fone bluetooth', 'smartwatch', 'panela eletrica', 'fritadeira sem oleo', 'carregador portatil', 'mochila'];
+const DESCONTO_MINIMO = 10;
 
 export default async function handler(req, res) {
   try {
