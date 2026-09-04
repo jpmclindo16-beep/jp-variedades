@@ -15,6 +15,14 @@ const DESCONTO_MINIMO = 10;
 
 export default async function handler(req, res) {
   try {
+    // MODO DEBUG: acesse /api/buscar-ofertas?debug=1 pra ver a estrutura real de um produto
+    if (req.query.debug) {
+      const url = `https://api.mercadolibre.com/sites/MLB/search?q=fone bluetooth&limit=3`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      return res.status(200).json({ amostra: data.results?.slice(0, 2) || data });
+    }
+
     const ofertasEncontradas = [];
 
     for (const termo of TERMOS_BUSCA) {
