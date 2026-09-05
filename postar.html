@@ -68,7 +68,7 @@
 </head>
 <body>
 
-<h1>🔥 Postar oferta no Telegram e Facebook</h1>
+<h1>🔥 Postar oferta no Telegram, Facebook e Instagram</h1>
 
 <form id="form-oferta">
   <label>Título do produto *</label>
@@ -83,10 +83,10 @@
   <label>Link de afiliado *</label>
   <input type="url" id="link" required>
 
-  <label>URL da imagem — opcional</label>
+  <label>URL da imagem — opcional (obrigatória para postar no Instagram)</label>
   <input type="url" id="imagem">
 
-  <button type="submit" id="botao-enviar">Postar no Telegram e Facebook</button>
+  <button type="submit" id="botao-enviar">Postar no Telegram, Facebook e Instagram</button>
 </form>
 
 <div id="resultado"></div>
@@ -120,18 +120,21 @@ document.getElementById('form-oferta').addEventListener('submit', async (e) => {
     const json = await resp.json();
 
     if (json.ok) {
-      let mensagem = '✅ Oferta postada com sucesso!';
-      
-      if (json.telegram && json.facebook) {
-        mensagem = '✅ Oferta postada no Telegram e no Facebook!';
-      } else if (json.telegram) {
-        mensagem = '✅ Oferta postada no Telegram! ⚠️ Falha no Facebook.';
-      } else if (json.facebook) {
-        mensagem = '✅ Oferta postada no Facebook! ⚠️ Falha no Telegram.';
+      let partes = [];
+      if (json.telegram) partes.push('Telegram');
+      if (json.facebook) partes.push('Facebook');
+      if (json.instagram) partes.push('Instagram');
+
+      let mensagem = partes.length > 0
+        ? '✅ Postado em: ' + partes.join(', ') + '!'
+        : '⚠️ Nenhuma plataforma recebeu a postagem.';
+
+      if (!json.instagram && json.instagramMsg) {
+        mensagem += ' (Instagram: ' + json.instagramMsg + ')';
       }
-      
+
       resultado.textContent = mensagem;
-      resultado.className = 'sucesso';
+      resultado.className = partes.length > 0 ? 'sucesso' : 'erro';
       document.getElementById('form-oferta').reset();
     } else {
       resultado.textContent = '❌ Erro: ' + (json.error || 'algo deu errado');
@@ -143,7 +146,7 @@ document.getElementById('form-oferta').addEventListener('submit', async (e) => {
   }
 
   botao.disabled = false;
-  botao.textContent = 'Postar no Telegram e Facebook';
+  botao.textContent = 'Postar no Telegram, Facebook e Instagram';
 });
 </script>
 
