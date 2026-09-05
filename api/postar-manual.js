@@ -8,13 +8,54 @@ export default async function handler(req, res) {
   const FACEBOOK_PAGE_ID = process.env.FACEBOOK_PAGE_ID;
   const FACEBOOK_PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
   const INSTAGRAM_BUSINESS_ACCOUNT_ID = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
+  const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
+
+  // Função que baixa a imagem original e re-hospeda no imgbb,
+  // devolvendo um novo link público que não sofre bloqueio de hotlink.
+  async function rehospedarImagem(urlOriginal) {
+    if (!urlOriginal || !IMGBB_API_KEY) return urlOriginal;
+
+    try {
+      const imgResp = await fetch(urlOriginal);
+      if (!imgResp.ok) {
+        console.error('Falha ao baixar imagem original:', imgResp.status);
+        return urlOriginal;
+      }
+
+      const buffer = await imgResp.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+
+      const uploadResp = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ image: base64 }),
+      });
+
+      const uploadData = await uploadResp.json();
+
+      if (uploadData.success) {
+        console.log('Imagem re-hospedada com sucesso:', uploadData.data.url);
+        return uploadData.data.url;
+      } else {
+        console.error('Falha ao re-hospedar no imgbb:', JSON.stringify(uploadData));
+        return urlOriginal;
+      }
+    } catch (err) {
+      console.error('Erro ao re-hospedar imagem:', err);
+      return urlOriginal;
+    }
+  }
 
   try {
-    const { titulo, precoAtual, precoOriginal, imagem, link } = req.body;
+    const { titulo, precoAtual, precoOriginal, imagem: imagemOriginal, link } = req.body;
 
     if (!titulo || !precoAtual || !link) {
       return res.status(400).json({ error: 'Preencha pelo menos título, preço atual e link.' });
     }
+
+    // Re-hospeda a imagem uma única vez e reaproveita o novo link
+    // em todas as plataformas (Telegram, Facebook e Instagram).
+    const imagem = imagemOriginal ? await rehospedarImagem(imagemOriginal) : null;
 
     let mensagemTelegram = `🔥 *${titulo}*\n\n`;
 
@@ -110,6 +151,7 @@ export default async function handler(req, res) {
           }),
         });
         const facebookData = await facebookResp.json();
+        console.log('Facebook resposta completa:', JSON.stringify(facebookData));
         if (facebookData.error) facebookOk = false;
       } else {
         const facebookResp = await fetch(`${baseFacebook}/feed`, {
@@ -121,6 +163,7 @@ export default async function handler(req, res) {
           }),
         });
         const facebookData = await facebookResp.json();
+        console.log('Facebook resposta completa:', JSON.stringify(facebookData));
         if (facebookData.error) facebookOk = false;
       }
     } catch (err) {
@@ -150,7 +193,7 @@ export default async function handler(req, res) {
           }),
         });
         const containerData = await containerResp.json();
-        console.log('Instagram container:', containerData);
+        console.log('Instagram container:', JSON.stringify(containerData));
 
         if (containerData.error) {
           instagramOk = false;
@@ -166,7 +209,7 @@ export default async function handler(req, res) {
             }),
           });
           const publishData = await publishResp.json();
-          console.log('Instagram publish:', publishData);
+          console.log('Instagram publish:', JSON.stringify(publishData));
 
           if (publishData.error) {
             instagramOk = false;
