@@ -104,5 +104,5 @@ async function postarNoTelegram(texto, imagemUrl) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: texto, parse_mode: 'Markdown' }),
     });
-  }
-}
+  }njjhh
+}nmmmbvhoknb
