@@ -1,3 +1,5 @@
+import { Jimp } from 'jimp';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
@@ -10,8 +12,9 @@ export default async function handler(req, res) {
   const INSTAGRAM_BUSINESS_ACCOUNT_ID = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
   const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 
-  // Função que baixa a imagem original e re-hospeda no imgbb,
-  // devolvendo um novo link público que não sofre bloqueio de hotlink.
+  // Baixa a imagem original, converte para JPEG (formato aceito por todas
+  // as plataformas, incluindo Instagram) e re-hospeda no imgbb, devolvendo
+  // um novo link público que não sofre bloqueio de hotlink das lojas.
   async function rehospedarImagem(urlOriginal) {
     if (!urlOriginal || !IMGBB_API_KEY) return urlOriginal;
 
@@ -22,8 +25,19 @@ export default async function handler(req, res) {
         return urlOriginal;
       }
 
-      const buffer = await imgResp.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
+      const bufferOriginal = Buffer.from(await imgResp.arrayBuffer());
+
+      // Converte para JPEG usando jimp, independente do formato de origem
+      // (webp, png, etc). Isso garante compatibilidade com o Instagram.
+      let bufferFinal = bufferOriginal;
+      try {
+        const image = await Jimp.read(bufferOriginal);
+        bufferFinal = await image.getBuffer('image/jpeg');
+      } catch (convErr) {
+        console.error('Falha ao converter imagem para JPEG, usando original:', convErr);
+      }
+
+      const base64 = bufferFinal.toString('base64');
 
       const uploadResp = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
         method: 'POST',
