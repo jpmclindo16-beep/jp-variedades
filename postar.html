@@ -68,7 +68,7 @@
 </head>
 <body>
 
-<h1>🔥 Postar oferta no Telegram</h1>
+<h1>🔥 Postar oferta no Telegram e Facebook</h1>
 
 <form id="form-oferta">
   <label>Título do produto *</label>
@@ -86,7 +86,7 @@
   <label>URL da imagem — opcional</label>
   <input type="url" id="imagem">
 
-  <button type="submit" id="botao-enviar">Postar no Telegram</button>
+  <button type="submit" id="botao-enviar">Postar no Telegram e Facebook</button>
 </form>
 
 <div id="resultado"></div>
@@ -120,7 +120,17 @@ document.getElementById('form-oferta').addEventListener('submit', async (e) => {
     const json = await resp.json();
 
     if (json.ok) {
-      resultado.textContent = '✅ Oferta postada com sucesso no Telegram!';
+      let mensagem = '✅ Oferta postada com sucesso!';
+      
+      if (json.telegram && json.facebook) {
+        mensagem = '✅ Oferta postada no Telegram e no Facebook!';
+      } else if (json.telegram) {
+        mensagem = '✅ Oferta postada no Telegram! ⚠️ Falha no Facebook.';
+      } else if (json.facebook) {
+        mensagem = '✅ Oferta postada no Facebook! ⚠️ Falha no Telegram.';
+      }
+      
+      resultado.textContent = mensagem;
       resultado.className = 'sucesso';
       document.getElementById('form-oferta').reset();
     } else {
@@ -133,7 +143,7 @@ document.getElementById('form-oferta').addEventListener('submit', async (e) => {
   }
 
   botao.disabled = false;
-  botao.textContent = 'Postar no Telegram';
+  botao.textContent = 'Postar no Telegram e Facebook';
 });
 </script>
 
