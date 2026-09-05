@@ -8,6 +8,11 @@ export default async function handler(req, res) {
   const FACEBOOK_PAGE_ID = process.env.FACEBOOK_PAGE_ID;
   const FACEBOOK_PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
 
+  // Log para verificar se as variáveis estão sendo lidas
+  console.log('FACEBOOK_PAGE_ID:', FACEBOOK_PAGE_ID);
+  console.log('FACEBOOK_PAGE_TOKEN existe:', FACEBOOK_PAGE_TOKEN ? 'SIM' : 'NÃO');
+  console.log('FACEBOOK_PAGE_TOKEN primeiros 20 chars:', FACEBOOK_PAGE_TOKEN ? FACEBOOK_PAGE_TOKEN.substring(0, 20) : 'N/A');
+
   try {
     const { titulo, precoAtual, precoOriginal, imagem, link } = req.body;
 
@@ -49,7 +54,7 @@ export default async function handler(req, res) {
 
     try {
       if (imagem) {
-        await fetch(`${baseTelegram}/sendPhoto`, {
+        const telegramResp = await fetch(`${baseTelegram}/sendPhoto`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -59,8 +64,13 @@ export default async function handler(req, res) {
             parse_mode: 'Markdown',
           }),
         });
+        const telegramData = await telegramResp.json();
+        console.log('Telegram resposta:', telegramData);
+        if (!telegramData.ok) {
+          telegramOk = false;
+        }
       } else {
-        await fetch(`${baseTelegram}/sendMessage`, {
+        const telegramResp = await fetch(`${baseTelegram}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -69,6 +79,11 @@ export default async function handler(req, res) {
             parse_mode: 'Markdown',
           }),
         });
+        const telegramData = await telegramResp.json();
+        console.log('Telegram resposta:', telegramData);
+        if (!telegramData.ok) {
+          telegramOk = false;
+        }
       }
     } catch (err) {
       telegramOk = false;
@@ -83,7 +98,7 @@ export default async function handler(req, res) {
 
       if (imagem) {
         // Publicar foto no Facebook
-        await fetch(`${baseFacebook}/photos`, {
+        const facebookResp = await fetch(`${baseFacebook}/photos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -92,9 +107,15 @@ export default async function handler(req, res) {
             access_token: FACEBOOK_PAGE_TOKEN,
           }),
         });
+        const facebookData = await facebookResp.json();
+        console.log('Facebook resposta (foto):', facebookData);
+        if (facebookData.error) {
+          facebookOk = false;
+          console.error('Erro Facebook:', facebookData.error);
+        }
       } else {
         // Publicar apenas texto no Facebook
-        await fetch(`${baseFacebook}/feed`, {
+        const facebookResp = await fetch(`${baseFacebook}/feed`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -102,6 +123,12 @@ export default async function handler(req, res) {
             access_token: FACEBOOK_PAGE_TOKEN,
           }),
         });
+        const facebookData = await facebookResp.json();
+        console.log('Facebook resposta (texto):', facebookData);
+        if (facebookData.error) {
+          facebookOk = false;
+          console.error('Erro Facebook:', facebookData.error);
+        }
       }
     } catch (err) {
       facebookOk = false;
