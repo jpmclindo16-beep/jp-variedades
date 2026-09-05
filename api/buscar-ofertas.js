@@ -1,4 +1,4 @@
-/import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -15,7 +15,6 @@ const DESCONTO_MINIMO = 10;
 
 export default async function handler(req, res) {
   try {
-    // MODO DEBUG: acesse /api/buscar-ofertas?debug=1 pra ver a estrutura real de um produto
     if (req.query.debug) {
       const url = `https://api.mercadolibre.com/sites/MLB/search?q=fone bluetooth&limit=3`;
       const resp = await fetch(url);
@@ -104,5 +103,5 @@ async function postarNoTelegram(texto, imagemUrl) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: texto, parse_mode: 'Markdown' }),
     });
-  }njjhh
-}nmmmbvhoknb
+  }
+}
