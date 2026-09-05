@@ -1,4 +1,4 @@
-import { Jimp } from 'jimp';
+import Jimp from 'jimp';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
