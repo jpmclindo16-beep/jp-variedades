@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Postar Oferta</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 4px;
+    font-size: 14px;
+    color: #9198a1;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #e6edf3;
+    box-sizing: border-box;
+    font-size: 15px;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    background: #2ea043;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  button:disabled {
+    background: #444;
+  }
+  #resultado {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    display: none;
+    font-size: 14px;
+  }
+  .sucesso {
+    background: #0d3320;
+    color: #4dd47e;
+    display: block !important;
+  }
+  .erro {
+    background: #3d1116;
+    color: #ff7b72;
+    display: block !important;
+  }
+</style>
+</head>
+<body>
+
+<h1>🔥 Postar oferta no Telegram</h1>
+
+<form id="form-oferta">
+  <label>Título do produto *</label>
+  <input type="text" id="titulo" required>
+
+  <label>Preço atual (R$) *</label>
+  <input type="number" step="0.01" id="precoAtual" required>
+
+  <label>Preço original (R$) — opcional, deixa em branco se não tiver desconto</label>
+  <input type="number" step="0.01" id="precoOriginal">
+
+  <label>Link de afiliado *</label>
+  <input type="url" id="link" required>
+
+  <label>URL da imagem — opcional</label>
+  <input type="url" id="imagem">
+
+  <button type="submit" id="botao-enviar">Postar no Telegram</button>
+</form>
+
+<div id="resultado"></div>
+
+<script>
+document.getElementById('form-oferta').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const botao = document.getElementById('botao-enviar');
+  const resultado = document.getElementById('resultado');
+  botao.disabled = true;
+  botao.textContent = 'Enviando...';
+  resultado.className = '';
+  resultado.style.display = 'none';
+
+  const dados = {
+    titulo: document.getElementById('titulo').value,
+    precoAtual: document.getElementById('precoAtual').value,
+    precoOriginal: document.getElementById('precoOriginal').value || null,
+    link: document.getElementById('link').value,
+    imagem: document.getElementById('imagem').value || null,
+  };
+
+  try {
+    const resp = await fetch('/api/postar-manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados),
+    });
+
+    const json = await resp.json();
+
+    if (json.ok) {
+      resultado.textContent = '✅ Oferta postada com sucesso no Telegram!';
+      resultado.className = 'sucesso';
+      document.getElementById('form-oferta').reset();
+    } else {
+      resultado.textContent = '❌ Erro: ' + (json.error || 'algo deu errado');
+      resultado.className = 'erro';
+    }
+  } catch (err) {
+    resultado.textContent = '❌ Erro de conexão: ' + err.message;
+    resultado.className = 'erro';
+  }
+
+  botao.disabled = false;
+  botao.textContent = 'Postar no Telegram';
+});
+</script>
+
+</body>
+</html>
