@@ -13,11 +13,15 @@ const MATT_TOOL = process.env.ML_MATT_TOOL;
 const TERMOS_BUSCA = ['fone bluetooth', 'smartwatch', 'panela eletrica', 'fritadeira sem oleo', 'carregador portatil', 'mochila'];
 const DESCONTO_MINIMO = 10;
 
+const HEADERS_ML = {
+  'User-Agent': 'Mozilla/5.0 (compatible; AcelaraOfertasBot/1.0)'
+};
+
 export default async function handler(req, res) {
   try {
     if (req.query.debug) {
       const url = `https://api.mercadolibre.com/sites/MLB/search?q=fone bluetooth&limit=3`;
-      const resp = await fetch(url);
+      const resp = await fetch(url, { headers: HEADERS_ML });
       const data = await resp.json();
       return res.status(200).json({ amostra: data.results?.slice(0, 2) || data });
     }
@@ -26,7 +30,7 @@ export default async function handler(req, res) {
 
     for (const termo of TERMOS_BUSCA) {
       const url = `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(termo)}&limit=10`;
-      const resp = await fetch(url);
+      const resp = await fetch(url, { headers: HEADERS_ML });
       const data = await resp.json();
 
       for (const item of data.results || []) {
