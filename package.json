@@ -4,7 +4,8 @@
   "private": true,
   "dependencies": {
     "mercadopago": "^3.0.0",
-    "@supabase/supabase-js": "^2.45.0"
+    "@supabase/supabase-js": "^2.45.0",
+    "jimp": "^0.22.12"
   },
   "engines": {
     "node": ">=18"
