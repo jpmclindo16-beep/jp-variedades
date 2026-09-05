@@ -52,22 +52,21 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
 .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);overflow-x:auto}.tab{padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);font-weight:600;white-space:nowrap}.tab.active{border-bottom-color:var(--accent);color:var(--accent)}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--text);padding:12px 20px;border-radius:50px;font-size:13px;border:1px solid var(--border);z-index:400;display:none}.toast.on{display:block}.toast.ok{border-color:var(--accent);color:var(--accent)}.toast.err{border-color:var(--danger);color:var(--danger)}
 
-.import-search{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:12px}
-.import-search input{width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;outline:none}
-.import-search select{padding:13px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;outline:none}
-.import-btn{padding:12px 16px;border-radius:10px;border:none;background:var(--accent);color:#000;font-weight:800;cursor:pointer;white-space:nowrap}
-.channel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
-.channel{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px}
-.channel input{width:18px;height:18px;accent-color:var(--accent)}
-.import-result{display:grid;gap:8px;margin-top:12px}
-.import-product{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--card)}
-.import-product img{width:64px;height:64px;object-fit:cover;border-radius:8px;background:var(--border);flex-shrink:0}
-.import-product .info{flex:1;min-width:0}.import-product h4{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.import-product small{color:var(--muted)}
-.import-product .actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.import-product button{padding:8px 10px;border:0;border-radius:8px;background:var(--accent);color:#000;font-size:11px;font-weight:800;cursor:pointer}
-.import-product button.secondary{background:var(--border);color:var(--text)}
-.notice{padding:10px 12px;border-radius:10px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);color:#f5c76a;font-size:12px;line-height:1.4;margin-bottom:12px}
-@media(max-width:520px){.import-search{grid-template-columns:1fr}.channel-grid{grid-template-columns:1fr}.import-product{align-items:flex-start}.import-product .actions{width:100%}.import-product button{flex:1}}
+.import-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.import-toolbar input,.import-toolbar select{flex:1;min-width:150px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;outline:none}
+.import-toolbar button,.channel-btn{padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--border);color:var(--text);font-weight:700;cursor:pointer}
+.import-toolbar button.primary{background:var(--accent);color:#000;border-color:var(--accent)}
+.import-results{display:grid;gap:10px}
+.import-card{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.import-card img{width:72px;height:72px;object-fit:cover;border-radius:10px;background:var(--border);flex-shrink:0}
+.import-card-info{flex:1;min-width:0}.import-card-info h4{font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.import-card-info .source{font-size:11px;color:var(--muted);margin-bottom:3px}.import-card-info .import-price{font-size:15px;color:var(--accent);font-weight:800}
+.import-card button{padding:9px 11px;border:0;border-radius:9px;background:var(--accent);color:#000;font-weight:800;cursor:pointer;white-space:nowrap}
+.import-help{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}
+.channels{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0 14px}
+.channel-btn{display:flex;align-items:center;gap:8px;text-align:left}.channel-btn.on{background:rgba(0,230,118,.15);border-color:var(--accent);color:var(--accent)}
+@media(min-width:768px){.channels{grid-template-columns:repeat(5,1fr)}}
+
 @media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
@@ -88,7 +87,6 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
   <div class="nav">
     <button class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
     <button class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</button>
-    <button class="nav-item" onclick="showPage('importar',this);initImportPage()">📥 Importar</button>
     <button class="nav-item" onclick="showPage('pedidos',this)">📦 Pedidos</button>
     <button class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</button>
     <button class="nav-item" onclick="showPage('config',this)">⚙️ Config</button>
@@ -114,36 +112,6 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
       <div id="lista"></div><button class="fab" onclick="openForm()">+</button>
     </div>
 
-    <div class="page" id="page-importar">
-      <div class="page-title">📥 Importar Produtos</div>
-      <div class="notice">As chaves das APIs e tokens de publicação devem ficar no backend. Este painel chama endpoints seguros do seu servidor e não expõe essas credenciais no navegador.</div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">🔎 Buscar em marketplaces</div></div>
-        <div class="card-body">
-          <div class="import-search">
-            <input id="importQuery" type="search" placeholder="Ex: fone bluetooth, relógio, TV..." onkeypress="if(event.key==='Enter')searchImportedProducts()">
-            <select id="importSource"><option value="mercadolivre">Mercado Livre</option><option value="shopee">Shopee</option><option value="shein">SHEIN</option><option value="todos">Todos</option></select>
-            <button class="import-btn" onclick="searchImportedProducts()">🔎 Pesquisar</button>
-          </div>
-          <div id="importStatus" style="color:var(--muted);font-size:12px"></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">📢 Onde publicar</div><button class="import-btn" onclick="selectAllChannels()">Selecionar todos</button></div>
-        <div class="card-body">
-          <div class="channel-grid">
-            <label class="channel"><input type="checkbox" class="publish-channel" value="site" checked> 🌐 Site</label>
-            <label class="channel"><input type="checkbox" class="publish-channel" value="telegram" checked> 📲 Telegram</label>
-            <label class="channel"><input type="checkbox" class="publish-channel" value="whatsapp" checked> 💬 WhatsApp</label>
-            <label class="channel"><input type="checkbox" class="publish-channel" value="facebook" checked> 🔵 Facebook</label>
-            <label class="channel"><input type="checkbox" class="publish-channel" value="instagram" checked> 📸 Instagram</label>
-          </div>
-          <small style="display:block;color:var(--muted);margin-top:9px">Facebook e Instagram usam a integração oficial da Meta. Grupos do Facebook podem ter limitações de API/permissão.</small>
-        </div>
-      </div>
-      <div id="importResults" class="import-result"></div>
-    </div>
-
     <div class="page" id="page-pedidos">
       <div class="page-title">Pedidos</div>
       <div class="tabs"><div class="tab active" onclick="filterOrders('todos',this)">Todos</div><div class="tab" onclick="filterOrders('pago',this)">Pagos</div><div class="tab" onclick="filterOrders('aguardando_pagamento',this)">Pendentes</div><div class="tab" onclick="filterOrders('enviado',this)">Enviados</div></div>
@@ -166,6 +134,24 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
         <tr><td style="width:50%;color:var(--muted)">Nome da Loja</td><td><b>JP Shoppew</b></td></tr><tr><td style="color:var(--muted)">URL</td><td>jp-variedades.vercel.app</td></tr><tr><td style="color:var(--muted)">Taxa de Lucro</td><td>35%</td></tr><tr><td style="color:var(--muted)">Frete Gratis acima de</td><td>R$ 99,00</td></tr>
       </tbody></table></div></div></div>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="publishModal">
+  <div class="modal-h"><h3>🚀 Publicar produto</h3><button onclick="closePublishModal()">&times;</button></div>
+  <div class="modal-body">
+    <div id="publishPreview" class="card"></div>
+    <div class="form-group"><label>Onde publicar</label>
+      <div class="channels">
+        <button type="button" class="channel-btn on" data-channel="site" onclick="toggleChannel(this)">🌐 Site</button>
+        <button type="button" class="channel-btn" data-channel="telegram" onclick="toggleChannel(this)">📲 Telegram</button>
+        <button type="button" class="channel-btn" data-channel="whatsapp" onclick="toggleChannel(this)">💬 WhatsApp</button>
+        <button type="button" class="channel-btn" data-channel="facebook" onclick="toggleChannel(this)">🔵 Facebook</button>
+        <button type="button" class="channel-btn" data-channel="instagram" onclick="toggleChannel(this)">📸 Instagram</button>
+      </div>
+    </div>
+    <button class="save-btn" onclick="confirmImportAndPublish()">➕ Adicionar e publicar</button>
+    <div class="import-help">As publicações externas dependem das APIs oficiais e dos endpoints configurados no backend.</div>
   </div>
 </div>
 
@@ -514,101 +500,56 @@ async function saveProd(){
 }
 
 
-/* ===== IMPORTAÇÃO E PUBLICAÇÃO MULTICANAL =====
-   O frontend não guarda tokens das plataformas. Ele chama o backend:
-   GET  /api/integracoes/products/search?source=...&q=...
-   POST /api/integracoes/publish
-*/
-const INTEGRATION_API='/api/integracoes';
-let importInitialized=false;
+let importProdutoSelecionado=null;
 
-function initImportPage(){
-  if(importInitialized)return;
-  importInitialized=true;
-  const q=document.getElementById('importQuery');
-  if(q)q.focus();
-}
-
-function selectedChannels(){
-  return [...document.querySelectorAll('.publish-channel:checked')].map(x=>x.value);
-}
-
-function selectAllChannels(){
-  const boxes=[...document.querySelectorAll('.publish-channel')];
-  const all=boxes.every(x=>x.checked);
-  boxes.forEach(x=>x.checked=!all);
-}
-
-function normalizeImportedProduct(p,source){
-  const image=Array.isArray(p.imagens)?p.imagens:(p.imagem_url?[p.imagem_url]:(p.image?[p.image]:[]));
-  return {
-    external_id:p.external_id||p.id||p.product_id||'',
-    nome:p.nome||p.title||p.name||'Produto',
-    preco_atual:Number(p.preco_atual??p.price??0),
-    preco_antigo:p.preco_antigo??p.old_price??p.original_price??null,
-    imagem_url:image.filter(Boolean).join('\n'),
-    link_afiliado:p.link_afiliado||p.affiliate_url||p.affiliate_link||p.url||p.link||'',
-    categoria:p.categoria||p.category||'',
-    descricao:p.descricao||p.description||'',
-    loja_origem:p.loja_origem||source||'Outro',
-    tipo:'afiliado',
-    destaque:false,
-    ativo:true
-  };
-}
-
-async function searchImportedProducts(){
-  const q=document.getElementById('importQuery').value.trim();
-  const source=document.getElementById('importSource').value;
-  const results=document.getElementById('importResults');
-  const status=document.getElementById('importStatus');
+async function buscarImportacao(){
+  const source=document.getElementById('importFonte').value;
+  const q=document.getElementById('importBusca').value.trim();
+  const box=document.getElementById('importResultados');
   if(!q){toast('Digite o produto que deseja pesquisar.',false);return;}
-  status.textContent='Pesquisando...';results.innerHTML='';
+  box.innerHTML='<div class="empty">🔎 Buscando...</div>';
   try{
     const {data:{session}}=await supabaseClient.auth.getSession();
-    if(!session)throw new Error('Sessão expirada. Entre novamente.');
-    const url=INTEGRATION_API+'/products/search?source='+encodeURIComponent(source)+'&q='+encodeURIComponent(q);
-    const res=await fetch(url,{headers:{Authorization:'Bearer '+session.access_token}});
-    if(!res.ok){let msg='Erro '+res.status;try{const e=await res.json();msg=e.error||e.message||msg}catch(_){}throw new Error(msg);}
+    if(!session)throw new Error('Sessao expirada. Entre novamente.');
+    const res=await fetch('/api/products/search?source='+encodeURIComponent(source)+'&q='+encodeURIComponent(q),{headers:{Authorization:'Bearer '+session.access_token}});
+    if(!res.ok)throw new Error('Erro '+res.status);
     const data=await res.json();
-    const list=Array.isArray(data)?data:(data.products||data.results||[]);
-    if(!list.length){status.textContent='Nenhum produto encontrado.';return;}
-    status.textContent=list.length+' produto(s) encontrado(s).';
-    results.innerHTML=list.map((raw,i)=>{
-      const p=normalizeImportedProduct(raw,source);
-      const payload=encodeURIComponent(JSON.stringify(p));
-      const photo=(p.imagem_url||'').split(/\n|,/)[0].trim();
-      return `<div class="import-product"><img src="${escapeHtml(photo)}" onerror="this.style.display='none'"><div class="info"><h4>${escapeHtml(p.nome)}</h4><div class="price">${money(p.preco_atual)}</div><small>${escapeHtml(p.loja_origem)}${p.link_afiliado?' • link disponível':''}</small></div><div class="actions"><button onclick="addImportedProduct('${payload}')">➕ Adicionar</button><button class="secondary" onclick="previewImportedProduct('${payload}')">👁️ Ver</button></div></div>`;
-    }).join('');
-  }catch(e){status.textContent='';results.innerHTML='<div class="empty">Não foi possível buscar os produtos.</div>';toast('Importação: '+e.message,false);}
+    const items=Array.isArray(data)?data:(data.products||data.items||[]);
+    box.innerHTML=items.length?items.map(p=>{
+      const image=p.image_url||p.imagem_url||p.thumbnail||'';
+      const price=p.price??p.preco_atual??0;
+      return `<div class="import-card"><img src="${escapeHtml(image)}" onerror="this.style.visibility='hidden'"><div class="import-card-info"><h4>${escapeHtml(p.title||p.nome||'Produto')}</h4><div class="source">${escapeHtml(p.source||source)}</div><div class="import-price">${money(price)}</div></div><button onclick='selecionarImportacao(${JSON.stringify(p).replace(/</g,"\\u003c")})'>➕ Adicionar</button></div>`;
+    }).join(''):'<div class="empty">Nenhum produto encontrado.</div>';
+  }catch(e){
+    box.innerHTML='<div class="empty">Configure o endpoint /api/products/search no backend para ativar a busca.</div>';
+    toast('Importação: '+e.message,false);
+  }
 }
 
-function previewImportedProduct(encoded){
-  try{const p=JSON.parse(decodeURIComponent(encoded));alert('Produto: '+p.nome+'\nPreço: '+money(p.preco_atual)+'\nLoja: '+p.loja_origem+'\nLink: '+(p.link_afiliado||'Não informado'));}catch(e){toast('Produto inválido.',false)}
+function selecionarImportacao(p){
+  importProdutoSelecionado=p;
+  const image=p.image_url||p.imagem_url||p.thumbnail||'';
+  const price=p.price??p.preco_atual??0;
+  document.getElementById('publishPreview').innerHTML=`<div class="card-body"><b>${escapeHtml(p.title||p.nome||'Produto')}</b><div class="price" style="margin-top:5px">${money(price)}</div></div>`;
+  document.querySelectorAll('.channel-btn').forEach(b=>b.classList.toggle('on',b.dataset.channel==='site'));
+  document.getElementById('publishModal').classList.add('on');
 }
+function toggleChannel(btn){btn.classList.toggle('on')}
+function closePublishModal(){document.getElementById('publishModal').classList.remove('on');importProdutoSelecionado=null}
 
-async function addImportedProduct(encoded){
-  let p;try{p=JSON.parse(decodeURIComponent(encoded));}catch(e){toast('Produto inválido.',false);return}
-  if(!p.nome||!p.preco_atual||!p.imagem_url){toast('O produto retornado pela API está incompleto.',false);return}
-  const channels=selectedChannels();
+async function confirmImportAndPublish(){
+  if(!importProdutoSelecionado){toast('Selecione um produto.',false);return}
+  const channels=[...document.querySelectorAll('.channel-btn.on')].map(b=>b.dataset.channel);
   if(!channels.length){toast('Selecione pelo menos um canal.',false);return}
   try{
     const headers=await getAuthHeaders();
-    const body={...p,publicacao_canais:channels};
-    const res=await fetch(SUPABASE_URL+'/rest/v1/produtos',{method:'POST',headers,body:JSON.stringify(body)});
-    if(!res.ok){let msg='Erro '+res.status;try{const e=await res.json();msg=e.message||msg}catch(_){}throw new Error(msg)}
-    const saved=await res.json();
-    const product=saved&&saved[0]?saved[0]:p;
-    let publishMessage='Produto adicionado ao site.';
-    const externalChannels=channels.filter(c=>c!=='site');
-    if(externalChannels.length){
-      const {data:{session}}=await supabaseClient.auth.getSession();
-      const pub=await fetch(INTEGRATION_API+'/publish',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({product,channels:externalChannels})});
-      if(!pub.ok){let msg='Falha na publicação externa';try{const e=await pub.json();msg=e.error||e.message||msg}catch(_){}publishMessage+=' '+msg+'. O produto continua salvo no site.';}
-      else publishMessage+=' Publicação enviada para: '+externalChannels.join(', ')+'.';
-    }
-    toast(publishMessage,true);loadProds();
-  }catch(e){if(e.message.includes('Sessao')){await logout();return}toast('Erro ao adicionar: '+e.message,false)}
+    const res=await fetch('/api/products/import',{method:'POST',headers,body:JSON.stringify({product:importProdutoSelecionado,channels})});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    const data=await res.json();
+    toast(data.message||'Produto adicionado e publicado!',true);
+    closePublishModal();
+    await loadProds();
+  }catch(e){toast('Não foi possível adicionar/publicar: '+e.message,false)}
 }
 
 /* Recupera sessão existente e monitora logout/expiração */
