@@ -6,17 +6,33 @@
 <title>Conectar com TikTok</title>
 
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     font-family: system-ui, sans-serif;
     background: #0d1117;
     color: #e6edf3;
     margin: 0;
+    min-height: 100vh;
     padding: 40px 20px;
     text-align: center;
   }
 
+  .container {
+    max-width: 420px;
+    margin: 80px auto 0;
+  }
+
   h1 {
-    font-size: 20px;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: #aab4c0;
+    line-height: 1.5;
   }
 
   a.botao {
@@ -30,41 +46,55 @@
     font-size: 16px;
     font-weight: bold;
   }
+
+  a.botao:hover {
+    opacity: 0.9;
+  }
 </style>
 </head>
 
 <body>
 
-<h1>🎵 Conectar com TikTok</h1>
+<div class="container">
 
-<p>
-  Clique abaixo para autorizar o JP Ofertas Bot.
-</p>
+  <h1>🎵 Conectar com TikTok</h1>
 
-<a class="botao" id="link-login" href="#">
-  Entrar com TikTok
-</a>
+  <p>
+    Clique abaixo para entrar com sua conta do TikTok
+    e autorizar o JP Ofertas Bot.
+  </p>
+
+  <a class="botao" id="link-login" href="#">
+    Entrar com TikTok
+  </a>
+
+</div>
 
 <script>
-const CLIENT_KEY = 'SEU_CLIENT_KEY_AQUI';
+  // Client Key do aplicativo TikTok
+  const CLIENT_KEY = 'awhix2ag9yx68zr1';
 
-const REDIRECT_URI =
-  'https://jp-variedades.vercel.app/tiktok-callback.html';
+  // Deve ser EXATAMENTE igual ao cadastrado no TikTok Developer
+  const REDIRECT_URI =
+    'https://jp-variedades.vercel.app/tiktok-callback.html';
 
-const STATE =
-  crypto.randomUUID();
+  // Estado temporário para a solicitação OAuth
+  const STATE = crypto.randomUUID();
 
-const params = new URLSearchParams({
-  client_key: CLIENT_KEY,
-  response_type: 'code',
-  scope: 'user.info.basic',
-  redirect_uri: REDIRECT_URI,
-  state: STATE
-});
+  // Primeiro vamos testar somente a permissão básica
+  const params = new URLSearchParams({
+    client_key: CLIENT_KEY,
+    response_type: 'code',
+    scope: 'user.info.basic',
+    redirect_uri: REDIRECT_URI,
+    state: STATE
+  });
 
-document.getElementById('link-login').href =
-  'https://www.tiktok.com/v2/auth/authorize/?' +
-  params.toString();
+  const loginUrl =
+    'https://www.tiktok.com/v2/auth/authorize/?' +
+    params.toString();
+
+  document.getElementById('link-login').href = loginUrl;
 </script>
 
 </body>
