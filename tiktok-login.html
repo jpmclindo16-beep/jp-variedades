@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conectar com TikTok</title>
+
 <style>
   body {
     font-family: system-ui, sans-serif;
@@ -13,7 +14,11 @@
     padding: 40px 20px;
     text-align: center;
   }
-  h1 { font-size: 20px; }
+
+  h1 {
+    font-size: 20px;
+  }
+
   a.botao {
     display: inline-block;
     margin-top: 24px;
@@ -27,22 +32,39 @@
   }
 </style>
 </head>
+
 <body>
 
 <h1>🎵 Conectar com TikTok</h1>
-<p>Clique abaixo para autorizar o JP Ofertas Bot a publicar vídeos no seu perfil.</p>
 
-<a class="botao" id="link-login" href="#">Entrar com TikTok</a>
+<p>
+  Clique abaixo para autorizar o JP Ofertas Bot.
+</p>
+
+<a class="botao" id="link-login" href="#">
+  Entrar com TikTok
+</a>
 
 <script>
-  const CLIENT_KEY = 'awhix2ag9yx68zr1';
-  const REDIRECT_URI = encodeURIComponent('https://jp-variedades.vercel.app/tiktok-callback.html');
-  const SCOPE = 'user.info.basic,video.publish,video.upload';
-  const STATE = Math.random().toString(36).substring(2);
+const CLIENT_KEY = 'SEU_CLIENT_KEY_AQUI';
 
-  const url = `https://www.tiktok.com/v2/auth/authorize/?client_key=${CLIENT_KEY}&scope=${SCOPE}&response_type=code&redirect_uri=${REDIRECT_URI}&state=${STATE}`;
+const REDIRECT_URI =
+  'https://jp-variedades.vercel.app/tiktok-callback.html';
 
-  document.getElementById('link-login').href = url;
+const STATE =
+  crypto.randomUUID();
+
+const params = new URLSearchParams({
+  client_key: CLIENT_KEY,
+  response_type: 'code',
+  scope: 'user.info.basic',
+  redirect_uri: REDIRECT_URI,
+  state: STATE
+});
+
+document.getElementById('link-login').href =
+  'https://www.tiktok.com/v2/auth/authorize/?' +
+  params.toString();
 </script>
 
 </body>
