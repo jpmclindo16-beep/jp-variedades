@@ -1,101 +1,238 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conectar com TikTok</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conectar com TikTok</title>
 
-<style>
-  * {
-    box-sizing: border-box;
-  }
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-  body {
-    font-family: system-ui, sans-serif;
-    background: #0d1117;
-    color: #e6edf3;
-    margin: 0;
-    min-height: 100vh;
-    padding: 40px 20px;
-    text-align: center;
-  }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-  .container {
-    max-width: 420px;
-    margin: 80px auto 0;
-  }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 24px;
+      text-align: center;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      box-shadow: 0 10px 35px rgba(0,0,0,.35);
+    }
 
-  h1 {
-    font-size: 24px;
-    margin-bottom: 12px;
-  }
+    .icone {
+      font-size: 52px;
+      margin-bottom: 10px;
+    }
 
-  p {
-    color: #aab4c0;
-    line-height: 1.5;
-  }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
 
-  a.botao {
-    display: inline-block;
-    margin-top: 24px;
-    padding: 14px 28px;
-    background: #ff0050;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-  }
+    p {
+      margin: 0;
+      color: #9da7b3;
+      line-height: 1.5;
+      font-size: 15px;
+    }
 
-  a.botao:hover {
-    opacity: 0.9;
-  }
-</style>
+    .botao {
+      display: block;
+      width: 100%;
+      margin-top: 28px;
+      padding: 15px 20px;
+      border: 0;
+      border-radius: 10px;
+      background: #ff0050;
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .botao:active {
+      transform: scale(.98);
+    }
+
+    .aviso {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #6e7681;
+    }
+
+    #erro {
+      display: none;
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #3d1116;
+      color: #ff7b72;
+      font-size: 13px;
+      word-break: break-word;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <div class="card">
 
-  <h1>🎵 Conectar com TikTok</h1>
+    <div class="icone">🎵</div>
 
-  <p>
-    Clique abaixo para entrar com sua conta do TikTok
-    e autorizar o JP Ofertas Bot.
-  </p>
+    <h1>Conectar com TikTok</h1>
 
-  <a class="botao" id="link-login" href="#">
-    Entrar com TikTok
-  </a>
+    <p>
+      Entre com sua conta do TikTok para autorizar
+      o JP Ofertas Bot.
+    </p>
 
-</div>
+    <a
+      id="link-login"
+      class="botao"
+      href="#"
+    >
+      Entrar com TikTok
+    </a>
 
-<script>
-  // Client Key do aplicativo TikTok
-  const CLIENT_KEY = 'awhix2ag9yx68zr1';
+    <div class="aviso">
+      Você será direcionado para o TikTok para autorizar o acesso.
+    </div>
 
-  // Deve ser EXATAMENTE igual ao cadastrado no TikTok Developer
-  const REDIRECT_URI =
-    'https://jp-variedades.vercel.app/tiktok-callback.html';
+    <div id="erro"></div>
 
-  // Estado temporário para a solicitação OAuth
-  const STATE = crypto.randomUUID();
+  </div>
 
-  // Primeiro vamos testar somente a permissão básica
-  const params = new URLSearchParams({
-    client_key: CLIENT_KEY,
-    response_type: 'code',
-    scope: 'user.info.basic',
-    redirect_uri: REDIRECT_URI,
-    state: STATE
-  });
+  <script>
+    /*
+     * ==========================================
+     * CONFIGURAÇÃO DO TIKTOK
+     * ==========================================
+     */
 
-  const loginUrl =
-    'https://www.tiktok.com/v2/auth/authorize/?' +
-    params.toString();
+    // SUA CLIENT KEY
+    const CLIENT_KEY = 'awhix2ag9yx68zr1';
 
-  document.getElementById('link-login').href = loginUrl;
-</script>
+    // URL cadastrada no TikTok Developer
+    const REDIRECT_URI =
+      'https://jp-variedades.vercel.app/tiktok-callback.html';
+
+
+    /*
+     * ==========================================
+     * GERAR STATE DE SEGURANÇA
+     * ==========================================
+     */
+
+    let STATE;
+
+    try {
+      STATE = crypto.randomUUID();
+    } catch (e) {
+      STATE =
+        Date.now().toString(36) +
+        Math.random().toString(36).substring(2);
+    }
+
+
+    /*
+     * ==========================================
+     * PERMISSÃO INICIAL
+     * ==========================================
+     *
+     * Primeiro vamos testar somente o Login Kit
+     * básico. Depois que o login funcionar,
+     * configuramos a publicação.
+     */
+
+    const SCOPE = 'user.info.basic';
+
+
+    /*
+     * ==========================================
+     * MONTAR URL DO TIKTOK
+     * ==========================================
+     */
+
+    const params = new URLSearchParams();
+
+    params.set('client_key', CLIENT_KEY);
+    params.set('response_type', 'code');
+    params.set('scope', SCOPE);
+    params.set('redirect_uri', REDIRECT_URI);
+    params.set('state', STATE);
+
+    const LOGIN_URL =
+      'https://www.tiktok.com/v2/auth/authorize/?' +
+      params.toString();
+
+
+    /*
+     * ==========================================
+     * COLOCAR LINK NO BOTÃO
+     * ==========================================
+     */
+
+    const botao =
+      document.getElementById('link-login');
+
+    botao.href = LOGIN_URL;
+
+
+    /*
+     * ==========================================
+     * VERIFICAÇÃO BÁSICA
+     * ==========================================
+     */
+
+    const erro =
+      document.getElementById('erro');
+
+    if (!CLIENT_KEY || CLIENT_KEY === 'SEU_CLIENT_KEY_AQUI') {
+
+      erro.style.display = 'block';
+
+      erro.textContent =
+        '❌ Client Key não configurada.';
+      
+      botao.removeAttribute('href');
+
+    }
+
+
+    /*
+     * ==========================================
+     * CLIQUE
+     * ==========================================
+     */
+
+    botao.addEventListener('click', function(event) {
+
+      if (!CLIENT_KEY) {
+        event.preventDefault();
+
+        erro.style.display = 'block';
+
+        erro.textContent =
+          '❌ Não foi possível iniciar o login.';
+      }
+
+    });
+  </script>
 
 </body>
 </html>
