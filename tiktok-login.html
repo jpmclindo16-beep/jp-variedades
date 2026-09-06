@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conectar com TikTok</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    margin: 0;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  h1 { font-size: 20px; }
+  a.botao {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 14px 28px;
+    background: #ff0050;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎵 Conectar com TikTok</h1>
+<p>Clique abaixo para autorizar o JP Ofertas Bot a publicar vídeos no seu perfil.</p>
+
+<a class="botao" id="link-login" href="#">Entrar com TikTok</a>
+
+<script>
+  const CLIENT_KEY = 'awhix2ag9yx68zr1';
+  const REDIRECT_URI = encodeURIComponent('https://jp-variedades.vercel.app/tiktok-callback.html');
+  const SCOPE = 'user.info.basic,video.publish,video.upload';
+  const STATE = Math.random().toString(36).substring(2);
+
+  const url = `https://www.tiktok.com/v2/auth/authorize/?client_key=${CLIENT_KEY}&scope=${SCOPE}&response_type=code&redirect_uri=${REDIRECT_URI}&state=${STATE}`;
+
+  document.getElementById('link-login').href = url;
+</script>
+
+</body>
+</html>
