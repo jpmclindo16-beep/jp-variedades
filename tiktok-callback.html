@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conectando com TikTok...</title>
+
 <style>
   body {
     font-family: system-ui, sans-serif;
@@ -13,82 +14,129 @@
     padding: 40px 20px;
     text-align: center;
   }
-  h1 { font-size: 18px; }
-  p { color: #9198a1; font-size: 14px; }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  p {
+    color: #9198a1;
+    font-size: 14px;
+  }
+
   #resultado {
-    margin-top: 20px;
-    padding: 12px;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 15px;
     border-radius: 8px;
     font-size: 14px;
-    word-break: break-all;
+    word-break: break-word;
   }
-  .sucesso { background: #0d3320; color: #4dd47e; }
-  .erro { background: #3d1116; color: #ff7b72; }
+
+  .sucesso {
+    background: #0d3320;
+    color: #4dd47e;
+  }
+
+  .erro {
+    background: #3d1116;
+    color: #ff7b72;
+  }
+
+  .info {
+    background: #161b22;
+    color: #e6edf3;
+  }
 </style>
 </head>
+
 <body>
 
 <h1>🔄 Processando login com TikTok...</h1>
 <p>Aguarde um instante.</p>
-<div id="resultado"></div>
+
+<div id="resultado" class="info">
+  Verificando autorização...
+</div>
 
 <script>
 (async () => {
+
   const params = new URLSearchParams(window.location.search);
+
   const code = params.get('code');
   const error = params.get('error');
+  const errorDescription = params.get('error_description');
+
   const resultado = document.getElementById('resultado');
 
+  // TikTok recusou a autorização
   if (error) {
     resultado.className = 'erro';
-    resultado.textContent = '❌ Erro na autorização: ' + error;
+
+    resultado.textContent =
+      '❌ TikTok recusou a autorização: ' +
+      error +
+      (errorDescription ? ' — ' + errorDescription : '');
+
     return;
   }
 
+  // Nenhum código recebido
   if (!code) {
     resultado.className = 'erro';
-    resultado.textContent = '❌ Nenhum código de autorização recebido.';
+
+    resultado.textContent =
+      '❌ Nenhum código de autorização recebido.';
+
     return;
   }
 
+  resultado.className = 'info';
+  resultado.textContent =
+    '🔐 Código recebido. Confirmando autorização...';
+
   try {
+
     const resp = await fetch('/api/tiktok-auth', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code }),
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({
+        code: code
+      })
     });
 
     const data = await resp.json();
 
-    if (data.ok) {
-      resultado.className = 'sucesso';
-      resultado.textContent = '✅ Login realizado! Publicando vídeo de teste...';
+    if (!resp.ok || !data.ok) {
 
-      const postResp = await fetch('/api/tiktok-postar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          access_token: data.access_token,
-          open_id: data.open_id,
-        }),
-      });
-
-      const postData = await postResp.json();
-
-      if (postData.ok) {
-        resultado.textContent = '✅ Login e publicação realizados com sucesso! Verifique seu perfil no TikTok (rascunho/publicação).';
-      } else {
-        resultado.className = 'erro';
-        resultado.textContent = '⚠️ Login OK, mas falha ao publicar: ' + (postData.error || 'erro desconhecido');
-      }
-    } else {
       resultado.className = 'erro';
-      resultado.textContent = '❌ Erro: ' + (data.error || 'algo deu errado');
+
+      resultado.textContent =
+        '❌ Falha ao autenticar com TikTok: ' +
+        (data.error || 'erro desconhecido');
+
+      return;
     }
+
+    resultado.className = 'sucesso';
+
+    resultado.textContent =
+      '✅ Login com TikTok realizado com sucesso!';
+
   } catch (err) {
+
     resultado.className = 'erro';
-    resultado.textContent = '❌ Erro de conexão: ' + err.message;
+
+    resultado.textContent =
+      '❌ Erro de conexão com o servidor: ' +
+      err.message;
   }
+
 })();
 </script>
 
