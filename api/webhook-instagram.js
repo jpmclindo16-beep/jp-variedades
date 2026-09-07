@@ -6,7 +6,7 @@
 
 // ==== CONFIGURAÇÃO ====
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN; // você inventa uma string qualquer, ex: "jp_shoppew_2026"
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN; // o mesmo token de longa duração que você já usa pro bot de ofertas
+const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_TOKEN; // mesmo token já usado no bot de ofertas
 
 // Mapa de palavra-chave -> link que deve ser enviado
 // Adicione quantas palavras-chave quiser aqui
