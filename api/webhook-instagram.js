@@ -1,105 +1,83 @@
-// api/webhook-instagram.js
-// Endpoint de webhook do Instagram: recebe comentários e responde no Direct
-// automaticamente quando o comentário contém uma palavra-chave.
-//
-// Rota final na Vercel: https://SEU-PROJETO.vercel.app/api/webhook-instagram
+// api/webhook-instagram.js - COMBINADO: responde DM + comentario com palavra-chave -> DM
+const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
+const IG_TOKEN = process.env.IG_ACCESS_TOKEN; // token que voce gerou (Instagram Login)
+const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN || process.env.IG_ACCESS_TOKEN; // p/ private_reply
 
-// ==== CONFIGURAÇÃO ====
-const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN; // você inventa uma string qualquer, ex: "jp_shoppew_2026"
-const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_TOKEN; // mesmo token já usado no bot de ofertas
-
-// Mapa de palavra-chave -> link que deve ser enviado
-// Adicione quantas palavras-chave quiser aqui
 const KEYWORD_LINKS = {
-  QUERO: "https://seusite.com/produto-1",
-  LINK: "https://seusite.com/produto-1",
-  // "OUTRAPALAVRA": "https://seusite.com/produto-2",
+  QUERO: "https://jp-variedades.vercel.app/",
+  LINK: "https://jp-variedades.vercel.app/",
 };
 
 export default async function handler(req, res) {
-  // ---------- 1. VERIFICAÇÃO DO WEBHOOK (Meta chama isso 1x ao configurar) ----------
   if (req.method === "GET") {
     const mode = req.query["hub.mode"];
     const token = req.query["hub.verify_token"];
     const challenge = req.query["hub.challenge"];
-
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
-      console.log("Webhook verificado com sucesso");
+      console.log("Webhook verificado");
       return res.status(200).send(challenge);
     }
-    return res.status(403).send("Verificação falhou");
+    return res.status(403).send("Verificacao falhou");
   }
 
-  // ---------- 2. RECEBIMENTO DE EVENTOS (novos comentários) ----------
   if (req.method === "POST") {
     try {
       const body = req.body;
-
-      if (body.object !== "instagram") {
-        return res.status(404).send("Not Found");
-      }
+      console.log("WEBHOOK RECEBIDO:", JSON.stringify(body).slice(0, 2000));
+      if (body.object !== "instagram") return res.status(404).send("Not Found");
 
       for (const entry of body.entry || []) {
+        // 1) COMENTARIOS -> private reply
         for (const change of entry.changes || []) {
           if (change.field === "comments") {
-            const comment = change.value;
+            const comment = change.value || {};
             const commentId = comment.id;
-            const commentText = (comment.text || "").toUpperCase().trim();
-
-            console.log(`Comentário recebido: "${commentText}" (id: ${commentId})`);
-
-            // Verifica se alguma palavra-chave está contida no comentário
-            const keywordFound = Object.keys(KEYWORD_LINKS).find((kw) =>
-              commentText.includes(kw)
-            );
-
-            if (keywordFound) {
-              const link = KEYWORD_LINKS[keywordFound];
-              await sendPrivateReply(commentId, link);
-            }
+            const text = (comment.text || "").toUpperCase().trim();
+            console.log(`Comentario: "${text}" id:${commentId}`);
+            const kw = Object.keys(KEYWORD_LINKS).find((k) => text.includes(k));
+            if (kw && commentId) await sendPrivateReply(commentId, KEYWORD_LINKS[kw]);
           }
         }
+        // 2) DIRECT MESSAGES -> responde no DM
+        for (const msgEvent of entry.messaging || []) {
+          const senderId = msgEvent.sender?.id;
+          const text = msgEvent.message?.text || "";
+          // ignora echo do proprio bot
+          if (msgEvent.message?.is_echo || !senderId || !text) continue;
+          console.log(`DM de ${senderId}: ${text}`);
+          const reply = `Oi! Aqui da JP Variedades 👇\nMe fala o que voce procura ou comenta QUERO em qualquer post que te mando o link!`;
+          await sendDM(senderId, reply);
+        }
       }
-
-      // Sempre responder 200 rápido pra Meta não re-enviar o evento
       return res.status(200).send("EVENT_RECEIVED");
     } catch (err) {
-      console.error("Erro processando webhook:", err);
-      // Mesmo com erro interno, responde 200 pra evitar reenvio em loop
+      console.error("Erro:", err);
       return res.status(200).send("EVENT_RECEIVED");
     }
   }
-
   return res.status(405).send("Method Not Allowed");
 }
 
-// ---------- 3. ENVIO DA PRIVATE REPLY ----------
 async function sendPrivateReply(commentId, link) {
   const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies`;
-
-  const message = `Oi! Aqui está o link que você pediu 👇\n${link}`;
-
-  const response = await fetch(url, {
+  const r = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message,
-      access_token: PAGE_ACCESS_TOKEN,
-    }),
+    body: JSON.stringify({ message: `Oi! Aqui esta o link que voce pediu 👇\n${link}`, access_token: PAGE_TOKEN }),
   });
-
-  const data = await response.json();
-
-  if (data.error) {
-    console.error("Erro ao enviar private reply:", data.error);
-  } else {
-    console.log("Private reply enviada com sucesso:", data);
-  }
+  const data = await r.json();
+  console.log("private_reply:", JSON.stringify(data).slice(0, 500));
 }
 
-// Necessário pra Vercel não fazer parsing estranho do body em alguns casos
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
+async function sendDM(recipientId, text) {
+  const url = `https://graph.instagram.com/v23.0/me/messages`;
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${IG_TOKEN}` },
+    body: JSON.stringify({ recipient: { id: recipientId }, message: { text } }),
+  });
+  const data = await r.json();
+  console.log("sendDM:", JSON.stringify(data).slice(0, 500));
+}
+
+export const config = { api: { bodyParser: true } };
