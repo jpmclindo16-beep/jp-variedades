@@ -19,7 +19,7 @@ const MAX_CACHE_SIZE = 500;
 const REQUEST_TIMEOUT = 10000; // 10 segundos
 
 export default async function handler(req, res) {
-  // Configuração CORS (opcional, se necessário)
+  // Configuração CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -57,12 +57,10 @@ export default async function handler(req, res) {
       return res.status(200).send("EVENT_RECEIVED");
     } catch (err) {
       console.error("Erro no processamento:", err);
-      // Sempre retorna 200 para evitar reenvios do webhook
       return res.status(200).send("EVENT_RECEIVED");
     }
   }
 
-  // Método não permitido
   return res.status(405).send("Method Not Allowed");
 }
 
@@ -90,7 +88,8 @@ async function processComment(comment) {
   try {
     const commentId = comment.id;
     const fromId = comment.from?.id?.toString();
-    const parentId = comment.parent_id; // Para identificar respostas
+    const mediaId = comment.media?.id; // ID da mídia/post
+    const parentId = comment.parent_id;
 
     // Validações
     if (!commentId || !fromId) {
@@ -115,14 +114,14 @@ async function processComment(comment) {
 
     // Processa o texto do comentário
     const text = (comment.text || "").toUpperCase().trim();
-    console.log(`Comentário recebido: "${text}" (ID: ${commentId}, Autor: ${fromId})`);
+    console.log(`Comentário recebido: "${text}" (ID: ${commentId}, Autor: ${fromId}, Media: ${mediaId})`);
 
     // Verifica palavras-chave
     for (const [keyword, link] of Object.entries(KEYWORD_LINKS)) {
       if (text.includes(keyword)) {
         console.log(`Palavra-chave "${keyword}" detectada no comentário ${commentId}`);
-        await handleKeywordComment(commentId, link);
-        break; // Processa apenas a primeira palavra-chave encontrada
+        await handleKeywordComment(commentId, link, mediaId);
+        break;
       }
     }
   } catch (err) {
@@ -145,7 +144,7 @@ async function processMessage(msgEvent) {
       return;
     }
 
-    // Ignora mensagens de eco (enviadas pelo próprio bot)
+    // Ignora mensagens de eco
     if (isEcho) {
       console.log("Ignorando mensagem de eco");
       return;
@@ -190,7 +189,7 @@ async function processMessage(msgEvent) {
 }
 
 // Processa comentários com palavras-chave
-async function handleKeywordComment(commentId, link) {
+async function handleKeywordComment(commentId, link, mediaId) {
   try {
     // Tenta enviar resposta privada primeiro
     const privateSent = await sendPrivateReply(commentId, link);
@@ -208,6 +207,7 @@ async function handleKeywordComment(commentId, link) {
 // Envia resposta privada para comentário
 async function sendPrivateReply(commentId, link) {
   try {
+    // Usando a API correta do Instagram para respostas privadas
     const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies`;
     const response = await fetchWithTimeout(url, {
       method: "POST",
@@ -224,6 +224,13 @@ async function sendPrivateReply(commentId, link) {
     
     if (data.error) {
       console.error("Erro na resposta privada:", data.error);
+      
+      // Se o erro for de permissão, tenta com o token do Instagram
+      if (data.error.code === 100 || data.error.code === 190) {
+        console.log("Tentando com token do Instagram...");
+        return await sendPrivateReplyWithIGToken(commentId, link);
+      }
+      
       return false;
     }
     
@@ -235,23 +242,63 @@ async function sendPrivateReply(commentId, link) {
   }
 }
 
+// Tenta enviar resposta privada com token do Instagram
+async function sendPrivateReplyWithIGToken(commentId, link) {
+  try {
+    const url = `https://graph.instagram.com/v21.0/${commentId}/replies`;
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${IG_TOKEN}`
+      },
+      body: JSON.stringify({ 
+        message: PRIVATE_REPLY_MESSAGE(link) 
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("Erro na resposta privada com IG Token:", data.error);
+      return false;
+    }
+    
+    console.log("Resposta privada enviada com sucesso (IG Token):", data.id);
+    return true;
+  } catch (err) {
+    console.error("Exceção ao enviar resposta privada com IG Token:", err);
+    return false;
+  }
+}
+
 // Envia resposta pública para comentário
 async function sendPublicReply(commentId, text) {
   try {
+    // Usando o endpoint correto para respostas públicas
     const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
     const response = await fetchWithTimeout(url, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${PAGE_TOKEN}`
+        "Authorization": `Bearer ${IG_TOKEN}`
       },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ 
+        message: text 
+      }),
     });
 
     const data = await response.json();
     
     if (data.error) {
       console.error("Erro na resposta pública:", data.error);
+      
+      // Tenta com PAGE_TOKEN se IG_TOKEN falhar
+      if (data.error.code === 100 || data.error.code === 190) {
+        console.log("Tentando resposta pública com PAGE_TOKEN...");
+        return await sendPublicReplyWithPageToken(commentId, text);
+      }
+      
       return false;
     }
     
@@ -263,10 +310,41 @@ async function sendPublicReply(commentId, text) {
   }
 }
 
+// Tenta resposta pública com PAGE_TOKEN
+async function sendPublicReplyWithPageToken(commentId, text) {
+  try {
+    const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${PAGE_TOKEN}`
+      },
+      body: JSON.stringify({ 
+        message: text 
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("Erro na resposta pública com PAGE_TOKEN:", data.error);
+      return false;
+    }
+    
+    console.log("Resposta pública enviada com sucesso (PAGE_TOKEN):", data.id);
+    return true;
+  } catch (err) {
+    console.error("Exceção ao enviar resposta pública com PAGE_TOKEN:", err);
+    return false;
+  }
+}
+
 // Envia mensagem direta
 async function sendDM(recipientId, text) {
   try {
-    const url = `https://graph.instagram.com/v23.0/me/messages`;
+    // Usando a API do Instagram para enviar DMs
+    const url = `https://graph.instagram.com/v21.0/me/messages`;
     const response = await fetchWithTimeout(url, {
       method: "POST",
       headers: { 
@@ -283,6 +361,13 @@ async function sendDM(recipientId, text) {
     
     if (data.error) {
       console.error("Erro ao enviar DM:", data.error);
+      
+      // Se falhar com IG_TOKEN, tenta com PAGE_TOKEN
+      if (data.error.code === 100 || data.error.code === 190) {
+        console.log("Tentando enviar DM com PAGE_TOKEN...");
+        return await sendDMWithPageToken(recipientId, text);
+      }
+      
       return false;
     }
     
@@ -290,6 +375,37 @@ async function sendDM(recipientId, text) {
     return true;
   } catch (err) {
     console.error("Exceção ao enviar DM:", err);
+    return false;
+  }
+}
+
+// Tenta enviar DM com PAGE_TOKEN
+async function sendDMWithPageToken(recipientId, text) {
+  try {
+    const url = `https://graph.facebook.com/v21.0/me/messages`;
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${PAGE_TOKEN}` 
+      },
+      body: JSON.stringify({ 
+        recipient: { id: recipientId }, 
+        message: { text } 
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("Erro ao enviar DM com PAGE_TOKEN:", data.error);
+      return false;
+    }
+    
+    console.log("DM enviada com sucesso (PAGE_TOKEN):", data.message_id);
+    return true;
+  } catch (err) {
+    console.error("Exceção ao enviar DM com PAGE_TOKEN:", err);
     return false;
   }
 }
@@ -325,8 +441,6 @@ function addToCache(cacheSet, item) {
 export const config = { 
   api: { 
     bodyParser: true,
-    // Aumenta o timeout da função serverless
     maxDuration: 30,
   } 
 };
-  
