@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     try {
       const body = req.body;
       console.log("WEBHOOK RECEBIDO:", JSON.stringify(body).slice(0, 2000));
-      if (body.object !== "instagram") return res.status(404).send("Not Found");
+      if (body.object!== "instagram") return res.status(404).send("Not Found");
 
       for (const entry of body.entry || []) {
         // 1) COMENTARIOS -> private reply
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
           const senderId = msgEvent.sender?.id;
           const text = msgEvent.message?.text || "";
           // ignora echo do proprio bot
-          if (msgEvent.message?.is_echo || !senderId || !text) continue;
+          if (msgEvent.message?.is_echo ||!senderId ||!text) continue;
           console.log(`DM de ${senderId}: ${text}`);
           const reply = `Oi! Aqui da JP Variedades 👇\nMe fala o que voce procura ou comenta QUERO em qualquer post que te mando o link!`;
           await sendDM(senderId, reply);
@@ -59,11 +59,11 @@ export default async function handler(req, res) {
 }
 
 async function sendPrivateReply(commentId, link) {
-  const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies`;
+  const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies?access_token=${PAGE_TOKEN}`;
   const r = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: `Oi! Aqui esta o link que voce pediu 👇\n${link}`, access_token: PAGE_TOKEN }),
+    body: JSON.stringify({ message: `Oi! Aqui esta o link que voce pediu 👇\n${link}` }),
   });
   const data = await r.json();
   console.log("private_reply:", JSON.stringify(data).slice(0, 500));
