@@ -3,10 +3,7 @@ const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
 const IG_BUSINESS_ID = "17841467530671368";
 
-// Site que vai ser enviado no Direct
-const SITE_LINK = "https://jp-variedades.vercel.app/";
-
-// Todas as palavras/variações que disparam o envio do link.
+// Todas as palavras/variações que disparam a resposta automática.
 // Adicione novas palavras aqui, sempre em MAIÚSCULO.
 const KEYWORDS = [
   "QUERO",
@@ -28,7 +25,8 @@ const KEYWORDS = [
   "MANDA",
 ];
 
-const PRIVATE_REPLY_MESSAGE = `Oi! Aqui está o site que você pediu 👇\n${SITE_LINK}`;
+// Resposta pública no próprio comentário (o ManyChat cuida do envio do link no Direct)
+const PUBLIC_REPLY_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram pra não perder as próximas promoções! 🔥";
 
 // Cache de deduplicação (best-effort — não sobrevive a cold start,
 // mas ajuda quando a mesma instância recebe reenvio rápido da Meta)
@@ -60,45 +58,42 @@ export default async function handler(req, res) {
 
     // *** PONTO CRÍTICO DA CORREÇÃO ***
     // Responde 200 IMEDIATAMENTE, antes de processar qualquer coisa.
-    // Isso evita que a Meta ache que a requisição falhou por demora
-    // e reenvie o mesmo evento (causa mais comum de duplicidade).
+    // Isso evita que a Meta ache que a requisição falhou e reenvie o mesmo evento.
     res.status(200).send("EVENT_RECEIVED");
 
-    // A partir daqui, tudo roda "depois" de já termos respondido.
+    // Processa de forma assíncrona (não bloqueia a resposta)
     try {
-      if (!body || (body.object !== "instagram" && body.object !== "page")) {
-        return;
-      }
-
-      if (body.entry && Array.isArray(body.entry)) {
-        for (const entry of body.entry) {
-          await processEntry(entry);
+      if (body && (body.object === "instagram" || body.object === "page")) {
+        if (body.entry && Array.isArray(body.entry)) {
+          for (const entry of body.entry) {
+            await processEntry(entry);
+          }
         }
       }
     } catch (err) {
-      console.error("Erro no processamento em segundo plano:", err);
+      console.error("Erro no processamento:", err);
     }
+
     return;
   }
 
+  // Método OPTIONS para CORS
   if (req.method === "OPTIONS") {
     return res.status(200).send("OK");
   }
 
+  // Método não permitido
   return res.status(405).send("Method Not Allowed");
 }
 
 async function processEntry(entry) {
-  try {
-    if (entry.changes && Array.isArray(entry.changes)) {
-      for (const change of entry.changes) {
-        if (change.field === "comments") {
-          await processComment(change.value);
-        }
+  // Processa apenas comentários
+  if (entry.changes && Array.isArray(entry.changes)) {
+    for (const change of entry.changes) {
+      if (change.field === "comments") {
+        await processComment(change.value);
       }
     }
-  } catch (err) {
-    console.error("Erro ao processar entry:", err);
   }
 }
 
@@ -108,85 +103,115 @@ async function processComment(comment) {
     const fromId = comment.from?.id?.toString();
     const text = (comment.text || "").toUpperCase().trim();
 
-    if (!commentId || !fromId) return;
+    // Validações
+    if (!commentId || !fromId) {
+      console.log("Comentário sem ID ou autor");
+      return;
+    }
 
     // Ignora comentários do próprio bot
-    if (fromId === IG_BUSINESS_ID) return;
+    if (fromId === IG_BUSINESS_ID) {
+      console.log("Ignorando comentário do próprio bot");
+      return;
+    }
 
-    // Deduplicação (best-effort)
+    // Verifica deduplicação
     if (processedCommentIds.has(commentId)) {
       console.log(`Comentário duplicado ignorado: ${commentId}`);
       return;
     }
+
+    // Adiciona ao cache
     addToCache(processedCommentIds, commentId);
 
     console.log(`Comentário recebido: "${text}" (ID: ${commentId}, Autor: ${fromId})`);
 
-    // Verifica se alguma palavra-chave bate com o comentário
-    const matched = KEYWORDS.some((kw) => text.includes(kw));
-
-    if (matched) {
-      console.log(`Palavra-chave encontrada no comentário ${commentId}, enviando private reply...`);
-      await sendPrivateReply(commentId, PRIVATE_REPLY_MESSAGE);
+    // Verifica se contém alguma palavra-chave
+    const hasKeyword = KEYWORDS.some(keyword => text.includes(keyword));
+    
+    if (hasKeyword) {
+      console.log(`Palavra-chave detectada no comentário ${commentId}`);
+      
+      // Responde ao comentário
+      const replySent = await sendCommentReply(commentId, PUBLIC_REPLY_MESSAGE);
+      
+      if (replySent) {
+        console.log(`Resposta enviada com sucesso para o comentário ${commentId}`);
+      } else {
+        console.error(`Falha ao responder comentário ${commentId}`);
+      }
+    } else {
+      console.log(`Nenhuma palavra-chave encontrada no comentário "${text}"`);
     }
   } catch (err) {
     console.error("Erro ao processar comentário:", err);
   }
 }
 
-// Envia a DM diretamente em resposta ao comentário.
-// Esse é o endpoint correto para "comentário -> Direct", funciona mesmo
-// sem conversa aberta previamente (diferente de /me/messages).
-async function sendPrivateReply(commentId, text) {
+// Função para responder comentário
+async function sendCommentReply(commentId, text) {
   try {
-    const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies`;
-
+    console.log(`Tentando responder comentário ${commentId}...`);
+    
+    // Usa o endpoint correto para respostas a comentários
+    const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
     const response = await fetchWithTimeout(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: text,
-        access_token: PAGE_TOKEN,
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${PAGE_TOKEN}` 
+      },
+      body: JSON.stringify({ 
+        message: text 
       }),
     });
 
     const data = await response.json();
-
-    if (data.error) {
-      console.error("Erro ao enviar private reply:", data.error);
-      return false;
+    
+    if (!data.error) {
+      console.log("Resposta enviada com sucesso");
+      return true;
     }
-
-    console.log("Private reply enviada com sucesso:", data);
-    return true;
+    
+    console.error("Erro ao responder comentário:", data.error);
+    return false;
+    
   } catch (err) {
-    console.error("Exceção ao enviar private reply:", err);
+    console.error("Exceção ao responder comentário:", err);
     return false;
   }
 }
 
+// Função utilitária para fetch com timeout
 async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
     return response;
   } finally {
     clearTimeout(timeoutId);
   }
 }
 
+// Função utilitária para adicionar ao cache com limite
 function addToCache(cacheSet, item) {
   cacheSet.add(item);
+  
   if (cacheSet.size > MAX_CACHE_SIZE) {
     const firstItem = cacheSet.values().next().value;
     cacheSet.delete(firstItem);
   }
 }
 
-export const config = {
-  api: {
+// Configuração da API
+export const config = { 
+  api: { 
     bodyParser: true,
     maxDuration: 30,
-  },
+  } 
 };
