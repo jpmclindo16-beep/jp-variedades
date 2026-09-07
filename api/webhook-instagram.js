@@ -2,130 +2,331 @@
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN || process.env.IG_ACCESS_TOKEN;
+const IG_BUSINESS_ID = "17841467530671368"; // seu IG business id do log
 
 const KEYWORD_LINKS = {
   QUERO: "https://jp-variedades.vercel.app/",
-  LINK: "https://jp-variedades.vercel.app/",
 };
 
-// evita responder 2x a mesma mensagem (retry do webhook)
+// Mensagens personalizadas
+const DM_REPLY_MESSAGE = "Oi! Aqui da JP Variedades 👇\nMe fala o que você procura ou comenta QUERO em qualquer post que te mando o site!";
+const PRIVATE_REPLY_MESSAGE = (link) => `Oi! Aqui está o site que você pediu 👇\n${link}`;
+const PUBLIC_REPLY_MESSAGE = "Te chamei no privado! Se não chegar, me chama no direct 👇";
+
 const processedMids = new Set();
 const processedCommentIds = new Set();
+const MAX_CACHE_SIZE = 500;
+const REQUEST_TIMEOUT = 10000; // 10 segundos
 
 export default async function handler(req, res) {
+  // Configuração CORS (opcional, se necessário)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Verificação do webhook (GET)
   if (req.method === "GET") {
     const mode = req.query["hub.mode"];
     const token = req.query["hub.verify_token"];
     const challenge = req.query["hub.challenge"];
+    
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
-      console.log("Webhook verificado");
+      console.log("Webhook verificado com sucesso!");
       return res.status(200).send(challenge);
     }
-    return res.status(403).send("Verificacao falhou");
+    
+    console.warn("Falha na verificação do webhook:", { mode, token });
+    return res.status(403).send("Verificação falhou");
   }
 
+  // Processamento de eventos (POST)
   if (req.method === "POST") {
     try {
       const body = req.body;
-      console.log("WEBHOOK RECEBIDO:", JSON.stringify(body).slice(0, 2000));
-      if (body.object!== "instagram") return res.status(404).send("Not Found");
-
-      for (const entry of body.entry || []) {
-        // 1) COMENTARIOS -> private reply
-        for (const change of entry.changes || []) {
-          if (change.field === "comments") {
-            const comment = change.value || {};
-            const commentId = comment.id;
-            if (commentId && processedCommentIds.has(commentId)) continue;
-            if (commentId) {
-              processedCommentIds.add(commentId);
-              if (processedCommentIds.size > 200) {
-                const first = processedCommentIds.values().next().value;
-                processedCommentIds.delete(first);
-              }
-            }
-            const text = (comment.text || "").toUpperCase().trim();
-            console.log(`Comentario: "${text}" id:${commentId}`);
-            const kw = Object.keys(KEYWORD_LINKS).find((k) => text.includes(k));
-            if (kw && commentId) await handleComment(commentId, KEYWORD_LINKS[kw]);
-          }
-        }
-        // 2) DIRECT MESSAGES -> responde no DM
-        for (const msgEvent of entry.messaging || []) {
-          const mid = msgEvent.message?.mid;
-          if (mid && processedMids.has(mid)) {
-            console.log(`DM duplicado ignorado: ${mid}`);
-            continue;
-          }
-          if (mid) {
-            processedMids.add(mid);
-            if (processedMids.size > 200) {
-              const first = processedMids.values().next().value;
-              processedMids.delete(first);
-            }
-          }
-          const senderId = msgEvent.sender?.id;
-          const text = msgEvent.message?.text || "";
-          if (msgEvent.message?.is_echo ||!senderId ||!text) continue;
-          console.log(`DM de ${senderId}: ${text}`);
-          const reply = `Oi! Aqui da JP Variedades 👇\nMe fala o que voce procura ou comenta QUERO em qualquer post que te mando o link!`;
-          await sendDM(senderId, reply);
-        }
+      
+      // Validação básica do payload
+      if (!body || body.object !== "instagram") {
+        return res.status(404).send("Not Found");
       }
+
+      // Processa cada entry do webhook
+      for (const entry of body.entry || []) {
+        await processEntry(entry);
+      }
+      
       return res.status(200).send("EVENT_RECEIVED");
     } catch (err) {
-      console.error("Erro:", err);
+      console.error("Erro no processamento:", err);
+      // Sempre retorna 200 para evitar reenvios do webhook
       return res.status(200).send("EVENT_RECEIVED");
     }
   }
+
+  // Método não permitido
   return res.status(405).send("Method Not Allowed");
 }
 
-async function handleComment(commentId, link) {
-  const ok = await sendPrivateReply(commentId, link);
-  if (!ok) {
-    console.log("private_reply falhou, tentando resposta publica");
-    await sendPublicReply(commentId, `Te mandei o link no privado! Se não chegar, me chama no direct 👇\n${link}`);
+// Processa cada entry do webhook
+async function processEntry(entry) {
+  // Processa mudanças (comentários)
+  if (entry.changes) {
+    for (const change of entry.changes) {
+      if (change.field === "comments") {
+        await processComment(change.value);
+      }
+    }
+  }
+
+  // Processa mensagens (DMs)
+  if (entry.messaging) {
+    for (const msgEvent of entry.messaging) {
+      await processMessage(msgEvent);
+    }
   }
 }
 
+// Processa comentários
+async function processComment(comment) {
+  try {
+    const commentId = comment.id;
+    const fromId = comment.from?.id?.toString();
+    const parentId = comment.parent_id; // Para identificar respostas
+
+    // Validações
+    if (!commentId || !fromId) {
+      console.warn("Comentário sem ID ou autor:", comment);
+      return;
+    }
+
+    // Ignora comentários do próprio bot
+    if (fromId === IG_BUSINESS_ID) {
+      console.log("Ignorando comentário do próprio bot");
+      return;
+    }
+
+    // Verifica deduplicação
+    if (processedCommentIds.has(commentId)) {
+      console.log(`Comentário duplicado ignorado: ${commentId}`);
+      return;
+    }
+
+    // Adiciona ao cache de processados
+    addToCache(processedCommentIds, commentId);
+
+    // Processa o texto do comentário
+    const text = (comment.text || "").toUpperCase().trim();
+    console.log(`Comentário recebido: "${text}" (ID: ${commentId}, Autor: ${fromId})`);
+
+    // Verifica palavras-chave
+    for (const [keyword, link] of Object.entries(KEYWORD_LINKS)) {
+      if (text.includes(keyword)) {
+        console.log(`Palavra-chave "${keyword}" detectada no comentário ${commentId}`);
+        await handleKeywordComment(commentId, link);
+        break; // Processa apenas a primeira palavra-chave encontrada
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao processar comentário:", err);
+  }
+}
+
+// Processa mensagens diretas
+async function processMessage(msgEvent) {
+  try {
+    const mid = msgEvent.message?.mid;
+    const senderId = msgEvent.sender?.id;
+    const text = msgEvent.message?.text || "";
+    const isEcho = msgEvent.message?.is_echo || false;
+    const attachments = msgEvent.message?.attachments || [];
+
+    // Validações
+    if (!senderId) {
+      console.warn("Mensagem sem remetente:", msgEvent);
+      return;
+    }
+
+    // Ignora mensagens de eco (enviadas pelo próprio bot)
+    if (isEcho) {
+      console.log("Ignorando mensagem de eco");
+      return;
+    }
+
+    // Ignora mensagens do próprio bot
+    if (senderId.toString() === IG_BUSINESS_ID) {
+      console.log("Ignorando mensagem do próprio bot");
+      return;
+    }
+
+    // Verifica deduplicação
+    if (mid && processedMids.has(mid)) {
+      console.log(`Mensagem duplicada ignorada: ${mid}`);
+      return;
+    }
+
+    // Adiciona ao cache de processados
+    if (mid) {
+      addToCache(processedMids, mid);
+    }
+
+    // Verifica se é mensagem de texto ou mídia
+    if (!text && attachments.length === 0) {
+      console.log("Mensagem vazia ignorada");
+      return;
+    }
+
+    console.log(`DM recebida de ${senderId}: "${text}"`);
+
+    // Responde à mensagem
+    const dmSent = await sendDM(senderId, DM_REPLY_MESSAGE);
+    
+    if (dmSent) {
+      console.log(`Resposta enviada com sucesso para ${senderId}`);
+    } else {
+      console.error(`Falha ao enviar resposta para ${senderId}`);
+    }
+  } catch (err) {
+    console.error("Erro ao processar mensagem:", err);
+  }
+}
+
+// Processa comentários com palavras-chave
+async function handleKeywordComment(commentId, link) {
+  try {
+    // Tenta enviar resposta privada primeiro
+    const privateSent = await sendPrivateReply(commentId, link);
+    
+    if (!privateSent) {
+      console.log(`Resposta privada falhou para ${commentId}, tentando resposta pública`);
+      // Fallback para resposta pública
+      await sendPublicReply(commentId, PUBLIC_REPLY_MESSAGE);
+    }
+  } catch (err) {
+    console.error("Erro ao processar comentário com palavra-chave:", err);
+  }
+}
+
+// Envia resposta privada para comentário
 async function sendPrivateReply(commentId, link) {
   try {
-    const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies?access_token=${PAGE_TOKEN}`;
-    const r = await fetch(url, {
+    const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies`;
+    const response = await fetchWithTimeout(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: `Oi! Aqui esta o link que voce pediu 👇\n${link}` }),
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${PAGE_TOKEN}`
+      },
+      body: JSON.stringify({ 
+        message: PRIVATE_REPLY_MESSAGE(link) 
+      }),
     });
-    const data = await r.json();
-    console.log("private_reply:", JSON.stringify(data).slice(0, 500));
-    return!data.error;
-  } catch (e) {
-    console.log("private_reply erro:", e.message);
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("Erro na resposta privada:", data.error);
+      return false;
+    }
+    
+    console.log("Resposta privada enviada com sucesso:", data.id);
+    return true;
+  } catch (err) {
+    console.error("Exceção ao enviar resposta privada:", err);
     return false;
   }
 }
 
+// Envia resposta pública para comentário
 async function sendPublicReply(commentId, text) {
-  const url = `https://graph.facebook.com/v21.0/${commentId}/replies?access_token=${PAGE_TOKEN}`;
-  const r = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: text }),
-  });
-  const data = await r.json();
-  console.log("public_reply:", JSON.stringify(data).slice(0, 500));
+  try {
+    const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${PAGE_TOKEN}`
+      },
+      body: JSON.stringify({ message: text }),
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("Erro na resposta pública:", data.error);
+      return false;
+    }
+    
+    console.log("Resposta pública enviada com sucesso:", data.id);
+    return true;
+  } catch (err) {
+    console.error("Exceção ao enviar resposta pública:", err);
+    return false;
+  }
 }
 
+// Envia mensagem direta
 async function sendDM(recipientId, text) {
-  const url = `https://graph.instagram.com/v23.0/me/messages`;
-  const r = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${IG_TOKEN}` },
-    body: JSON.stringify({ recipient: { id: recipientId }, message: { text } }),
-  });
-  const data = await r.json();
-  console.log("sendDM:", JSON.stringify(data).slice(0, 500));
+  try {
+    const url = `https://graph.instagram.com/v23.0/me/messages`;
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${IG_TOKEN}` 
+      },
+      body: JSON.stringify({ 
+        recipient: { id: recipientId }, 
+        message: { text } 
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("Erro ao enviar DM:", data.error);
+      return false;
+    }
+    
+    console.log("DM enviada com sucesso:", data.message_id);
+    return true;
+  } catch (err) {
+    console.error("Exceção ao enviar DM:", err);
+    return false;
+  }
 }
 
-export const config = { api: { bodyParser: true } };
+// Função utilitária para fetch com timeout
+async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// Função utilitária para adicionar ao cache com limite
+function addToCache(cacheSet, item) {
+  cacheSet.add(item);
+  
+  // Remove itens antigos se exceder o limite
+  if (cacheSet.size > MAX_CACHE_SIZE) {
+    const firstItem = cacheSet.values().next().value;
+    cacheSet.delete(firstItem);
+  }
+}
+
+// Configuração da API
+export const config = { 
+  api: { 
+    bodyParser: true,
+    // Aumenta o timeout da função serverless
+    maxDuration: 30,
+  } 
+};
+  
