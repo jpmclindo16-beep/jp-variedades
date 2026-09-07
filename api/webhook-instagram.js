@@ -1,4 +1,4 @@
-// api/webhook-instagram.js - VERSÃO CORRIGIDA
+// api/webhook-instagram.js - VERSÃO COMPLETA E CORRIGIDA
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN || process.env.IG_ACCESS_TOKEN;
@@ -18,33 +18,63 @@ const MAX_CACHE_SIZE = 500;
 const REQUEST_TIMEOUT = 10000;
 
 export default async function handler(req, res) {
+  // Configuração CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+  // Log inicial para debug
+  console.log("Requisição recebida:", {
+    method: req.method,
+    userAgent: req.headers['user-agent'],
+    contentType: req.headers['content-type'],
+    bodySize: JSON.stringify(req.body || {}).length
+  });
+
+  // Verificação do webhook (GET)
   if (req.method === "GET") {
     const mode = req.query["hub.mode"];
     const token = req.query["hub.verify_token"];
     const challenge = req.query["hub.challenge"];
+    
+    console.log("Verificação GET:", { mode, token, challenge });
     
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
       console.log("Webhook verificado com sucesso!");
       return res.status(200).send(challenge);
     }
     
+    console.warn("Falha na verificação do webhook");
     return res.status(403).send("Verificação falhou");
   }
 
+  // Processamento de eventos (POST)
   if (req.method === "POST") {
     try {
       const body = req.body;
       
-      if (!body || body.object !== "instagram") {
-        return res.status(404).send("Not Found");
+      // Log detalhado do body
+      console.log("Body recebido:", JSON.stringify(body).slice(0, 1000));
+      
+      // Validação básica do payload
+      if (!body) {
+        console.log("Body vazio");
+        return res.status(200).send("EVENT_RECEIVED");
       }
 
-      for (const entry of body.entry || []) {
-        await processEntry(entry);
+      // Aceita diferentes formatos de payload
+      if (body.object !== "instagram" && body.object !== "page") {
+        console.log("Object não reconhecido:", body.object);
+        return res.status(200).send("EVENT_RECEIVED");
+      }
+
+      // Processa cada entry do webhook
+      if (body.entry && Array.isArray(body.entry)) {
+        for (const entry of body.entry) {
+          await processEntry(entry);
+        }
+      } else {
+        console.log("Sem entries para processar");
       }
       
       return res.status(200).send("EVENT_RECEIVED");
@@ -54,25 +84,42 @@ export default async function handler(req, res) {
     }
   }
 
+  // Método OPTIONS para CORS
+  if (req.method === "OPTIONS") {
+    return res.status(200).send("OK");
+  }
+
+  // Método não permitido
   return res.status(405).send("Method Not Allowed");
 }
 
+// Processa cada entry do webhook
 async function processEntry(entry) {
-  if (entry.changes) {
-    for (const change of entry.changes) {
-      if (change.field === "comments") {
-        await processComment(change.value);
+  try {
+    // Log da entry
+    console.log("Processando entry:", JSON.stringify(entry).slice(0, 500));
+
+    // Processa mudanças (comentários)
+    if (entry.changes && Array.isArray(entry.changes)) {
+      for (const change of entry.changes) {
+        if (change.field === "comments") {
+          await processComment(change.value);
+        }
       }
     }
-  }
 
-  if (entry.messaging) {
-    for (const msgEvent of entry.messaging) {
-      await processMessage(msgEvent);
+    // Processa mensagens (DMs)
+    if (entry.messaging && Array.isArray(entry.messaging)) {
+      for (const msgEvent of entry.messaging) {
+        await processMessage(msgEvent);
+      }
     }
+  } catch (err) {
+    console.error("Erro ao processar entry:", err);
   }
 }
 
+// Processa comentários
 async function processComment(comment) {
   try {
     const commentId = comment.id;
@@ -80,28 +127,36 @@ async function processComment(comment) {
     const mediaId = comment.media?.id;
     const text = (comment.text || "").toUpperCase().trim();
 
+    // Log detalhado do comentário
+    console.log("Comentário detalhado:", JSON.stringify(comment).slice(0, 500));
+
+    // Validações
     if (!commentId || !fromId) {
       console.warn("Comentário sem ID ou autor:", comment);
       return;
     }
 
+    // Ignora comentários do próprio bot
     if (fromId === IG_BUSINESS_ID) {
       console.log("Ignorando comentário do próprio bot");
       return;
     }
 
+    // Verifica deduplicação
     if (processedCommentIds.has(commentId)) {
       console.log(`Comentário duplicado ignorado: ${commentId}`);
       return;
     }
 
+    // Adiciona ao cache de processados
     addToCache(processedCommentIds, commentId);
 
     console.log(`Comentário recebido: "${text}" (ID: ${commentId}, Autor: ${fromId})`);
 
+    // Verifica palavras-chave
     for (const [keyword, link] of Object.entries(KEYWORD_LINKS)) {
       if (text.includes(keyword)) {
-        console.log(`Palavra-chave "${keyword}" detectada`);
+        console.log(`Palavra-chave "${keyword}" detectada no comentário ${commentId}`);
         
         // Tenta enviar DM diretamente para o usuário
         const dmSent = await sendDMToUser(fromId, PRIVATE_REPLY_MESSAGE(link));
@@ -111,7 +166,7 @@ async function processComment(comment) {
           console.log("DM falhou, tentando responder ao comentário...");
           await sendCommentReply(commentId, PUBLIC_REPLY_MESSAGE);
         }
-        break;
+        break; // Processa apenas a primeira palavra-chave encontrada
       }
     }
   } catch (err) {
@@ -119,23 +174,56 @@ async function processComment(comment) {
   }
 }
 
+// Processa mensagens diretas
 async function processMessage(msgEvent) {
   try {
     const mid = msgEvent.message?.mid;
     const senderId = msgEvent.sender?.id;
     const text = msgEvent.message?.text || "";
     const isEcho = msgEvent.message?.is_echo || false;
+    const attachments = msgEvent.message?.attachments || [];
 
-    if (!senderId || isEcho) return;
-    if (senderId.toString() === IG_BUSINESS_ID) return;
-    
-    if (mid && processedMids.has(mid)) return;
-    if (mid) addToCache(processedMids, mid);
+    // Log detalhado da mensagem
+    console.log("Mensagem detalhada:", JSON.stringify(msgEvent).slice(0, 500));
 
-    if (!text) return;
+    // Validações
+    if (!senderId) {
+      console.warn("Mensagem sem remetente:", msgEvent);
+      return;
+    }
+
+    // Ignora mensagens de eco (enviadas pelo próprio bot)
+    if (isEcho) {
+      console.log("Ignorando mensagem de eco");
+      return;
+    }
+
+    // Ignora mensagens do próprio bot
+    if (senderId.toString() === IG_BUSINESS_ID) {
+      console.log("Ignorando mensagem do próprio bot");
+      return;
+    }
+
+    // Verifica deduplicação
+    if (mid && processedMids.has(mid)) {
+      console.log(`Mensagem duplicada ignorada: ${mid}`);
+      return;
+    }
+
+    // Adiciona ao cache de processados
+    if (mid) {
+      addToCache(processedMids, mid);
+    }
+
+    // Verifica se é mensagem de texto ou mídia
+    if (!text && attachments.length === 0) {
+      console.log("Mensagem vazia ignorada");
+      return;
+    }
 
     console.log(`DM recebida de ${senderId}: "${text}"`);
-    
+
+    // Responde à mensagem
     const dmSent = await sendDMToUser(senderId, DM_REPLY_MESSAGE);
     
     if (dmSent) {
@@ -242,6 +330,7 @@ async function sendCommentReply(commentId, text) {
   }
 }
 
+// Função utilitária para fetch com timeout
 async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -257,18 +346,22 @@ async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   }
 }
 
+// Função utilitária para adicionar ao cache com limite
 function addToCache(cacheSet, item) {
   cacheSet.add(item);
   
+  // Remove itens antigos se exceder o limite
   if (cacheSet.size > MAX_CACHE_SIZE) {
     const firstItem = cacheSet.values().next().value;
     cacheSet.delete(firstItem);
   }
 }
 
+// Configuração da API
 export const config = { 
   api: { 
     bodyParser: true,
     maxDuration: 30,
   } 
 };
+        
