@@ -8,6 +8,10 @@ const KEYWORD_LINKS = {
   LINK: "https://jp-variedades.vercel.app/",
 };
 
+// evita responder 2x a mesma mensagem (retry do webhook)
+const processedMids = new Set();
+const processedCommentIds = new Set();
+
 export default async function handler(req, res) {
   if (req.method === "GET") {
     const mode = req.query["hub.mode"];
@@ -27,17 +31,39 @@ export default async function handler(req, res) {
       if (body.object!== "instagram") return res.status(404).send("Not Found");
 
       for (const entry of body.entry || []) {
+        // 1) COMENTARIOS -> private reply
         for (const change of entry.changes || []) {
           if (change.field === "comments") {
             const comment = change.value || {};
             const commentId = comment.id;
+            if (commentId && processedCommentIds.has(commentId)) continue;
+            if (commentId) {
+              processedCommentIds.add(commentId);
+              if (processedCommentIds.size > 200) {
+                const first = processedCommentIds.values().next().value;
+                processedCommentIds.delete(first);
+              }
+            }
             const text = (comment.text || "").toUpperCase().trim();
             console.log(`Comentario: "${text}" id:${commentId}`);
             const kw = Object.keys(KEYWORD_LINKS).find((k) => text.includes(k));
             if (kw && commentId) await handleComment(commentId, KEYWORD_LINKS[kw]);
           }
         }
+        // 2) DIRECT MESSAGES -> responde no DM
         for (const msgEvent of entry.messaging || []) {
+          const mid = msgEvent.message?.mid;
+          if (mid && processedMids.has(mid)) {
+            console.log(`DM duplicado ignorado: ${mid}`);
+            continue;
+          }
+          if (mid) {
+            processedMids.add(mid);
+            if (processedMids.size > 200) {
+              const first = processedMids.values().next().value;
+              processedMids.delete(first);
+            }
+          }
           const senderId = msgEvent.sender?.id;
           const text = msgEvent.message?.text || "";
           if (msgEvent.message?.is_echo ||!senderId ||!text) continue;
