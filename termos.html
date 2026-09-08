@@ -3,60 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Termos de Serviço - JP Shoppew</title>
+<title>Postar Oferta</title>
 <style>
-  body {
-    font-family: system-ui, sans-serif;
-    background: #0d1117;
-    color: #e6edf3;
-    margin: 0;
-    padding: 24px;
-    line-height: 1.6;
+  body { font-family: system-ui, sans-serif; background: #0d1117; color: #e6edf3; margin: 0; padding: 20px; }
+  h1 { font-size: 20px; margin-bottom: 20px; }
+  label { display: block; margin-top: 14px; margin-bottom: 4px; font-size: 14px; color: #9198a1; }
+  input, textarea {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #30363d;
+    background: #161b22; color: #e6edf3; box-sizing: border-box; font-size: 15px; font-family: inherit;
   }
-  h1 {
-    font-size: 24px;
-    margin-bottom: 8px;
+  textarea { resize: vertical; min-height: 70px; }
+  button {
+    margin-top: 20px; width: 100%; padding: 14px; border-radius: 8px; border: none;
+    background: #2ea043; color: white; font-size: 16px; font-weight: bold;
   }
-  h2 {
-    font-size: 18px;
-    margin-top: 28px;
-    color: #58a6ff;
-  }
-  p, li {
-    color: #c9d1d9;
-    font-size: 15px;
-  }
-  .atualizado {
-    color: #9198a1;
-    font-size: 13px;
-    margin-bottom: 24px;
-  }
+  button:disabled { background: #444; }
+  #resultado { margin-top: 16px; padding: 12px; border-radius: 8px; display: none; font-size: 14px; }
+  .sucesso { background: #0d3320; color: #4dd47e; display: block !important; }
+  .erro { background: #3d1116; color: #ff7b72; display: block !important; }
+  .hint { font-size: 12px; color: #6e7681; margin-top: 4px; }
 </style>
 </head>
 <body>
 
-<h1>Termos de Serviço</h1>
-<p class="atualizado">Última atualização: setembro de 2026</p>
+<h1>🔥 Postar oferta (Telegram, Facebook, Instagram e Threads)</h1>
 
-<p>Bem-vindo à JP Shoppew. Ao acessar e usar nosso site, você concorda com os termos e condições descritos abaixo.</p>
+<form id="form-oferta">
+  <label>Legenda *</label>
+  <textarea id="legenda" required placeholder="Escreva a legenda do post..."></textarea>
 
-<h2>1. Sobre o serviço</h2>
-<p>A JP Shoppew é uma plataforma de curadoria de ofertas e produtos, que divulga links de produtos disponíveis em marketplaces parceiros (como Shopee, Mercado Livre e outros). Não realizamos venda direta de produtos — atuamos como divulgadores de ofertas por meio de links de afiliado.</p>
+  <label>Preço atual (R$) *</label>
+  <input type="number" step="0.01" id="precoAtual" required>
 
-<h2>2. Uso do site</h2>
-<p>Você concorda em usar este site apenas para fins legais e de acordo com estes Termos. É proibido usar o site de forma que possa danificar, desabilitar ou sobrecarregar nossa infraestrutura.</p>
+  <label>Preço original (R$) — opcional, deixa em branco se não tiver desconto</label>
+  <input type="number" step="0.01" id="precoOriginal">
 
-<h2>3. Links de afiliado</h2>
-<p>Este site contém links de afiliado. Ao clicar em um link e realizar uma compra, podemos receber uma comissão do marketplace parceiro, sem custo adicional para você.</p>
+  <label>Link de afiliado *</label>
+  <input type="url" id="link" required>
 
-<h2>4. Responsabilidade sobre produtos e compras</h2>
-<p>A responsabilidade pela venda, entrega, qualidade e suporte pós-venda dos produtos é exclusivamente do marketplace e do vendedor onde a compra é efetivamente realizada. A JP Shoppew não processa pagamentos nem realiza entregas.</p>
+  <label>Imagem 1 — opcional (obrigatória p/ Instagram e Threads)</label>
+  <input type="url" id="imagem1">
 
-<h2>5. Alterações nos Termos</h2>
-<p>Podemos atualizar estes Termos periodicamente. A versão mais recente estará sempre disponível nesta página.</p>
+  <label>Imagem 2 — opcional</label>
+  <input type="url" id="imagem2">
 
-<h2>6. Contato</h2>
-<p>Em caso de dúvidas sobre estes Termos, entre em contato através dos nossos canais oficiais nas redes sociais.</p>
+  <label>Imagem 3 — opcional</label>
+  <input type="url" id="imagem3">
+  <div class="hint">Com 2 ou 3 imagens, o post vira um carrossel/álbum em todas as plataformas.</div>
+
+  <button type="submit" id="botao-enviar">Postar</button>
+</form>
+
+<div id="resultado"></div>
+
+<script>
+document.getElementById('form-oferta').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const botao = document.getElementById('botao-enviar');
+  const resultado = document.getElementById('resultado');
+  botao.disabled = true;
+  botao.textContent = 'Enviando...';
+  resultado.className = '';
+  resultado.style.display = 'none';
+
+  const imagens = [
+    document.getElementById('imagem1').value,
+    document.getElementById('imagem2').value,
+    document.getElementById('imagem3').value,
+  ].filter(Boolean);
+
+  const dados = {
+    legenda: document.getElementById('legenda').value,
+    precoAtual: document.getElementById('precoAtual').value,
+    precoOriginal: document.getElementById('precoOriginal').value || null,
+    link: document.getElementById('link').value,
+    imagens,
+  };
+
+  try {
+    const resp = await fetch('/api/postar-manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados),
+    });
+
+    const json = await resp.json();
+
+    if (json.ok) {
+      let partes = [];
+      if (json.telegram) partes.push('Telegram');
+      if (json.facebook) partes.push('Facebook');
+      if (json.instagram) partes.push('Instagram');
+      if (json.threads) partes.push('Threads');
+
+      let mensagem = partes.length > 0
+        ? '✅ Postado em: ' + partes.join(', ') + '!'
+        : '⚠️ Nenhuma plataforma recebeu a postagem.';
+
+      if (!json.instagram && json.instagramMsg) mensagem += ' | Instagram: ' + json.instagramMsg;
+      if (!json.threads && json.threadsMsg) mensagem += ' | Threads: ' + json.threadsMsg;
+
+      resultado.textContent = mensagem;
+      resultado.className = partes.length > 0 ? 'sucesso' : 'erro';
+      document.getElementById('form-oferta').reset();
+    } else {
+      resultado.textContent = '❌ Erro: ' + (json.error || 'algo deu errado');
+      resultado.className = 'erro';
+    }
+  } catch (err) {
+    resultado.textContent = '❌ Erro de conexão: ' + err.message;
+    resultado.className = 'erro';
+  }
+
+  botao.disabled = false;
+  botao.textContent = 'Postar';
+});
+</script>
 
 </body>
 </html>
