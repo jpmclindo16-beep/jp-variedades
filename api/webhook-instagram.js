@@ -1,6 +1,7 @@
-// api/webhook-instagram.js - VERSÃO APENAS DM (FUNCIONANDO)
+// api/webhook-instagram.js - VERSÃO COM RESPOSTA AO COMENTÁRIO
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
+const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
 const IG_BUSINESS_ID = "17841467530671368";
 
 const KEYWORDS = [
@@ -23,8 +24,7 @@ const KEYWORDS = [
   "MANDA",
 ];
 
-// Mensagem que vai para o Direct
-const DM_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram pra não perder as próximas promoções! 🔥";
+const PUBLIC_REPLY_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram pra não perder as próximas promoções! 🔥";
 
 const processedCommentIds = new Map();
 const MAX_CACHE_SIZE = 1000;
@@ -114,15 +114,15 @@ async function processComment(comment) {
     const hasKeyword = KEYWORDS.some(keyword => text.includes(keyword));
     
     if (hasKeyword) {
-      console.log(`Palavra-chave detectada, enviando DM...`);
+      console.log(`Palavra-chave detectada, respondendo ao comentário...`);
       
-      // Envia DM para o usuário
-      const dmSent = await sendDM(fromId, DM_MESSAGE);
+      // Responde diretamente ao comentário
+      const replySent = await sendCommentReply(commentId, PUBLIC_REPLY_MESSAGE);
       
-      if (dmSent) {
-        console.log(`✅ DM enviada com sucesso para ${fromId}`);
+      if (replySent) {
+        console.log(`✅ Resposta ao comentário enviada com sucesso!`);
       } else {
-        console.error(`❌ Falha ao enviar DM para ${fromId}`);
+        console.error(`❌ Falha ao responder comentário`);
       }
     }
   } catch (err) {
@@ -130,37 +130,37 @@ async function processComment(comment) {
   }
 }
 
-// Função para enviar DM
-async function sendDM(recipientId, text) {
+// Função para responder comentário
+async function sendCommentReply(commentId, text) {
   try {
-    console.log(`Enviando DM para ${recipientId}...`);
+    console.log(`Respondendo comentário ${commentId}...`);
     
-    const url = `https://graph.instagram.com/v21.0/me/messages`;
+    // Usa o endpoint do Facebook Graph API para responder comentários
+    const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
     
     const response = await fetch(url, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json", 
-        "Authorization": `Bearer ${IG_TOKEN}` 
+        "Authorization": `Bearer ${PAGE_TOKEN}` 
       },
       body: JSON.stringify({ 
-        recipient: { id: recipientId }, 
-        message: { text } 
+        message: text 
       }),
     });
 
     const data = await response.json();
-    console.log("Resposta DM:", JSON.stringify(data));
+    console.log("Resposta comentário:", JSON.stringify(data));
     
     if (!data.error) {
-      console.log("✅ DM enviada com sucesso");
+      console.log("✅ Resposta ao comentário enviada");
       return true;
     }
     
-    console.error("Erro DM:", data.error);
+    console.error("Erro resposta comentário:", data.error);
     return false;
   } catch (err) {
-    console.error("Exceção DM:", err.message);
+    console.error("Exceção resposta comentário:", err.message);
     return false;
   }
 }
