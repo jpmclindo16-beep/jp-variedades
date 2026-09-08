@@ -1,4 +1,4 @@
-// api/webhook-instagram.js - VERSÃO FINAL CORRIGIDA
+// api/webhook-instagram.js - VERSÃO COM ENDPOINT CORRETO
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
@@ -29,7 +29,6 @@ const PUBLIC_REPLY_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram
 const processedCommentIds = new Map();
 const MAX_CACHE_SIZE = 1000;
 const CACHE_EXPIRY = 10000;
-const REQUEST_TIMEOUT = 15000;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -51,7 +50,6 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const body = req.body;
 
-    // NÃO responde imediatamente - processa primeiro
     try {
       if (body && (body.object === "instagram" || body.object === "page")) {
         if (body.entry && Array.isArray(body.entry)) {
@@ -61,7 +59,6 @@ export default async function handler(req, res) {
         }
       }
       
-      // Só responde depois de processar
       return res.status(200).send("EVENT_RECEIVED");
     } catch (err) {
       console.error("Erro no processamento:", err);
@@ -91,12 +88,13 @@ async function processComment(comment) {
     const commentId = comment.id;
     const fromId = comment.from?.id?.toString();
     const text = (comment.text || "").toUpperCase().trim();
+    const mediaId = comment.media?.id;
 
     console.log("Dados do comentário:", {
       commentId,
       fromId,
       text,
-      mediaId: comment.media?.id
+      mediaId
     });
 
     if (!commentId || !fromId) {
@@ -126,13 +124,20 @@ async function processComment(comment) {
     if (hasKeyword) {
       console.log(`Palavra-chave detectada, tentando responder...`);
       
-      // Tenta responder diretamente
-      const replySent = await sendReply(commentId, PUBLIC_REPLY_MESSAGE);
+      // Tenta enviar DM em vez de responder comentário
+      const dmSent = await sendDM(fromId, PUBLIC_REPLY_MESSAGE);
       
-      if (replySent) {
-        console.log(`✅ Resposta enviada com sucesso!`);
+      if (dmSent) {
+        console.log(`✅ DM enviada com sucesso!`);
       } else {
-        console.error(`❌ Falha ao enviar resposta`);
+        console.log(`Tentando responder comentário...`);
+        const replySent = await sendCommentReply(commentId, PUBLIC_REPLY_MESSAGE);
+        
+        if (replySent) {
+          console.log(`✅ Resposta ao comentário enviada!`);
+        } else {
+          console.error(`❌ Todas as tentativas falharam`);
+        }
       }
     }
   } catch (err) {
@@ -140,93 +145,76 @@ async function processComment(comment) {
   }
 }
 
-// Função única para responder comentário
-async function sendReply(commentId, text) {
-  console.log(`Iniciando resposta para ${commentId}...`);
-  
-  // Verifica se temos tokens
-  if (!IG_TOKEN && !PAGE_TOKEN) {
-    console.error("NENHUM TOKEN CONFIGURADO!");
+// Função para enviar DM
+async function sendDM(recipientId, text) {
+  try {
+    console.log(`Tentando enviar DM para ${recipientId}...`);
+    
+    // Usa o endpoint correto para enviar DM
+    const url = `https://graph.instagram.com/v21.0/me/messages`;
+    
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${IG_TOKEN}` 
+      },
+      body: JSON.stringify({ 
+        recipient: { id: recipientId }, 
+        message: { text } 
+      }),
+    });
+
+    const data = await response.json();
+    console.log("Resposta DM:", JSON.stringify(data));
+    
+    if (!data.error) {
+      console.log("✅ DM enviada com sucesso");
+      return true;
+    }
+    
+    console.error("Erro DM:", data.error);
+    return false;
+  } catch (err) {
+    console.error("Exceção DM:", err.message);
     return false;
   }
-  
-  console.log("Tokens disponíveis:", {
-    IG_TOKEN: IG_TOKEN ? "✅ Presente" : "❌ Ausente",
-    PAGE_TOKEN: PAGE_TOKEN ? "✅ Presente" : "❌ Ausente"
-  });
+}
 
-  // Tenta com IG_TOKEN
-  if (IG_TOKEN) {
-    try {
-      console.log(`Tentando com IG_TOKEN...`);
-      
-      const url = `https://graph.instagram.com/v21.0/${commentId}/replies`;
-      console.log(`URL: ${url}`);
-      
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json", 
-          "Authorization": `Bearer ${IG_TOKEN}` 
-        },
-        body: JSON.stringify({ 
-          message: text 
-        }),
-      });
+// Função para responder comentário
+async function sendCommentReply(commentId, text) {
+  try {
+    console.log(`Tentando responder comentário ${commentId}...`);
+    
+    // Usa o endpoint correto para responder comentários do Instagram
+    // O endpoint correto é: /{ig-comment-id}/replies
+    const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
+    
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${PAGE_TOKEN}` 
+      },
+      body: JSON.stringify({ 
+        message: text 
+      }),
+    });
 
-      console.log(`Status da resposta: ${response.status}`);
-      
-      const data = await response.json();
-      console.log("Resposta IG_TOKEN:", JSON.stringify(data));
-      
-      if (!data.error) {
-        console.log("✅ Sucesso com IG_TOKEN");
-        return true;
-      }
-      
-      console.error("Erro IG_TOKEN:", data.error);
-    } catch (err) {
-      console.error("Exceção IG_TOKEN:", err.message);
+    const data = await response.json();
+    console.log("Resposta comentário:", JSON.stringify(data));
+    
+    if (!data.error) {
+      console.log("✅ Resposta ao comentário enviada");
+      return true;
     }
+    
+    console.error("Erro resposta comentário:", data.error);
+    return false;
+  } catch (err) {
+    console.error("Exceção resposta comentário:", err.message);
+    return false;
   }
-
-  // Tenta com PAGE_TOKEN
-  if (PAGE_TOKEN) {
-    try {
-      console.log(`Tentando com PAGE_TOKEN...`);
-      
-      const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
-      console.log(`URL: ${url}`);
-      
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json", 
-          "Authorization": `Bearer ${PAGE_TOKEN}` 
-        },
-        body: JSON.stringify({ 
-          message: text 
-        }),
-      });
-
-      console.log(`Status da resposta: ${response.status}`);
-      
-      const data = await response.json();
-      console.log("Resposta PAGE_TOKEN:", JSON.stringify(data));
-      
-      if (!data.error) {
-        console.log("✅ Sucesso com PAGE_TOKEN");
-        return true;
-      }
-      
-      console.error("Erro PAGE_TOKEN:", data.error);
-    } catch (err) {
-      console.error("Exceção PAGE_TOKEN:", err.message);
-    }
-  }
-
-  console.error("❌ Todas as tentativas falharam");
-  return false;
 }
 
 function addToCache(cacheMap, item, timestamp) {
