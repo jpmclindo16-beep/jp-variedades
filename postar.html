@@ -5,74 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Postar Oferta</title>
 <style>
-  body {
-    font-family: system-ui, sans-serif;
-    background: #0d1117;
-    color: #e6edf3;
-    margin: 0;
-    padding: 20px;
+  body { font-family: system-ui, sans-serif; background: #0d1117; color: #e6edf3; margin: 0; padding: 20px; }
+  h1 { font-size: 20px; margin-bottom: 20px; }
+  label { display: block; margin-top: 14px; margin-bottom: 4px; font-size: 14px; color: #9198a1; }
+  input, textarea {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #30363d;
+    background: #161b22; color: #e6edf3; box-sizing: border-box; font-size: 15px; font-family: inherit;
   }
-  h1 {
-    font-size: 20px;
-    margin-bottom: 20px;
-  }
-  label {
-    display: block;
-    margin-top: 14px;
-    margin-bottom: 4px;
-    font-size: 14px;
-    color: #9198a1;
-  }
-  input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #30363d;
-    background: #161b22;
-    color: #e6edf3;
-    box-sizing: border-box;
-    font-size: 15px;
-  }
+  textarea { resize: vertical; min-height: 70px; }
   button {
-    margin-top: 20px;
-    width: 100%;
-    padding: 14px;
-    border-radius: 8px;
-    border: none;
-    background: #2ea043;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
+    margin-top: 20px; width: 100%; padding: 14px; border-radius: 8px; border: none;
+    background: #2ea043; color: white; font-size: 16px; font-weight: bold;
   }
-  button:disabled {
-    background: #444;
-  }
-  #resultado {
-    margin-top: 16px;
-    padding: 12px;
-    border-radius: 8px;
-    display: none;
-    font-size: 14px;
-  }
-  .sucesso {
-    background: #0d3320;
-    color: #4dd47e;
-    display: block !important;
-  }
-  .erro {
-    background: #3d1116;
-    color: #ff7b72;
-    display: block !important;
-  }
+  button:disabled { background: #444; }
+  #resultado { margin-top: 16px; padding: 12px; border-radius: 8px; display: none; font-size: 14px; }
+  .sucesso { background: #0d3320; color: #4dd47e; display: block !important; }
+  .erro { background: #3d1116; color: #ff7b72; display: block !important; }
+  .hint { font-size: 12px; color: #6e7681; margin-top: 4px; }
 </style>
 </head>
 <body>
 
-<h1>🔥 Postar oferta no Telegram, Facebook e Instagram</h1>
+<h1>🔥 Postar oferta (Telegram, Facebook, Instagram e Threads)</h1>
 
 <form id="form-oferta">
-  <label>Título do produto *</label>
-  <input type="text" id="titulo" required>
+  <label>Legenda *</label>
+  <textarea id="legenda" required placeholder="Escreva a legenda do post..."></textarea>
 
   <label>Preço atual (R$) *</label>
   <input type="number" step="0.01" id="precoAtual" required>
@@ -83,10 +41,17 @@
   <label>Link de afiliado *</label>
   <input type="url" id="link" required>
 
-  <label>URL da imagem — opcional (obrigatória para postar no Instagram)</label>
-  <input type="url" id="imagem">
+  <label>Imagem 1 — opcional (obrigatória p/ Instagram e Threads)</label>
+  <input type="url" id="imagem1">
 
-  <button type="submit" id="botao-enviar">Postar no Telegram, Facebook e Instagram</button>
+  <label>Imagem 2 — opcional</label>
+  <input type="url" id="imagem2">
+
+  <label>Imagem 3 — opcional</label>
+  <input type="url" id="imagem3">
+  <div class="hint">Com 2 ou 3 imagens, o post vira um carrossel/álbum em todas as plataformas.</div>
+
+  <button type="submit" id="botao-enviar">Postar</button>
 </form>
 
 <div id="resultado"></div>
@@ -102,12 +67,18 @@ document.getElementById('form-oferta').addEventListener('submit', async (e) => {
   resultado.className = '';
   resultado.style.display = 'none';
 
+  const imagens = [
+    document.getElementById('imagem1').value,
+    document.getElementById('imagem2').value,
+    document.getElementById('imagem3').value,
+  ].filter(Boolean);
+
   const dados = {
-    titulo: document.getElementById('titulo').value,
+    legenda: document.getElementById('legenda').value,
     precoAtual: document.getElementById('precoAtual').value,
     precoOriginal: document.getElementById('precoOriginal').value || null,
     link: document.getElementById('link').value,
-    imagem: document.getElementById('imagem').value || null,
+    imagens,
   };
 
   try {
@@ -124,14 +95,14 @@ document.getElementById('form-oferta').addEventListener('submit', async (e) => {
       if (json.telegram) partes.push('Telegram');
       if (json.facebook) partes.push('Facebook');
       if (json.instagram) partes.push('Instagram');
+      if (json.threads) partes.push('Threads');
 
       let mensagem = partes.length > 0
         ? '✅ Postado em: ' + partes.join(', ') + '!'
         : '⚠️ Nenhuma plataforma recebeu a postagem.';
 
-      if (!json.instagram && json.instagramMsg) {
-        mensagem += ' (Instagram: ' + json.instagramMsg + ')';
-      }
+      if (!json.instagram && json.instagramMsg) mensagem += ' | Instagram: ' + json.instagramMsg;
+      if (!json.threads && json.threadsMsg) mensagem += ' | Threads: ' + json.threadsMsg;
 
       resultado.textContent = mensagem;
       resultado.className = partes.length > 0 ? 'sucesso' : 'erro';
@@ -146,7 +117,7 @@ document.getElementById('form-oferta').addEventListener('submit', async (e) => {
   }
 
   botao.disabled = false;
-  botao.textContent = 'Postar no Telegram, Facebook e Instagram';
+  botao.textContent = 'Postar';
 });
 </script>
 
