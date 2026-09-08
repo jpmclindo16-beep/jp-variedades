@@ -1,4 +1,4 @@
-// api/webhook-instagram.js - VERSÃO CORRIGIDA PARA ENVIO DE RESPOSTA
+// api/webhook-instagram.js - VERSÃO CORRIGIDA (sem bloqueio por duplicidade)
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
@@ -26,8 +26,10 @@ const KEYWORDS = [
 
 const PUBLIC_REPLY_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram pra não perder as próximas promoções! 🔥";
 
-const processedCommentIds = new Set();
-const MAX_CACHE_SIZE = 500;
+// Cache com timestamp para expirar após 10 segundos
+const processedCommentIds = new Map();
+const MAX_CACHE_SIZE = 1000;
+const CACHE_EXPIRY = 10000; // 10 segundos
 const REQUEST_TIMEOUT = 15000;
 
 export default async function handler(req, res) {
@@ -109,14 +111,19 @@ async function processComment(comment) {
       return;
     }
 
-    if (processedCommentIds.has(commentId)) {
-      console.log(`Comentário duplicado ignorado: ${commentId}`);
+    // Verifica deduplicação com timestamp
+    const now = Date.now();
+    const lastProcessed = processedCommentIds.get(commentId);
+    
+    if (lastProcessed && (now - lastProcessed) < CACHE_EXPIRY) {
+      console.log(`Comentário processado recentemente (${Math.round((now - lastProcessed) / 1000)}s atrás), ignorando...`);
       return;
     }
 
-    addToCache(processedCommentIds, commentId);
+    // Adiciona ao cache com timestamp
+    addToCache(processedCommentIds, commentId, now);
 
-    console.log(`Comentário recebido: "${text}"`);
+    console.log(`Comentário recebido: "${text}" - Processando...`);
 
     const hasKeyword = KEYWORDS.some(keyword => text.includes(keyword));
     
@@ -143,6 +150,8 @@ async function processComment(comment) {
       } else {
         console.error(`❌ Todas as tentativas falharam`);
       }
+    } else {
+      console.log(`Nenhuma palavra-chave encontrada`);
     }
   } catch (err) {
     console.error("Erro ao processar comentário:", err);
@@ -261,12 +270,13 @@ async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   }
 }
 
-function addToCache(cacheSet, item) {
-  cacheSet.add(item);
+function addToCache(cacheMap, item, timestamp) {
+  cacheMap.set(item, timestamp);
   
-  if (cacheSet.size > MAX_CACHE_SIZE) {
-    const firstItem = cacheSet.values().next().value;
-    cacheSet.delete(firstItem);
+  // Remove itens antigos se exceder o limite
+  if (cacheMap.size > MAX_CACHE_SIZE) {
+    const firstKey = cacheMap.keys().next().value;
+    cacheMap.delete(firstKey);
   }
 }
 
@@ -276,4 +286,3 @@ export const config = {
     maxDuration: 60,
   } 
 };
-                  
