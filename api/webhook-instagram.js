@@ -1,10 +1,9 @@
-// api/webhook-instagram.js - VERSÃO CORRIGIDA (sem duplicidade)
+// api/webhook-instagram.js - VERSÃO CORRIGIDA PARA ENVIO DE RESPOSTA
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
+const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
 const IG_BUSINESS_ID = "17841467530671368";
 
-// Todas as palavras/variações que disparam a resposta automática.
-// Adicione novas palavras aqui, sempre em MAIÚSCULO.
 const KEYWORDS = [
   "QUERO",
   "EU QUERO",
@@ -25,21 +24,17 @@ const KEYWORDS = [
   "MANDA",
 ];
 
-// Resposta pública no próprio comentário (o ManyChat cuida do envio do link no Direct)
 const PUBLIC_REPLY_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram pra não perder as próximas promoções! 🔥";
 
-// Cache de deduplicação (best-effort — não sobrevive a cold start,
-// mas ajuda quando a mesma instância recebe reenvio rápido da Meta)
 const processedCommentIds = new Set();
 const MAX_CACHE_SIZE = 500;
-const REQUEST_TIMEOUT = 10000;
+const REQUEST_TIMEOUT = 15000;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Verificação do webhook (GET)
   if (req.method === "GET") {
     const mode = req.query["hub.mode"];
     const token = req.query["hub.verify_token"];
@@ -52,16 +47,13 @@ export default async function handler(req, res) {
     return res.status(403).send("Verificação falhou");
   }
 
-  // Processamento de eventos (POST)
   if (req.method === "POST") {
     const body = req.body;
 
-    // *** PONTO CRÍTICO DA CORREÇÃO ***
-    // Responde 200 IMEDIATAMENTE, antes de processar qualquer coisa.
-    // Isso evita que a Meta ache que a requisição falhou e reenvie o mesmo evento.
+    // Responde 200 imediatamente
     res.status(200).send("EVENT_RECEIVED");
 
-    // Processa de forma assíncrona (não bloqueia a resposta)
+    // Processa de forma assíncrona
     try {
       if (body && (body.object === "instagram" || body.object === "page")) {
         if (body.entry && Array.isArray(body.entry)) {
@@ -77,17 +69,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Método OPTIONS para CORS
   if (req.method === "OPTIONS") {
     return res.status(200).send("OK");
   }
 
-  // Método não permitido
   return res.status(405).send("Method Not Allowed");
 }
 
 async function processEntry(entry) {
-  // Processa apenas comentários
   if (entry.changes && Array.isArray(entry.changes)) {
     for (const change of entry.changes) {
       if (change.field === "comments") {
@@ -103,57 +92,100 @@ async function processComment(comment) {
     const fromId = comment.from?.id?.toString();
     const text = (comment.text || "").toUpperCase().trim();
 
-    // Validações
+    console.log("Dados do comentário:", {
+      commentId,
+      fromId,
+      text,
+      mediaId: comment.media?.id
+    });
+
     if (!commentId || !fromId) {
       console.log("Comentário sem ID ou autor");
       return;
     }
 
-    // Ignora comentários do próprio bot
     if (fromId === IG_BUSINESS_ID) {
       console.log("Ignorando comentário do próprio bot");
       return;
     }
 
-    // Verifica deduplicação
     if (processedCommentIds.has(commentId)) {
       console.log(`Comentário duplicado ignorado: ${commentId}`);
       return;
     }
 
-    // Adiciona ao cache
     addToCache(processedCommentIds, commentId);
 
-    console.log(`Comentário recebido: "${text}" (ID: ${commentId}, Autor: ${fromId})`);
+    console.log(`Comentário recebido: "${text}"`);
 
-    // Verifica se contém alguma palavra-chave
     const hasKeyword = KEYWORDS.some(keyword => text.includes(keyword));
     
     if (hasKeyword) {
-      console.log(`Palavra-chave detectada no comentário ${commentId}`);
+      console.log(`Palavra-chave detectada, tentando responder...`);
       
-      // Responde ao comentário
-      const replySent = await sendCommentReply(commentId, PUBLIC_REPLY_MESSAGE);
+      // Tenta com IG_TOKEN primeiro
+      let replySent = await sendReplyWithIGToken(commentId, PUBLIC_REPLY_MESSAGE);
+      
+      // Se falhar, tenta com PAGE_TOKEN
+      if (!replySent) {
+        console.log("Tentando com PAGE_TOKEN...");
+        replySent = await sendReplyWithPageToken(commentId, PUBLIC_REPLY_MESSAGE);
+      }
+      
+      // Se ambos falharem, tenta endpoint alternativo
+      if (!replySent) {
+        console.log("Tentando endpoint alternativo...");
+        replySent = await sendReplyAlternative(commentId, PUBLIC_REPLY_MESSAGE);
+      }
       
       if (replySent) {
-        console.log(`Resposta enviada com sucesso para o comentário ${commentId}`);
+        console.log(`✅ Resposta enviada com sucesso!`);
       } else {
-        console.error(`Falha ao responder comentário ${commentId}`);
+        console.error(`❌ Todas as tentativas falharam`);
       }
-    } else {
-      console.log(`Nenhuma palavra-chave encontrada no comentário "${text}"`);
     }
   } catch (err) {
     console.error("Erro ao processar comentário:", err);
   }
 }
 
-// Função para responder comentário
-async function sendCommentReply(commentId, text) {
+// Tenta com IG_TOKEN
+async function sendReplyWithIGToken(commentId, text) {
   try {
-    console.log(`Tentando responder comentário ${commentId}...`);
+    console.log(`Usando IG_TOKEN para responder ${commentId}`);
     
-    // Usa o endpoint correto para respostas a comentários
+    const url = `https://graph.instagram.com/v21.0/${commentId}/replies`;
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${IG_TOKEN}` 
+      },
+      body: JSON.stringify({ 
+        message: text 
+      }),
+    });
+
+    const data = await response.json();
+    console.log("Resposta IG_TOKEN:", JSON.stringify(data));
+    
+    if (!data.error) {
+      return true;
+    }
+    
+    console.error("Erro IG_TOKEN:", data.error);
+    return false;
+  } catch (err) {
+    console.error("Exceção IG_TOKEN:", err);
+    return false;
+  }
+}
+
+// Tenta com PAGE_TOKEN
+async function sendReplyWithPageToken(commentId, text) {
+  try {
+    console.log(`Usando PAGE_TOKEN para responder ${commentId}`);
+    
     const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
     const response = await fetchWithTimeout(url, {
       method: "POST",
@@ -167,22 +199,53 @@ async function sendCommentReply(commentId, text) {
     });
 
     const data = await response.json();
+    console.log("Resposta PAGE_TOKEN:", JSON.stringify(data));
     
     if (!data.error) {
-      console.log("Resposta enviada com sucesso");
       return true;
     }
     
-    console.error("Erro ao responder comentário:", data.error);
+    console.error("Erro PAGE_TOKEN:", data.error);
     return false;
-    
   } catch (err) {
-    console.error("Exceção ao responder comentário:", err);
+    console.error("Exceção PAGE_TOKEN:", err);
     return false;
   }
 }
 
-// Função utilitária para fetch com timeout
+// Tenta endpoint alternativo
+async function sendReplyAlternative(commentId, text) {
+  try {
+    console.log(`Usando endpoint alternativo para ${commentId}`);
+    
+    // Tenta com o endpoint do Graph API v20.0
+    const url = `https://graph.facebook.com/v20.0/${commentId}/replies`;
+    const response = await fetchWithTimeout(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${PAGE_TOKEN}` 
+      },
+      body: JSON.stringify({ 
+        message: text 
+      }),
+    });
+
+    const data = await response.json();
+    console.log("Resposta alternativa:", JSON.stringify(data));
+    
+    if (!data.error) {
+      return true;
+    }
+    
+    console.error("Erro alternativa:", data.error);
+    return false;
+  } catch (err) {
+    console.error("Exceção alternativa:", err);
+    return false;
+  }
+}
+
 async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -198,7 +261,6 @@ async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   }
 }
 
-// Função utilitária para adicionar ao cache com limite
 function addToCache(cacheSet, item) {
   cacheSet.add(item);
   
@@ -208,10 +270,10 @@ function addToCache(cacheSet, item) {
   }
 }
 
-// Configuração da API
 export const config = { 
   api: { 
     bodyParser: true,
-    maxDuration: 30,
+    maxDuration: 60,
   } 
 };
+                  
