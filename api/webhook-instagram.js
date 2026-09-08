@@ -1,4 +1,4 @@
-// api/webhook-instagram.js - VERSÃO COM RESPOSTA AO COMENTÁRIO
+// api/webhook-instagram.js - VERSÃO COM DELAY ANTI-BLOQUEIO
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
@@ -28,7 +28,11 @@ const PUBLIC_REPLY_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram
 
 const processedCommentIds = new Map();
 const MAX_CACHE_SIZE = 1000;
-const CACHE_EXPIRY = 10000;
+const CACHE_EXPIRY = 60000; // 1 minuto (aumentado para evitar duplicidade)
+
+// Fila de processamento para evitar bloqueio
+let isProcessing = false;
+const processingQueue = [];
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -114,19 +118,51 @@ async function processComment(comment) {
     const hasKeyword = KEYWORDS.some(keyword => text.includes(keyword));
     
     if (hasKeyword) {
-      console.log(`Palavra-chave detectada, respondendo ao comentário...`);
+      console.log(`Palavra-chave detectada, adicionando à fila...`);
       
-      // Responde diretamente ao comentário
-      const replySent = await sendCommentReply(commentId, PUBLIC_REPLY_MESSAGE);
+      // Adiciona à fila de processamento
+      processingQueue.push({ commentId, fromId });
       
-      if (replySent) {
-        console.log(`✅ Resposta ao comentário enviada com sucesso!`);
-      } else {
-        console.error(`❌ Falha ao responder comentário`);
-      }
+      // Processa a fila
+      await processQueue();
     }
   } catch (err) {
     console.error("Erro ao processar comentário:", err);
+  }
+}
+
+// Processa a fila com delay entre respostas
+async function processQueue() {
+  if (isProcessing) {
+    console.log("Já está processando, aguardando...");
+    return;
+  }
+
+  isProcessing = true;
+
+  try {
+    while (processingQueue.length > 0) {
+      const item = processingQueue.shift();
+      
+      console.log(`Processando comentário ${item.commentId}...`);
+      
+      // Tenta responder ao comentário
+      const replySent = await sendCommentReply(item.commentId, PUBLIC_REPLY_MESSAGE);
+      
+      if (replySent) {
+        console.log(`✅ Resposta enviada com sucesso!`);
+      } else {
+        console.error(`❌ Falha ao responder comentário ${item.commentId}`);
+      }
+      
+      // Delay entre respostas (5 segundos)
+      if (processingQueue.length > 0) {
+        console.log("Aguardando 5 segundos antes da próxima resposta...");
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
+  } finally {
+    isProcessing = false;
   }
 }
 
@@ -135,7 +171,6 @@ async function sendCommentReply(commentId, text) {
   try {
     console.log(`Respondendo comentário ${commentId}...`);
     
-    // Usa o endpoint do Facebook Graph API para responder comentários
     const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
     
     const response = await fetch(url, {
