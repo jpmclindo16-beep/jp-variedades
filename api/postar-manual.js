@@ -1,5 +1,12 @@
 // api/postar-manual.js
 
+try {
+  const dns = require("node:dns");
+  dns.setDefaultResultOrder("ipv4first");
+} catch (err) {
+  console.error("Não conseguiu forçar IPv4 no DNS:", err.message);
+}
+
 const jimpModule = require("jimp");
 
 const Jimp = jimpModule.Jimp || jimpModule;
@@ -185,11 +192,11 @@ async function rehospedarImagemNoImgBB(urlOriginal) {
 
     let imgResp;
     try {
-      imgResp = await fetchWithTimeout(urlOriginal, {}, 25000);
+      imgResp = await fetchWithTimeout(urlOriginal, {}, 15000);
     } catch (errPrimeiraTentativa) {
       console.error("Primeira tentativa de baixar imagem falhou, tentando de novo:", errPrimeiraTentativa.message);
-      await delay(2000);
-      imgResp = await fetchWithTimeout(urlOriginal, {}, 25000);
+      await delay(1000);
+      imgResp = await fetchWithTimeout(urlOriginal, {}, 15000);
     }
 
     if (!imgResp.ok) {
@@ -317,15 +324,11 @@ function limitarLegendaInstagram(caption) {
 // PROCESSAR IMAGENS PARA META
 // ======================================================
 async function processarImagensParaMeta(imagens) {
-  const imagensProcessadas = [];
+  console.log(`Processando ${imagens.length} imagem(ns) em paralelo`);
 
-  for (let i = 0; i < imagens.length; i++) {
-    console.log(`Processando imagem ${i + 1}/${imagens.length}`);
-
-    const imagemFinal = await rehospedarImagemNoImgBB(imagens[i]);
-
-    imagensProcessadas.push(imagemFinal);
-  }
+  const imagensProcessadas = await Promise.all(
+    imagens.map(url => rehospedarImagemNoImgBB(url))
+  );
 
   return imagensProcessadas;
 }
