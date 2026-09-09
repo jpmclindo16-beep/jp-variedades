@@ -172,32 +172,11 @@ async function converterParaJpeg(bufferOriginal) {
 // ======================================================
 // RE-HOSPEDAR IMAGEM NO IMGBB COMO JPG
 // ======================================================
-const DOMINIOS_CONFIAVEIS = [
-  "i.ibb.co",
-  "ibb.co",
-];
-
-function urlJaConfiavel(urlOriginal) {
-  try {
-    const host = new URL(urlOriginal).hostname;
-    return DOMINIOS_CONFIAVEIS.some(
-      dominio => host === dominio || host.endsWith(`.${dominio}`)
-    );
-  } catch {
-    return false;
-  }
-}
-
 async function rehospedarImagemNoImgBB(urlOriginal) {
   const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 
   if (!IMGBB_API_KEY) {
     console.log("IMGBB_API_KEY não configurada. Usando imagem original.");
-    return urlOriginal;
-  }
-
-  if (urlJaConfiavel(urlOriginal)) {
-    console.log("Imagem já está em domínio confiável, pulando re-hospedagem:", urlOriginal);
     return urlOriginal;
   }
 
