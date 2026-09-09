@@ -1,4 +1,4 @@
-// api/postar-manual.js - VERSÃO CORRIGIDA
+// api/postar-manual.js - VERSÃO COM TIMEOUT E RETRY
 const { Jimp } = require('jimp');
 
 export default async function handler(req, res) {
@@ -15,12 +15,58 @@ export default async function handler(req, res) {
   const THREADS_USER_ID = process.env.THREADS_USER_ID;
   const THREADS_ACCESS_TOKEN = process.env.THREADS_ACCESS_TOKEN;
 
+  // Função de fetch com timeout
+  async function fetchWithTimeout(url, options = {}, timeout = 30000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      return response;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  // Função de fetch com retry
+  async function fetchWithRetry(url, options = {}, maxRetries = 3, timeout = 30000) {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const response = await fetchWithTimeout(url, options, timeout);
+        
+        if (response.ok) {
+          return response;
+        }
+        
+        // Se for erro 4xx ou 5xx, tenta novamente
+        console.log(`Tentativa ${i + 1} falhou com status ${response.status}, tentando novamente...`);
+        
+        // Espera antes de tentar novamente
+        await new Promise(resolve => setTimeout(resolve, 2000 * (i + 1)));
+      } catch (err) {
+        console.log(`Tentativa ${i + 1} falhou: ${err.message}`);
+        
+        if (i === maxRetries - 1) {
+          throw err;
+        }
+        
+        // Espera antes de tentar novamente
+        await new Promise(resolve => setTimeout(resolve, 2000 * (i + 1)));
+      }
+    }
+    
+    throw new Error('Todas as tentativas falharam');
+  }
+
   // Baixa a imagem original, converte para JPEG e re-hospeda no imgbb.
   async function rehospedarImagem(urlOriginal) {
     if (!urlOriginal || !IMGBB_API_KEY) return urlOriginal;
 
     try {
-      const imgResp = await fetch(urlOriginal);
+      const imgResp = await fetchWithTimeout(urlOriginal, {}, 15000);
       if (!imgResp.ok) {
         console.error('Falha ao baixar imagem original:', imgResp.status);
         return urlOriginal;
@@ -30,7 +76,6 @@ export default async function handler(req, res) {
 
       let bufferFinal = bufferOriginal;
       try {
-        // CORREÇÃO: Usando a API correta do Jimp
         const image = await Jimp.read(bufferOriginal);
         bufferFinal = await image.getBuffer(Jimp.MIME_JPEG);
       } catch (convErr) {
@@ -39,11 +84,11 @@ export default async function handler(req, res) {
 
       const base64 = bufferFinal.toString('base64');
 
-      const uploadResp = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      const uploadResp = await fetchWithTimeout(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ image: base64 }),
-      });
+      }, 30000);
 
       const uploadData = await uploadResp.json();
 
@@ -64,14 +109,12 @@ export default async function handler(req, res) {
     
     console.log("Body recebido:", JSON.stringify(body).slice(0, 1000));
 
-    // Aceita diferentes nomes de campos
     const caption = body.caption || body.legenda || body.texto || "";
     const imagens = body.imagens || body.images || [];
     const precoAtual = body.precoAtual || body.preco_atual || "";
     const precoOriginal = body.precoOriginal || body.preco_original || "";
     const linkAfiliado = body.linkAfiliado || body.link_afiliado || "";
 
-    // Validações
     if (!caption || caption.trim() === "") {
       return res.status(400).json({ 
         success: false, 
@@ -86,7 +129,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Filtra imagens vazias
     const imagensValidas = imagens.filter(img => img && img.trim() !== "");
     
     if (imagensValidas.length === 0) {
@@ -98,7 +140,6 @@ export default async function handler(req, res) {
 
     console.log(`Processando ${imagensValidas.length} imagens...`);
 
-    // Monta a legenda completa
     let legendaCompleta = caption;
     
     if (precoAtual) {
@@ -116,19 +157,19 @@ export default async function handler(req, res) {
     console.log("Legenda completa:", legendaCompleta.slice(0, 200));
 
     // Rehospeda as imagens
-    const imagensProcessadas = await Promise.all(
-      imagensValidas.map(async (imagem, index) => {
-        try {
-          console.log(`Rehospedando imagem ${index + 1}...`);
-          const imagemProcessada = await rehospedarImagem(imagem);
-          console.log(`Imagem ${index + 1} processada`);
-          return imagemProcessada;
-        } catch (err) {
-          console.error(`Erro ao processar imagem ${index + 1}:`, err);
-          return imagem;
-        }
-      })
-    );
+    const imagensProcessadas = [];
+    
+    for (let i = 0; i < imagensValidas.length; i++) {
+      try {
+        console.log(`Rehospedando imagem ${i + 1}...`);
+        const imagemProcessada = await rehospedarImagem(imagensValidas[i]);
+        console.log(`Imagem ${i + 1} processada`);
+        imagensProcessadas.push(imagemProcessada);
+      } catch (err) {
+        console.error(`Erro ao processar imagem ${i + 1}:`, err);
+        imagensProcessadas.push(imagensValidas[i]); // Usa original
+      }
+    }
 
     console.log("Imagens processadas:", imagensProcessadas);
 
@@ -190,10 +231,9 @@ async function publicarNoInstagram(imagens, caption) {
 async function publicarImagemUnica(imagemUrl, caption, token, businessId) {
   try {
     console.log("Publicando imagem única...");
-    console.log("URL da imagem:", imagemUrl);
     
     const createUrl = `https://graph.instagram.com/v21.0/${businessId}/media`;
-    const createResponse = await fetch(createUrl, {
+    const createResponse = await fetchWithTimeout(createUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -203,10 +243,9 @@ async function publicarImagemUnica(imagemUrl, caption, token, businessId) {
         caption: caption,
         access_token: token
       }),
-    });
+    }, 30000);
 
     const createData = await createResponse.json();
-    console.log("Resposta criação container:", JSON.stringify(createData));
     
     if (createData.error) {
       throw new Error(`Erro ao criar container: ${createData.error.message}`);
@@ -215,7 +254,7 @@ async function publicarImagemUnica(imagemUrl, caption, token, businessId) {
     console.log("Container criado:", createData.id);
 
     const publishUrl = `https://graph.instagram.com/v21.0/${businessId}/media_publish`;
-    const publishResponse = await fetch(publishUrl, {
+    const publishResponse = await fetchWithTimeout(publishUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -224,10 +263,9 @@ async function publicarImagemUnica(imagemUrl, caption, token, businessId) {
         creation_id: createData.id,
         access_token: token
       }),
-    });
+    }, 30000);
 
     const publishData = await publishResponse.json();
-    console.log("Resposta publicação:", JSON.stringify(publishData));
     
     if (publishData.error) {
       throw new Error(`Erro ao publicar: ${publishData.error.message}`);
@@ -258,37 +296,86 @@ async function publicarCarrossel(imagens, caption, token, businessId) {
     
     for (let i = 0; i < imagens.length; i++) {
       console.log(`Criando container para imagem ${i + 1}...`);
+      console.log(`URL da imagem ${i + 1}:`, imagens[i]);
       
-      const createUrl = `https://graph.instagram.com/v21.0/${businessId}/media`;
-      const createResponse = await fetch(createUrl, {
+      try {
+        const createUrl = `https://graph.instagram.com/v21.0/${businessId}/media`;
+        const createResponse = await fetchWithTimeout(createUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image_url: imagens[i],
+            is_carousel_item: true,
+            access_token: token
+          }),
+        }, 45000); // Timeout maior para containers
+
+        const createData = await createResponse.json();
+        
+        if (createData.error) {
+          console.error(`Erro detalhado container ${i + 1}:`, createData.error);
+          throw new Error(`Erro ao criar container ${i + 1}: ${createData.error.message}`);
+        }
+
+        containerIds.push(createData.id);
+        console.log(`Container ${i + 1} criado:`, createData.id);
+        
+        // Delay entre containers
+        if (i < imagens.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      } catch (err) {
+        console.error(`Falha ao criar container ${i + 1}:`, err);
+        
+        // Se falhar, tenta com a imagem original (sem rehospedar)
+        if (i === imagens.length - 1 && containerIds.length >= 1) {
+          console.log("Tentando continuar com as imagens que funcionaram...");
+          break; // Continua com as imagens que já foram criadas
+        }
+        
+        throw err;
+      }
+    }
+
+    if (containerIds.length === 0) {
+      throw new Error("Nenhum container foi criado com sucesso");
+    }
+
+    console.log(`Containers criados: ${containerIds.length} de ${imagens.length}`);
+
+    // Se só tem 1 container, publica como imagem única
+    if (containerIds.length === 1) {
+      console.log("Apenas 1 container, publicando como imagem única...");
+      const publishUrl = `https://graph.instagram.com/v21.0/${businessId}/media_publish`;
+      const publishResponse = await fetchWithTimeout(publishUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          image_url: imagens[i],
-          is_carousel_item: true,
+          creation_id: containerIds[0],
           access_token: token
         }),
-      });
+      }, 30000);
 
-      const createData = await createResponse.json();
+      const publishData = await publishResponse.json();
       
-      if (createData.error) {
-        throw new Error(`Erro ao criar container ${i + 1}: ${createData.error.message}`);
+      if (publishData.error) {
+        throw new Error(`Erro ao publicar: ${publishData.error.message}`);
       }
 
-      containerIds.push(createData.id);
-      console.log(`Container ${i + 1} criado:`, createData.id);
-      
-      if (i < imagens.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
+      return {
+        success: true,
+        postId: publishData.id
+      };
     }
 
+    // Cria o container do carrossel
     console.log("Criando container do carrossel...");
     const carouselUrl = `https://graph.instagram.com/v21.0/${businessId}/media`;
-    const carouselResponse = await fetch(carouselUrl, {
+    const carouselResponse = await fetchWithTimeout(carouselUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -299,7 +386,7 @@ async function publicarCarrossel(imagens, caption, token, businessId) {
         caption: caption,
         access_token: token
       }),
-    });
+    }, 30000);
 
     const carouselData = await carouselResponse.json();
     
@@ -309,9 +396,10 @@ async function publicarCarrossel(imagens, caption, token, businessId) {
 
     console.log("Carrossel criado:", carouselData.id);
 
+    // Publica o carrossel
     console.log("Publicando carrossel...");
     const publishUrl = `https://graph.instagram.com/v21.0/${businessId}/media_publish`;
-    const publishResponse = await fetch(publishUrl, {
+    const publishResponse = await fetchWithTimeout(publishUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -320,7 +408,7 @@ async function publicarCarrossel(imagens, caption, token, businessId) {
         creation_id: carouselData.id,
         access_token: token
       }),
-    });
+    }, 30000);
 
     const publishData = await publishResponse.json();
     
