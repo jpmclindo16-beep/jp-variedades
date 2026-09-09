@@ -3,8 +3,44 @@
 // ======================================================
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function extrairTexto(body, keys = []) {
+  for (const key of keys) {
+    const value = body?.[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+function normalizarImagens(body) {
+  const imagens = [];
+
+  for (let i = 1; i <= 10; i++) {
+    const key = `imagem${i}`;
+    const value = body?.[key];
+
+    if (typeof value === "string" && value.trim()) {
+      imagens.push(value.trim());
+    }
+  }
+
+  if (Array.isArray(body?.imagens)) {
+    for (const img of body.imagens) {
+      if (typeof img === "string" && img.trim()) {
+        imagens.push(img.trim());
+      }
+    }
+  }
+
+  return [...new Set(imagens)];
+}
+
+function montarLegenda(body) {
+  const legenda = extrairTexto(body, ["legenda", "caption", "texto"]);
+  return legenda;
+}
+
 async function aguardarProcessamentoInstagram(containerId, token) {
-  const maxTentativas = 10;
+  const maxTentativas = 12;
   const intervalo = 2000;
 
   for (let i = 0; i < maxTentativas; i++) {
@@ -13,9 +49,7 @@ async function aguardarProcessamentoInstagram(containerId, token) {
       access_token: token,
     });
 
-    if (status?.status_code === "FINISHED") {
-      return true;
-    }
+    if (status?.status_code === "FINISHED") return true;
 
     if (status?.status_code === "ERROR") {
       throw new Error(`Container do Instagram com erro: ${containerId}`);
@@ -27,8 +61,16 @@ async function aguardarProcessamentoInstagram(containerId, token) {
   throw new Error(`Timeout aguardando processamento do container ${containerId}`);
 }
 
+async function processarImagensParaMeta(imagens) {
+  if (!Array.isArray(imagens) || imagens.length === 0) return [];
+
+  // Se você já converte imagem para URL pública antes, pode só retornar imagens.
+  // Mantido aqui caso você tenha pipeline com ImgBB ou similar.
+  return imagens;
+}
+
 // ======================================================
-// PUBLICAR IMAGEM ÚNICA NO INSTAGRAM
+// INSTAGRAM
 // ======================================================
 async function publicarImagemUnicaInstagram(imageUrl, caption, token, instagramId) {
   const container = await graphPost(`${instagramId}/media`, {
@@ -37,7 +79,7 @@ async function publicarImagemUnicaInstagram(imageUrl, caption, token, instagramI
     access_token: token,
   });
 
-  if (!container.id) {
+  if (!container?.id) {
     throw new Error("Falha ao criar o container de mídia do Instagram.");
   }
 
@@ -48,15 +90,13 @@ async function publicarImagemUnicaInstagram(imageUrl, caption, token, instagramI
     access_token: token,
   });
 
-  return {
-    success: true,
-    id: publish.id,
-  };
+  if (!publish?.id) {
+    throw new Error("Falha ao publicar no Instagram.");
+  }
+
+  return { success: true, id: publish.id };
 }
 
-// ======================================================
-// PUBLICAR CARROSSEL NO INSTAGRAM
-// ======================================================
 async function publicarCarrosselInstagram(imagens, caption, token, instagramId) {
   if (!Array.isArray(imagens) || imagens.length < 2) {
     throw new Error("Carrossel do Instagram exige no mínimo 2 imagens.");
@@ -75,7 +115,7 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
       access_token: token,
     });
 
-    if (!itemContainer.id) {
+    if (!itemContainer?.id) {
       throw new Error("Falha ao criar item do carrossel no Instagram.");
     }
 
@@ -93,7 +133,7 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
     access_token: token,
   });
 
-  if (!carouselContainer.id) {
+  if (!carouselContainer?.id) {
     throw new Error("Falha ao criar container do carrossel no Instagram.");
   }
 
@@ -104,15 +144,13 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
     access_token: token,
   });
 
-  return {
-    success: true,
-    id: publish.id,
-  };
+  if (!publish?.id) {
+    throw new Error("Falha ao publicar carrossel no Instagram.");
+  }
+
+  return { success: true, id: publish.id };
 }
 
-// ======================================================
-// PUBLICAR NO INSTAGRAM
-// ======================================================
 async function publicarNoInstagram(imagens, caption) {
   try {
     const token = process.env.INSTAGRAM_TOKEN;
@@ -127,15 +165,11 @@ async function publicarNoInstagram(imagens, caption) {
     }
 
     if (!imagens || imagens.length === 0) {
-      if (!caption) {
-        return {
-          success: false,
-          skipped: true,
-          error: "Sem imagem e sem legenda para publicar no Instagram.",
-        };
-      }
-
-      throw new Error("Instagram não suporta publicação apenas com texto via Graph API.");
+      return {
+        success: false,
+        skipped: true,
+        error: "Instagram exige pelo menos uma imagem para publicar.",
+      };
     }
 
     if (imagens.length === 1) {
@@ -150,7 +184,7 @@ async function publicarNoInstagram(imagens, caption) {
 }
 
 // ======================================================
-// PUBLICAR NO FACEBOOK
+// FACEBOOK
 // ======================================================
 async function publicarNoFacebook(imagens, caption) {
   try {
@@ -171,7 +205,7 @@ async function publicarNoFacebook(imagens, caption) {
         access_token: token,
       });
 
-      return { success: true, id: post.id };
+      return { success: true, id: post?.id };
     }
 
     if (imagens.length === 1) {
@@ -182,19 +216,19 @@ async function publicarNoFacebook(imagens, caption) {
         access_token: token,
       });
 
-      return { success: true, id: post.id || post.post_id };
+      return { success: true, id: post?.id || post?.post_id };
     }
 
     const attachedMedia = [];
 
-    for (const url of imagens) {
+    for (const url of imagens.slice(0, 10)) {
       const upload = await graphPost(`${pageId}/photos`, {
         url: url,
         published: false,
         access_token: token,
       });
 
-      if (upload.id) {
+      if (upload?.id) {
         attachedMedia.push({ media_fbid: upload.id });
       }
     }
@@ -214,7 +248,7 @@ async function publicarNoFacebook(imagens, caption) {
 
     const feedPost = await graphPost(`${pageId}/feed`, payload);
 
-    return { success: true, id: feedPost.id };
+    return { success: true, id: feedPost?.id };
   } catch (err) {
     console.error("Facebook erro:", err.message);
     return { success: false, error: err.message };
@@ -222,7 +256,7 @@ async function publicarNoFacebook(imagens, caption) {
 }
 
 // ======================================================
-// PUBLICAR NO TELEGRAM
+// TELEGRAM
 // ======================================================
 async function publicarNoTelegram(imagens, caption) {
   try {
@@ -248,7 +282,7 @@ async function publicarNoTelegram(imagens, caption) {
         token
       );
 
-      return { success: true, result: resp.result };
+      return { success: true, result: resp?.result };
     }
 
     if (imagens.length === 1) {
@@ -263,7 +297,7 @@ async function publicarNoTelegram(imagens, caption) {
         token
       );
 
-      return { success: true, result: resp.result };
+      return { success: true, result: resp?.result };
     }
 
     const media = imagens.slice(0, 10).map((img, index) => ({
@@ -282,7 +316,7 @@ async function publicarNoTelegram(imagens, caption) {
       token
     );
 
-    return { success: true, result: resp.result };
+    return { success: true, result: resp?.result };
   } catch (err) {
     console.error("Telegram erro:", err.message);
     return { success: false, error: err.message };
@@ -290,7 +324,7 @@ async function publicarNoTelegram(imagens, caption) {
 }
 
 // ======================================================
-// HANDLER PRINCIPAL (API ROUTE)
+// HANDLER PRINCIPAL
 // ======================================================
 export default async function handler(req, res) {
   if (req.method !== "POST") {
