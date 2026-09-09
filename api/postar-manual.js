@@ -1,10 +1,20 @@
 // api/postar-manual.js
 
-export const config = {
-  maxDuration: 60,
-};
+const jimpModule = require("jimp");
+
+const Jimp = jimpModule.Jimp || jimpModule;
+const JimpMime = jimpModule.JimpMime || {};
 
 const GRAPH_VERSION = "v21.0";
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "10mb",
+    },
+  },
+  maxDuration: 60,
+};
 
 // ======================================================
 // DELAY
@@ -16,17 +26,15 @@ function delay(ms) {
 // ======================================================
 // FETCH COM TIMEOUT
 // ======================================================
-async function fetchWithTimeout(url, options = {}, timeout = 25000) {
+async function fetchWithTimeout(url, options = {}, timeout = 30000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, {
+    return await fetch(url, {
       ...options,
       signal: controller.signal,
     });
-
-    return response;
   } finally {
     clearTimeout(timeoutId);
   }
@@ -48,9 +56,9 @@ async function lerResposta(response) {
 }
 
 // ======================================================
-// POST GRAPH API FACEBOOK/INSTAGRAM
+// POST GRAPH API
 // ======================================================
-async function graphPost(path, params, timeout = 25000) {
+async function graphPost(path, params, timeout = 30000) {
   const url = `https://graph.facebook.com/${GRAPH_VERSION}/${path}`;
 
   const response = await fetchWithTimeout(
@@ -82,7 +90,7 @@ async function graphPost(path, params, timeout = 25000) {
 // ======================================================
 // POST TELEGRAM
 // ======================================================
-async function telegramPost(method, payload, token, timeout = 25000) {
+async function telegramPost(method, payload, token, timeout = 30000) {
   const url = `https://api.telegram.org/bot${token}/${method}`;
 
   const response = await fetchWithTimeout(
@@ -111,7 +119,122 @@ async function telegramPost(method, payload, token, timeout = 25000) {
 }
 
 // ======================================================
-// NORMALIZAR IMAGENS
+// PEGAR MIME JPEG DO JIMP
+// ======================================================
+function getJpegMime() {
+  return (
+    JimpMime.jpeg ||
+    JimpMime.JPEG ||
+    jimpModule.MIME_JPEG ||
+    Jimp.MIME_JPEG ||
+    "image/jpeg"
+  );
+}
+
+// ======================================================
+// CONVERTER BUFFER PARA JPEG
+// ======================================================
+async function converterParaJpeg(bufferOriginal) {
+  const mimeJpeg = getJpegMime();
+
+  const image = await Jimp.read(bufferOriginal);
+
+  if (typeof image.quality === "function") {
+    image.quality(90);
+  }
+
+  if (typeof image.background === "function") {
+    image.background(0xffffffff);
+  }
+
+  if (typeof image.getBufferAsync === "function") {
+    return await image.getBufferAsync(mimeJpeg);
+  }
+
+  const result = image.getBuffer(mimeJpeg);
+
+  if (result && typeof result.then === "function") {
+    return await result;
+  }
+
+  if (Buffer.isBuffer(result)) {
+    return result;
+  }
+
+  return await new Promise((resolve, reject) => {
+    image.getBuffer(mimeJpeg, (err, buffer) => {
+      if (err) reject(err);
+      else resolve(buffer);
+    });
+  });
+}
+
+// ======================================================
+// RE-HOSPEDAR IMAGEM NO IMGBB COMO JPG
+// ======================================================
+async function rehospedarImagemNoImgBB(urlOriginal) {
+  const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
+
+  if (!IMGBB_API_KEY) {
+    console.log("IMGBB_API_KEY não configurada. Usando imagem original.");
+    return urlOriginal;
+  }
+
+  try {
+    console.log("Baixando imagem:", urlOriginal);
+
+    const imgResp = await fetchWithTimeout(urlOriginal, {}, 25000);
+
+    if (!imgResp.ok) {
+      console.error("Falha ao baixar imagem:", imgResp.status);
+      return urlOriginal;
+    }
+
+    const bufferOriginal = Buffer.from(await imgResp.arrayBuffer());
+
+    let bufferFinal = bufferOriginal;
+
+    try {
+      bufferFinal = await converterParaJpeg(bufferOriginal);
+      console.log("Imagem convertida para JPG");
+    } catch (err) {
+      console.error("Não conseguiu converter para JPG, usando original:", err.message);
+    }
+
+    const base64 = bufferFinal.toString("base64");
+
+    const uploadResp = await fetchWithTimeout(
+      `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          image: base64,
+          name: `produto-${Date.now()}.jpg`,
+        }),
+      },
+      45000
+    );
+
+    const uploadData = await lerResposta(uploadResp);
+
+    if (uploadData.success && uploadData.data?.url) {
+      console.log("Imagem re-hospedada no ImgBB:", uploadData.data.url);
+      return uploadData.data.url;
+    }
+
+    console.error("ImgBB falhou:", JSON.stringify(uploadData).slice(0, 500));
+    return urlOriginal;
+  } catch (err) {
+    console.error("Erro ao re-hospedar imagem:", err.message);
+    return urlOriginal;
+  }
+}
+
+// ======================================================
+// NORMALIZAR IMAGENS DO FORMULÁRIO
 // ======================================================
 function normalizarImagens(body) {
   let imagens = body.imagens || body.images || [];
@@ -150,12 +273,12 @@ function normalizarImagens(body) {
 // MONTAR LEGENDA
 // ======================================================
 function montarLegenda(body) {
-  const caption = body.caption || body.legenda || body.texto || "";
+  const caption = body.caption || body.legenda || body.texto || body.legendaCompleta || "";
   const precoAtual = body.precoAtual || body.preco_atual || "";
   const precoOriginal = body.precoOriginal || body.preco_original || "";
   const linkAfiliado = body.linkAfiliado || body.link_afiliado || "";
 
-  let legendaCompleta = caption.trim();
+  let legendaCompleta = String(caption).trim();
 
   if (precoAtual) {
     legendaCompleta += `\n\n💰 Preço: R$ ${precoAtual}`;
@@ -173,7 +296,7 @@ function montarLegenda(body) {
 }
 
 // ======================================================
-// LIMITAR LEGENDA INSTAGRAM
+// LIMITAR LEGENDA DO INSTAGRAM
 // ======================================================
 function limitarLegendaInstagram(caption) {
   if (caption.length <= 2200) {
@@ -181,6 +304,23 @@ function limitarLegendaInstagram(caption) {
   }
 
   return caption.slice(0, 2190) + "...";
+}
+
+// ======================================================
+// PROCESSAR IMAGENS PARA META
+// ======================================================
+async function processarImagensParaMeta(imagens) {
+  const imagensProcessadas = [];
+
+  for (let i = 0; i < imagens.length; i++) {
+    console.log(`Processando imagem ${i + 1}/${imagens.length}`);
+
+    const imagemFinal = await rehospedarImagemNoImgBB(imagens[i]);
+
+    imagensProcessadas.push(imagemFinal);
+  }
+
+  return imagensProcessadas;
 }
 
 // ======================================================
@@ -205,6 +345,13 @@ async function publicarNoInstagram(imagens, caption) {
         success: false,
         skipped: true,
         error: "INSTAGRAM_BUSINESS_ACCOUNT_ID não configurado",
+      };
+    }
+
+    if (!imagens || imagens.length === 0) {
+      return {
+        success: false,
+        error: "Nenhuma imagem para postar no Instagram",
       };
     }
 
@@ -251,12 +398,10 @@ async function publicarImagemUnicaInstagram(imagemUrl, caption, token, instagram
         caption,
         access_token: token,
       },
-      25000
+      45000
     );
 
     console.log("Instagram: container criado:", media.id);
-
-    await delay(5000);
 
     const publicado = await publicarContainerInstagramComRetry(
       media.id,
@@ -297,7 +442,7 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
           is_carousel_item: "true",
           access_token: token,
         },
-        25000
+        45000
       );
 
       containerIds.push(media.id);
@@ -317,12 +462,10 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
         caption,
         access_token: token,
       },
-      25000
+      45000
     );
 
     console.log("Instagram: container principal criado:", carousel.id);
-
-    await delay(5000);
 
     const publicado = await publicarContainerInstagramComRetry(
       carousel.id,
@@ -345,14 +488,19 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
 }
 
 // ======================================================
-// INSTAGRAM - PUBLICAR CONTAINER COM RETRY
+// INSTAGRAM - PUBLICAR COM RETRY
 // ======================================================
 async function publicarContainerInstagramComRetry(creationId, token, instagramId) {
   let ultimoErro = null;
 
-  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+  for (let tentativa = 1; tentativa <= 5; tentativa++) {
     try {
-      console.log(`Instagram: tentando publicar, tentativa ${tentativa}`);
+      const espera = tentativa === 1 ? 5000 : 4000;
+
+      console.log(`Instagram: aguardando ${espera / 1000}s antes da tentativa ${tentativa}`);
+      await delay(espera);
+
+      console.log(`Instagram: publicando container, tentativa ${tentativa}`);
 
       const publicado = await graphPost(
         `${instagramId}/media_publish`,
@@ -360,7 +508,7 @@ async function publicarContainerInstagramComRetry(creationId, token, instagramId
           creation_id: creationId,
           access_token: token,
         },
-        25000
+        45000
       );
 
       console.log("Instagram: publicado com sucesso:", publicado.id);
@@ -370,14 +518,10 @@ async function publicarContainerInstagramComRetry(creationId, token, instagramId
       ultimoErro = err;
 
       console.error(`Instagram: tentativa ${tentativa} falhou:`, err.message);
-
-      if (tentativa < 3) {
-        await delay(5000);
-      }
     }
   }
 
-  throw ultimoErro;
+  throw ultimoErro || new Error("Não conseguiu publicar no Instagram");
 }
 
 // ======================================================
@@ -401,6 +545,13 @@ async function publicarNoFacebook(imagens, caption) {
         success: false,
         skipped: true,
         error: "FACEBOOK_PAGE_TOKEN não configurado",
+      };
+    }
+
+    if (!imagens || imagens.length === 0) {
+      return {
+        success: false,
+        error: "Nenhuma imagem para postar no Facebook",
       };
     }
 
@@ -436,14 +587,16 @@ async function publicarNoFacebook(imagens, caption) {
 // ======================================================
 async function publicarFotoUnicaFacebook(imagemUrl, caption, pageId, token) {
   try {
+    console.log("Facebook: publicando foto única");
+
     const data = await graphPost(
       `${pageId}/photos`,
       {
         url: imagemUrl,
-        caption,
+        message: caption,
         access_token: token,
       },
-      25000
+      45000
     );
 
     console.log("Facebook: foto publicada:", data.post_id || data.id);
@@ -467,6 +620,8 @@ async function publicarFotoUnicaFacebook(imagemUrl, caption, pageId, token) {
 // ======================================================
 async function publicarMultiplasFotosFacebook(imagens, caption, pageId, token) {
   try {
+    console.log("Facebook: publicando múltiplas fotos");
+
     const mediaFbids = [];
 
     for (let i = 0; i < imagens.length; i++) {
@@ -479,7 +634,7 @@ async function publicarMultiplasFotosFacebook(imagens, caption, pageId, token) {
           published: "false",
           access_token: token,
         },
-        25000
+        45000
       );
 
       mediaFbids.push(photo.id);
@@ -501,7 +656,7 @@ async function publicarMultiplasFotosFacebook(imagens, caption, pageId, token) {
     const feed = await graphPost(
       `${pageId}/feed`,
       params,
-      25000
+      45000
     );
 
     console.log("Facebook: post publicado:", feed.id);
@@ -544,6 +699,13 @@ async function publicarNoTelegram(imagens, caption) {
       };
     }
 
+    if (!imagens || imagens.length === 0) {
+      return {
+        success: false,
+        error: "Nenhuma imagem para postar no Telegram",
+      };
+    }
+
     console.log(`Telegram: publicando ${imagens.length} imagem(ns)`);
 
     if (imagens.length === 1) {
@@ -576,6 +738,8 @@ async function publicarNoTelegram(imagens, caption) {
 // ======================================================
 async function publicarFotoUnicaTelegram(imagemUrl, caption, token, chatId) {
   try {
+    console.log("Telegram: publicando foto única");
+
     const captionCurta = caption.length <= 1024;
 
     const data = await telegramPost(
@@ -586,7 +750,7 @@ async function publicarFotoUnicaTelegram(imagemUrl, caption, token, chatId) {
         caption: captionCurta ? caption : undefined,
       },
       token,
-      25000
+      30000
     );
 
     if (!captionCurta) {
@@ -614,6 +778,8 @@ async function publicarFotoUnicaTelegram(imagemUrl, caption, token, chatId) {
 // ======================================================
 async function publicarAlbumTelegram(imagens, caption, token, chatId) {
   try {
+    console.log("Telegram: publicando álbum");
+
     const captionCurta = caption.length <= 1024;
 
     const media = imagens.map((imagemUrl, index) => ({
@@ -629,7 +795,7 @@ async function publicarAlbumTelegram(imagens, caption, token, chatId) {
         media,
       },
       token,
-      25000
+      45000
     );
 
     if (!captionCurta) {
@@ -663,14 +829,14 @@ async function enviarMensagemTelegram(texto, token, chatId) {
       text: texto,
     },
     token,
-    25000
+    30000
   );
 }
 
 // ======================================================
-// NORMALIZAR RESULTADO PROMISE
+// NORMALIZAR RESULTADO
 // ======================================================
-function resultadoPromise(resultado) {
+function normalizarResultado(resultado) {
   if (resultado.status === "fulfilled") {
     return resultado.value;
   }
@@ -698,7 +864,7 @@ export default async function handler(req, res) {
     console.log("Body recebido:", JSON.stringify(body).slice(0, 1000));
 
     const legendaCompleta = montarLegenda(body);
-    const imagensValidas = normalizarImagens(body);
+    const imagensOriginais = normalizarImagens(body);
 
     if (!legendaCompleta || legendaCompleta.trim() === "") {
       return res.status(400).json({
@@ -707,7 +873,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (imagensValidas.length === 0) {
+    if (imagensOriginais.length === 0) {
       return res.status(400).json({
         success: false,
         error: "É necessário enviar pelo menos uma imagem válida",
@@ -715,17 +881,21 @@ export default async function handler(req, res) {
     }
 
     console.log("Legenda:", legendaCompleta.slice(0, 300));
-    console.log("Imagens:", imagensValidas);
+    console.log("Imagens originais:", imagensOriginais);
+
+    const imagensMeta = await processarImagensParaMeta(imagensOriginais);
+
+    console.log("Imagens para Meta:", imagensMeta);
 
     const resultadosRaw = await Promise.allSettled([
-      publicarNoInstagram(imagensValidas, legendaCompleta),
-      publicarNoFacebook(imagensValidas, legendaCompleta),
-      publicarNoTelegram(imagensValidas, legendaCompleta),
+      publicarNoInstagram(imagensMeta, legendaCompleta),
+      publicarNoFacebook(imagensMeta, legendaCompleta),
+      publicarNoTelegram(imagensOriginais, legendaCompleta),
     ]);
 
-    const instagram = resultadoPromise(resultadosRaw[0]);
-    const facebook = resultadoPromise(resultadosRaw[1]);
-    const telegram = resultadoPromise(resultadosRaw[2]);
+    const instagram = normalizarResultado(resultadosRaw[0]);
+    const facebook = normalizarResultado(resultadosRaw[1]);
+    const telegram = normalizarResultado(resultadosRaw[2]);
 
     const resultados = {
       instagram,
@@ -760,4 +930,3 @@ export default async function handler(req, res) {
     });
   }
 }
-  
