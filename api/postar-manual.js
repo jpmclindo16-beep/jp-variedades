@@ -1,7 +1,8 @@
 // api/postar-manual.js
-// Publica imagens do ImgBB no Instagram/Facebook e Telegram.
-// IMPORTANTE: Instagram exige imagem JPEG pública. Se a imagem for PNG/WebP,
-// configure IMGBB_API_KEY para o servidor converter e re-hospedar como JPG.
+// Publica imagens do ImgBB no Instagram, Facebook e Telegram.
+// Instagram: converte PNG/WebP para JPEG antes de publicar.
+// Facebook: usa o Page Access Token e valida a Página antes de criar
+// as fotos não publicadas usadas em posts com várias imagens.
 
 const jimpModule = require('jimp');
 const Jimp = jimpModule.Jimp || jimpModule;
@@ -19,7 +20,7 @@ export const config = {
 };
 
 function delay(ms) {
-  return new Promise(r => setTimeout(r, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function fetchWithTimeout(url, options = {}, timeout = 30000) {
@@ -42,7 +43,9 @@ async function readResponse(response) {
   try {
     return JSON.parse(text);
   } catch {
-    return { raw: text };
+    return {
+      raw: text
+    };
   }
 }
 
@@ -94,7 +97,12 @@ async function graphGet(path, params, timeout = 30000) {
   return data;
 }
 
-async function telegramPost(method, payload, token, timeout = 45000) {
+async function telegramPost(
+  method,
+  payload,
+  token,
+  timeout = 45000
+) {
   const response = await fetchWithTimeout(
     `https://api.telegram.org/bot${token}/${method}`,
     {
@@ -119,6 +127,10 @@ async function telegramPost(method, payload, token, timeout = 45000) {
 
   return data;
 }
+
+/* =========================================================
+   IMAGEM / JPEG
+========================================================= */
 
 function getJpegMime() {
   return (
@@ -160,11 +172,11 @@ async function toJpeg(buffer) {
   return await new Promise((resolve, reject) => {
     image.getBuffer(
       mime,
-      (err, b) => {
+      (err, buffer) => {
         if (err) {
           reject(err);
         } else {
-          resolve(b);
+          resolve(buffer);
         }
       }
     );
@@ -183,6 +195,10 @@ function isDirectImageUrl(url) {
     return false;
   }
 }
+
+/* =========================================================
+   IMGBB
+========================================================= */
 
 async function uploadImgBB(buffer, name) {
   const key = process.env.IMGBB_API_KEY;
@@ -229,12 +245,10 @@ async function uploadImgBB(buffer, name) {
 
 async function prepararImagemInstagram(url) {
   if (!isDirectImageUrl(url)) {
-    throw new Error(`URL de imagem inválida: ${url}`);
+    throw new Error(
+      `URL de imagem inválida: ${url}`
+    );
   }
-
-  // Instagram aceita JPEG para publicação de imagem.
-  // Sempre convertemos/re-hospedamos para evitar problemas
-  // com PNG/WebP do gerador de IA.
 
   const response = await fetchWithTimeout(
     url,
@@ -282,8 +296,15 @@ async function prepararImagemInstagram(url) {
   );
 }
 
+/* =========================================================
+   NORMALIZAÇÃO
+========================================================= */
+
 function normalizeImages(body) {
-  let arr = body.imagens || body.images || [];
+  let arr =
+    body.imagens ||
+    body.images ||
+    [];
 
   if (!Array.isArray(arr)) {
     arr = [arr];
@@ -304,7 +325,9 @@ function normalizeImages(body) {
     .filter(Boolean)
     .filter(isDirectImageUrl);
 
-  return [...new Set(arr)].slice(0, 10);
+  return [
+    ...new Set(arr)
+  ].slice(0, 10);
 }
 
 function buildCaption(body) {
@@ -348,7 +371,9 @@ function buildCaption(body) {
 }
 
 function normalizeNetworks(body) {
-  const r = body.redes || body.networks;
+  const r =
+    body.redes ||
+    body.networks;
 
   if (!r) {
     return {
@@ -361,8 +386,8 @@ function normalizeNetworks(body) {
   const a = Array.isArray(r)
     ? r
     : Object.entries(r)
-        .filter(([, v]) => v)
-        .map(([k]) => k);
+        .filter(([, value]) => value)
+        .map(([key]) => key);
 
   return {
     instagram: a.includes('instagram'),
@@ -377,8 +402,14 @@ function limitedInstagramCaption(c) {
     : c.slice(0, 2197) + '...';
 }
 
+/* =========================================================
+   INSTAGRAM
+========================================================= */
+
 async function publishInstagram(images, caption) {
-  const token = process.env.FACEBOOK_PAGE_TOKEN;
+  const token =
+    process.env.FACEBOOK_PAGE_TOKEN;
+
   const igId =
     process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
 
@@ -386,7 +417,8 @@ async function publishInstagram(images, caption) {
     return {
       success: false,
       skipped: true,
-      error: 'FACEBOOK_PAGE_TOKEN não configurado'
+      error:
+        'FACEBOOK_PAGE_TOKEN não configurado'
     };
   }
 
@@ -403,7 +435,7 @@ async function publishInstagram(images, caption) {
     return {
       success: false,
       error:
-        'IMGBB_API_KEY não configurada. Como suas imagens são PNG, preciso converter para JPEG antes do Instagram.'
+        'IMGBB_API_KEY não configurada. Como suas imagens podem ser PNG, é necessário converter para JPEG antes do Instagram.'
     };
   }
 
@@ -416,15 +448,16 @@ async function publishInstagram(images, caption) {
       );
     }
 
-    caption = limitedInstagramCaption(caption);
+    const finalCaption =
+      limitedInstagramCaption(caption);
 
-    // UMA IMAGEM
+    /* UMA IMAGEM */
     if (jpgUrls.length === 1) {
       const media = await graphPost(
         `${igId}/media`,
         {
           image_url: jpgUrls[0],
-          caption,
+          caption: finalCaption,
           access_token: token
         }
       );
@@ -441,7 +474,7 @@ async function publishInstagram(images, caption) {
       };
     }
 
-    // CARROSSEL
+    /* VÁRIAS IMAGENS */
     const children = [];
 
     for (const url of jpgUrls) {
@@ -464,7 +497,7 @@ async function publishInstagram(images, caption) {
       {
         media_type: 'CAROUSEL',
         children: children.join(','),
-        caption,
+        caption: finalCaption,
         access_token: token
       }
     );
@@ -492,20 +525,19 @@ async function publishInstagramContainer(
   creationId,
   token
 ) {
-  let last = '';
-
-  // Verifica o status antes de publicar.
   for (let i = 0; i < 8; i++) {
     try {
       const status = await graphGet(
         creationId,
         {
-          fields: 'status_code,status',
+          fields:
+            'status_code,status',
           access_token: token
         }
       );
 
-      const code = status.status_code;
+      const code =
+        status.status_code;
 
       if (
         code === 'ERROR' ||
@@ -524,27 +556,55 @@ async function publishInstagramContainer(
         break;
       }
 
-      last = `Instagram container: ${code}`;
-
     } catch (err) {
-      last = err.message;
+      // Continua tentando até o limite.
     }
 
     await delay(3000);
   }
 
-  const published = await graphPost(
-    `${process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID}/media_publish`,
-    {
-      creation_id: creationId,
-      access_token: token
-    }
-  );
+  const published =
+    await graphPost(
+      `${process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID}/media_publish`,
+      {
+        creation_id: creationId,
+        access_token: token
+      }
+    );
 
   return published;
 }
 
-async function publishFacebook(images, caption) {
+/* =========================================================
+   FACEBOOK
+========================================================= */
+
+async function validateFacebookPage(
+  pageId,
+  token
+) {
+  const page = await graphGet(
+    pageId,
+    {
+      fields: 'id,name',
+      access_token: token
+    },
+    30000
+  );
+
+  if (!page.id) {
+    throw new Error(
+      'A Meta não conseguiu validar o FACEBOOK_PAGE_ID.'
+    );
+  }
+
+  return page;
+}
+
+async function publishFacebook(
+  images,
+  caption
+) {
   const pageId =
     process.env.FACEBOOK_PAGE_ID;
 
@@ -570,7 +630,18 @@ async function publishFacebook(images, caption) {
   }
 
   try {
-    // UMA IMAGEM
+    /*
+     * PRIMEIRO:
+     * confirma que o token consegue acessar
+     * a Página informada.
+     */
+    const page =
+      await validateFacebookPage(
+        pageId,
+        token
+      );
+
+    /* UMA IMAGEM */
     if (images.length === 1) {
       const data = await graphPost(
         `${pageId}/photos`,
@@ -583,24 +654,46 @@ async function publishFacebook(images, caption) {
 
       return {
         success: true,
-        postId: data.post_id || data.id
+        postId:
+          data.post_id ||
+          data.id,
+        pageId: page.id,
+        pageName: page.name
       };
     }
 
-    // VÁRIAS IMAGENS
+    /*
+     * VÁRIAS IMAGENS
+     *
+     * As fotos são criadas como não publicadas
+     * e depois anexadas ao post da Página.
+     *
+     * IMPORTANTE:
+     * FACEBOOK_PAGE_TOKEN precisa ser um
+     * Page Access Token da própria Página.
+     */
     const ids = [];
 
     for (const url of images) {
-      const p = await graphPost(
-        `${pageId}/photos`,
-        {
-          url,
-          published: 'false',
-          access_token: token
-        }
-      );
+      const photo =
+        await graphPost(
+          `${pageId}/photos`,
+          {
+            url,
+            published: 'false',
+            access_token: token
+          }
+        );
 
-      ids.push(p.id);
+      if (!photo.id) {
+        throw new Error(
+          'A Meta não retornou o ID da foto do Facebook.'
+        );
+      }
+
+      ids.push(photo.id);
+
+      await delay(1000);
     }
 
     const params = {
@@ -608,30 +701,52 @@ async function publishFacebook(images, caption) {
       access_token: token
     };
 
-    ids.forEach((id, i) => {
-      params[`attached_media[${i}]`] =
+    ids.forEach((id, index) => {
+      params[`attached_media[${index}]`] =
         JSON.stringify({
           media_fbid: id
         });
     });
 
-    const feed = await graphPost(
-      `${pageId}/feed`,
-      params
-    );
+    const feed =
+      await graphPost(
+        `${pageId}/feed`,
+        params
+      );
 
     return {
       success: true,
-      postId: feed.id
+      postId: feed.id,
+      pageId: page.id,
+      pageName: page.name,
+      images: ids.length
     };
 
   } catch (err) {
+    let message = err.message || 'Erro desconhecido';
+
+    /*
+     * Deixa o erro do Meta mais claro para você.
+     */
+    if (
+      message.includes(
+        'Unpublished posts must be posted to a page as the page itself'
+      )
+    ) {
+      message =
+        'O FACEBOOK_PAGE_TOKEN não está sendo reconhecido pela Meta como Page Access Token da própria Página. Gere/coloque o Page Access Token correto dessa Página nas variáveis da Vercel.';
+    }
+
     return {
       success: false,
-      error: err.message
+      error: message
     };
   }
 }
+
+/* =========================================================
+   TELEGRAM
+========================================================= */
 
 async function publishTelegram(
   images,
@@ -662,35 +777,36 @@ async function publishTelegram(
   }
 
   try {
-    // UMA IMAGEM
+    /* UMA IMAGEM */
     if (images.length === 1) {
-
       if (caption.length <= 1024) {
-        const d = await telegramPost(
-          'sendPhoto',
-          {
-            chat_id: chatId,
-            photo: images[0],
-            caption
-          },
-          token
-        );
+        const data =
+          await telegramPost(
+            'sendPhoto',
+            {
+              chat_id: chatId,
+              photo: images[0],
+              caption
+            },
+            token
+          );
 
         return {
           success: true,
           postId:
-            d.result?.message_id
+            data.result?.message_id
         };
       }
 
-      const d = await telegramPost(
-        'sendPhoto',
-        {
-          chat_id: chatId,
-          photo: images[0]
-        },
-        token
-      );
+      const data =
+        await telegramPost(
+          'sendPhoto',
+          {
+            chat_id: chatId,
+            photo: images[0]
+          },
+          token
+        );
 
       await telegramPost(
         'sendMessage',
@@ -704,30 +820,31 @@ async function publishTelegram(
       return {
         success: true,
         postId:
-          d.result?.message_id
+          data.result?.message_id
       };
     }
 
-    // VÁRIAS IMAGENS
+    /* VÁRIAS IMAGENS */
     const media = images.map(
-      (url, i) => ({
+      (url, index) => ({
         type: 'photo',
         media: url,
-        ...(i === 0 &&
+        ...(index === 0 &&
         caption.length <= 1024
           ? { caption }
           : {})
       })
     );
 
-    const d = await telegramPost(
-      'sendMediaGroup',
-      {
-        chat_id: chatId,
-        media
-      },
-      token
-    );
+    const data =
+      await telegramPost(
+        'sendMediaGroup',
+        {
+          chat_id: chatId,
+          media
+        },
+        token
+      );
 
     if (caption.length > 1024) {
       await telegramPost(
@@ -743,7 +860,7 @@ async function publishTelegram(
     return {
       success: true,
       postId:
-        d.result?.[0]?.message_id
+        data.result?.[0]?.message_id
     };
 
   } catch (err) {
@@ -754,16 +871,26 @@ async function publishTelegram(
   }
 }
 
-function settled(x) {
-  return x.status === 'fulfilled'
-    ? x.value
-    : {
-        success: false,
-        error:
-          x.reason?.message ||
-          'Erro desconhecido'
-      };
+/* =========================================================
+   RESULTADO
+========================================================= */
+
+function settled(result) {
+  if (result.status === 'fulfilled') {
+    return result.value;
+  }
+
+  return {
+    success: false,
+    error:
+      result.reason?.message ||
+      'Erro desconhecido'
+  };
 }
+
+/* =========================================================
+   HANDLER
+========================================================= */
 
 export default async function handler(
   req,
@@ -840,12 +967,19 @@ export default async function handler(
     ];
 
     const raw =
-      await Promise.allSettled(tasks);
+      await Promise.allSettled(
+        tasks
+      );
 
     const resultados = {
-      instagram: settled(raw[0]),
-      facebook: settled(raw[1]),
-      telegram: settled(raw[2])
+      instagram:
+        settled(raw[0]),
+
+      facebook:
+        settled(raw[1]),
+
+      telegram:
+        settled(raw[2])
     };
 
     const success =
@@ -857,16 +991,20 @@ export default async function handler(
       success ? 200 : 500
     ).json({
       success,
+
       message: success
         ? 'Postagem processada.'
         : 'Nenhuma rede conseguiu publicar.',
+
       resultados
     });
 
   } catch (err) {
     return res.status(500).json({
       success: false,
-      error: err.message
+      error:
+        err.message ||
+        'Erro interno do servidor.'
     });
   }
-        }
+}
