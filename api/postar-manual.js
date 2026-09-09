@@ -1,7 +1,86 @@
-// ======================================================
-// HELPERS
-// ======================================================
+const GRAPH_API_VERSION = "v22.0";
+const META_GRAPH_BASE = https://graph.facebook.com/${GRAPH_API_VERSION};
+const TELEGRAM_BASE = "https://api.telegram.org";
+
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function graphPost(path, data) {
+  const url = ${META_GRAPH_BASE}/${path};
+  const body = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(data || {})) {
+    if (value === undefined || value === null) continue;
+
+    if (Array.isArray(value)) {
+      body.append(key, JSON.stringify(value));
+    } else {
+      body.append(key, String(value));
+    }
+  }
+
+  const resp = await fetch(url, {
+    method: "POST",
+    body,
+  });
+
+  const json = await resp.json();
+
+  if (!resp.ok || json.error) {
+    throw new Error(json.error?.message || Erro na Graph API: ${resp.status});
+  }
+
+  return json;
+}
+
+async function graphGet(path, data = {}) {
+  const url = new URL(${META_GRAPH_BASE}/${path});
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined && value !== null) {
+      url.searchParams.set(key, String(value));
+    }
+  }
+
+  const resp = await fetch(url.toString(), {
+    method: "GET",
+  });
+
+  const json = await resp.json();
+
+  if (!resp.ok || json.error) {
+    throw new Error(json.error?.message || Erro na Graph API: ${resp.status});
+  }
+
+  return json;
+}
+
+async function telegramPost(method, data, token) {
+  const url = ${TELEGRAM_BASE}/bot${token}/${method};
+  const body = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(data || {})) {
+    if (value === undefined || value === null) continue;
+
+    if (typeof value === "object") {
+      body.append(key, JSON.stringify(value));
+    } else {
+      body.append(key, String(value));
+    }
+  }
+
+  const resp = await fetch(url, {
+    method: "POST",
+    body,
+  });
+
+  const json = await resp.json();
+
+  if (!resp.ok || !json.ok) {
+    throw new Error(json.description || Erro no Telegram: ${resp.status});
+  }
+
+  return json;
+}
 
 function extrairTexto(body, keys = []) {
   for (const key of keys) {
@@ -14,102 +93,14 @@ function extrairTexto(body, keys = []) {
 function normalizarImagens(body) {
   const imagens = [];
 
-  for (let i = 1; i <= 10; i++) {
-    const key = `imagem${i}`;
-    const value = body?.[key];
-
-    if (typeof value === "string" && value.trim()) {
-      imagens.push(value.trim());
-    }
-  }
-
-  if (Array.isArray(body?.imagens)) {
-    for (const img of body.imagens) {
-      if (typeof img === "string" && img.trim()) {
-        imagens.push(img.trim());
-      }
-    }
-  }
-
-  return [...new Set(imagens)];
-}
-
-function montarLegenda(body) {
-  const legenda = extrairTexto(body, ["legenda", "caption", "texto"]);
-  return legenda;
-}
-
-async function aguardarProcessamentoInstagram(containerId, token) {
-  const maxTentativas = 12;
-  const intervalo = 2000;
-
-  for (let i = 0; i < maxTentativas; i++) {
-    const status = await graphGet(`${containerId}`, {
-      fields: "status_code",
-      access_token: token,
-    });
-
-    if (status?.status_code === "FINISHED") return true;
-
-    if (status?.status_code === "ERROR") {
-      throw new Error(`Container do Instagram com erro: ${containerId}`);
-    }
-
-    await delay(intervalo);
-  }
-
-  throw new Error(`Timeout aguardando processamento do container ${containerId}`);
-}
-
-async function processarImagensParaMeta(imagens) {
-  if (!Array.isArray(imagens) || imagens.length === 0) return [];
-
-  // Se você já converte imagem para URL pública antes, pode só retornar imagens.
-  // Mantido aqui caso você tenha pipeline com ImgBB ou similar.
-  return imagens;
-}
-
-// ======================================================
-// INSTAGRAM
-// ======================================================
-async function publicarImagemUnicaInstagram(imageUrl, caption, token, instagramId) {
-  const container = await graphPost(`${instagramId}/media`, {
-    image_url: imageUrl,
-    caption: caption,
-    access_token: token,
-  });
-
-  if (!container?.id) {
-    throw new Error("Falha ao criar o container de mídia do Instagram.");
-  }
-
-  await aguardarProcessamentoInstagram(container.id, token);
-
-  const publish = await graphPost(`${instagramId}/media_publish`, {
-    creation_id: container.id,
-    access_token: token,
-  });
-
-  if (!publish?.id) {
-    throw new Error("Falha ao publicar no Instagram.");
-  }
-
-  return { success: true, id: publish.id };
-}
-
-async function publicarCarrosselInstagram(imagens, caption, token, instagramId) {
-  if (!Array.isArray(imagens) || imagens.length < 2) {
-    throw new Error("Carrossel do Instagram exige no mínimo 2 imagens.");
-  }
-
-  if (imagens.length > 10) {
+  for (let i = 1; i  10) {
     throw new Error("Carrossel do Instagram permite no máximo 10 itens.");
   }
 
   const itemIds = [];
 
   for (const imageUrl of imagens) {
-    const itemContainer = await graphPost(`${instagramId}/media`, {
+    const itemContainer = await graphPost(${instagramId}/media, {
       image_url: imageUrl,
       is_carousel_item: true,
       access_token: token,
@@ -126,27 +117,25 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
     await aguardarProcessamentoInstagram(itemId, token);
   }
 
-  const carouselContainer = await graphPost(`${instagramId}/media`, {
+  const carouselContainer = await graphPost(${instagramId}/media, {
     media_type: "CAROUSEL",
     children: itemIds,
-    caption: caption,
+    caption,
     access_token: token,
   });
 
   if (!carouselContainer?.id) {
-    throw new Error("Falha ao criar container do carrossel no Instagram.");
+    throw new Error("Falha ao criar o carrossel no Instagram.");
   }
 
   await aguardarProcessamentoInstagram(carouselContainer.id, token);
 
-  const publish = await graphPost(`${instagramId}/media_publish`, {
+  const publish = await graphPost(${instagramId}/media_publish, {
     creation_id: carouselContainer.id,
     access_token: token,
   });
 
-  if (!publish?.id) {
-    throw new Error("Falha ao publicar carrossel no Instagram.");
-  }
+  if (!publish?.id) throw new Error("Falha ao publicar carrossel no Instagram.");
 
   return { success: true, id: publish.id };
 }
@@ -183,9 +172,6 @@ async function publicarNoInstagram(imagens, caption) {
   }
 }
 
-// ======================================================
-// FACEBOOK
-// ======================================================
 async function publicarNoFacebook(imagens, caption) {
   try {
     const token = process.env.FACEBOOK_PAGE_TOKEN;
@@ -200,7 +186,7 @@ async function publicarNoFacebook(imagens, caption) {
     }
 
     if (!imagens || imagens.length === 0) {
-      const post = await graphPost(`${pageId}/feed`, {
+      const post = await graphPost(${pageId}/feed, {
         message: caption,
         access_token: token,
       });
@@ -209,9 +195,9 @@ async function publicarNoFacebook(imagens, caption) {
     }
 
     if (imagens.length === 1) {
-      const post = await graphPost(`${pageId}/photos`, {
+      const post = await graphPost(${pageId}/photos, {
         url: imagens[0],
-        caption: caption,
+        caption,
         published: true,
         access_token: token,
       });
@@ -222,15 +208,13 @@ async function publicarNoFacebook(imagens, caption) {
     const attachedMedia = [];
 
     for (const url of imagens.slice(0, 10)) {
-      const upload = await graphPost(`${pageId}/photos`, {
-        url: url,
+      const upload = await graphPost(${pageId}/photos, {
+        url,
         published: false,
         access_token: token,
       });
 
-      if (upload?.id) {
-        attachedMedia.push({ media_fbid: upload.id });
-      }
+      if (upload?.id) attachedMedia.push({ media_fbid: upload.id });
     }
 
     if (attachedMedia.length === 0) {
@@ -243,10 +227,10 @@ async function publicarNoFacebook(imagens, caption) {
     };
 
     attachedMedia.forEach((media, index) => {
-      payload[`attached_media[${index}]`] = JSON.stringify(media);
+      payload[attached_media[${index}]] = JSON.stringify(media);
     });
 
-    const feedPost = await graphPost(`${pageId}/feed`, payload);
+    const feedPost = await graphPost(${pageId}/feed, payload);
 
     return { success: true, id: feedPost?.id };
   } catch (err) {
@@ -255,9 +239,6 @@ async function publicarNoFacebook(imagens, caption) {
   }
 }
 
-// ======================================================
-// TELEGRAM
-// ======================================================
 async function publicarNoTelegram(imagens, caption) {
   try {
     const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -274,11 +255,7 @@ async function publicarNoTelegram(imagens, caption) {
     if (!imagens || imagens.length === 0) {
       const resp = await telegramPost(
         "sendMessage",
-        {
-          chat_id: chatId,
-          text: caption,
-          parse_mode: "HTML",
-        },
+        { chat_id: chatId, text: caption, parse_mode: "HTML" },
         token
       );
 
@@ -288,12 +265,7 @@ async function publicarNoTelegram(imagens, caption) {
     if (imagens.length === 1) {
       const resp = await telegramPost(
         "sendPhoto",
-        {
-          chat_id: chatId,
-          photo: imagens[0],
-          caption: caption,
-          parse_mode: "HTML",
-        },
+        { chat_id: chatId, photo: imagens[0], caption, parse_mode: "HTML" },
         token
       );
 
@@ -309,10 +281,7 @@ async function publicarNoTelegram(imagens, caption) {
 
     const resp = await telegramPost(
       "sendMediaGroup",
-      {
-        chat_id: chatId,
-        media: media,
-      },
+      { chat_id: chatId, media },
       token
     );
 
@@ -323,9 +292,10 @@ async function publicarNoTelegram(imagens, caption) {
   }
 }
 
-// ======================================================
-// HANDLER PRINCIPAL
-// ======================================================
+async function processarImagensParaMeta(imagens) {
+  return Array.isArray(imagens) ? imagens : [];
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido. Utilize POST." });
@@ -374,4 +344,4 @@ export default async function handler(req, res) {
       error: error.message || "Erro interno do servidor.",
     });
   }
-}
+  }
