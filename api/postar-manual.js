@@ -1,10 +1,4 @@
-// api/postar-manual.js - VERSÃO CORRIGIDA
-const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
-const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
-const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
-const IG_BUSINESS_ID = "17841467530671368";
-
-// Importa Jimp de forma correta
+// api/postar-manual.js - VERSÃO CORRIGIDA (aceita "legenda" e "caption")
 const { Jimp } = require('jimp');
 
 export default async function handler(req, res) {
@@ -20,48 +14,72 @@ export default async function handler(req, res) {
     try {
       const body = req.body;
       
-      console.log("Recebendo requisição de postagem manual");
-      console.log("Body:", JSON.stringify(body).slice(0, 500));
+      console.log("Body recebido:", JSON.stringify(body).slice(0, 1000));
 
-      // Valida os dados
-      if (!body || !body.imagens || !Array.isArray(body.imagens) || body.imagens.length === 0) {
-        console.error("Dados inválidos: sem imagens");
-        return res.status(400).json({ 
-          success: false, 
-          error: "É necessário enviar pelo menos uma imagem" 
-        });
-      }
+      // Aceita tanto "caption" quanto "legenda"
+      const caption = body.caption || body.legenda || body.texto || "";
+      const imagens = body.imagens || body.images || [];
+      const precoAtual = body.precoAtual || body.preco_atual || "";
+      const precoOriginal = body.precoOriginal || body.preco_original || "";
+      const linkAfiliado = body.linkAfiliado || body.link_afiliado || "";
 
-      if (!body.caption || body.caption.trim() === "") {
-        console.error("Dados inválidos: sem caption");
+      console.log("Dados extraídos:", {
+        caption: caption.slice(0, 100),
+        numImagens: imagens.length,
+        precoAtual,
+        precoOriginal,
+        linkAfiliado
+      });
+
+      // Validações
+      if (!caption || caption.trim() === "") {
+        console.error("Legenda vazia");
         return res.status(400).json({ 
           success: false, 
           error: "É necessário enviar uma legenda" 
         });
       }
 
-      console.log(`Processando ${body.imagens.length} imagens...`);
+      if (!imagens || !Array.isArray(imagens) || imagens.length === 0) {
+        console.error("Sem imagens");
+        return res.status(400).json({ 
+          success: false, 
+          error: "É necessário enviar pelo menos uma imagem" 
+        });
+      }
 
-      // Rehospeda as imagens
-      const imagensProcessadas = await Promise.all(
-        body.imagens.map(async (imagem, index) => {
-          try {
-            console.log(`Processando imagem ${index + 1}...`);
-            const imagemProcessada = await rehospedarImagem(imagem);
-            console.log(`Imagem ${index + 1} processada com sucesso`);
-            return imagemProcessada;
-          } catch (err) {
-            console.error(`Erro ao processar imagem ${index + 1}:`, err);
-            // Retorna a imagem original se falhar
-            return imagem;
-          }
-        })
-      );
+      // Filtra imagens vazias
+      const imagensValidas = imagens.filter(img => img && img.trim() !== "");
+      
+      if (imagensValidas.length === 0) {
+        console.error("Nenhuma imagem válida");
+        return res.status(400).json({ 
+          success: false, 
+          error: "É necessário enviar pelo menos uma imagem válida" 
+        });
+      }
 
-      console.log("Imagens processadas:", imagensProcessadas.length);
+      console.log(`Processando ${imagensValidas.length} imagens...`);
+
+      // Monta a legenda completa
+      let legendaCompleta = caption;
+      
+      if (precoAtual) {
+        legendaCompleta += `\n\n💰 Preço: R$ ${precoAtual}`;
+      }
+      
+      if (precoOriginal) {
+        legendaCompleta += `\n📉 De: R$ ${precoOriginal}`;
+      }
+      
+      if (linkAfiliado) {
+        legendaCompleta += `\n\n🔗 Link: ${linkAfiliado}`;
+      }
+
+      console.log("Legenda completa:", legendaCompleta.slice(0, 200));
 
       // Publica no Instagram
-      const resultado = await publicarNoInstagram(imagensProcessadas, body.caption);
+      const resultado = await publicarNoInstagram(imagensValidas, legendaCompleta);
 
       if (resultado.success) {
         console.log("✅ Postagem realizada com sucesso!");
@@ -90,66 +108,25 @@ export default async function handler(req, res) {
   return res.status(405).json({ error: "Method Not Allowed" });
 }
 
-// Função para rehospedar imagem (corrigida)
-async function rehospedarImagem(imagemUrl) {
-  try {
-    console.log(`Rehospedando imagem: ${imagemUrl}`);
-    
-    // Baixa a imagem
-    const response = await fetch(imagemUrl);
-    if (!response.ok) {
-      throw new Error(`Falha ao baixar imagem: ${response.status}`);
-    }
-    
-    const buffer = await response.arrayBuffer();
-    const imageBuffer = Buffer.from(buffer);
-    
-    console.log(`Imagem baixada: ${imageBuffer.length} bytes`);
-    
-    // Tenta converter para JPEG usando Jimp
-    try {
-      // Usando a API correta do Jimp
-      const image = await Jimp.read(imageBuffer);
-      
-      // Converte para JPEG e obtém o buffer
-      const jpegBuffer = await image.getBuffer(Jimp.MIME_JPEG);
-      
-      console.log(`Imagem convertida para JPEG: ${jpegBuffer.length} bytes`);
-      
-      // Aqui você pode fazer upload para um serviço de hospedagem
-      // Por enquanto, retorna a URL original
-      return imagemUrl;
-      
-    } catch (jimpError) {
-      console.error("Erro ao converter com Jimp:", jimpError);
-      // Se falhar, usa a imagem original
-      return imagemUrl;
-    }
-    
-  } catch (err) {
-    console.error("Erro ao rehospedar imagem:", err);
-    // Retorna a URL original em caso de erro
-    return imagemUrl;
-  }
-}
-
 // Função para publicar no Instagram
 async function publicarNoInstagram(imagens, caption) {
   try {
-    console.log(`Publicando no Instagram com ${imagens.length} imagens...`);
-    
-    // Verifica se tem token
+    const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
+    const IG_BUSINESS_ID = process.env.IG_BUSINESS_ID || "17841467530671368";
+
     if (!IG_TOKEN) {
       throw new Error("IG_TOKEN não configurado");
     }
 
+    console.log(`Publicando no Instagram com ${imagens.length} imagens...`);
+
     // Se for apenas uma imagem
     if (imagens.length === 1) {
-      return await publicarImagemUnica(imagens[0], caption);
+      return await publicarImagemUnica(imagens[0], caption, IG_TOKEN, IG_BUSINESS_ID);
     }
     
     // Se forem múltiplas imagens (carrossel)
-    return await publicarCarrossel(imagens, caption);
+    return await publicarCarrossel(imagens, caption, IG_TOKEN, IG_BUSINESS_ID);
     
   } catch (err) {
     console.error("Erro ao publicar no Instagram:", err);
@@ -161,12 +138,13 @@ async function publicarNoInstagram(imagens, caption) {
 }
 
 // Publica uma única imagem
-async function publicarImagemUnica(imagemUrl, caption) {
+async function publicarImagemUnica(imagemUrl, caption, token, businessId) {
   try {
     console.log("Publicando imagem única...");
+    console.log("URL da imagem:", imagemUrl);
     
-    // Primeiro, cria o container
-    const createUrl = `https://graph.instagram.com/v21.0/${IG_BUSINESS_ID}/media`;
+    // Cria o container
+    const createUrl = `https://graph.instagram.com/v21.0/${businessId}/media`;
     const createResponse = await fetch(createUrl, {
       method: "POST",
       headers: {
@@ -175,11 +153,12 @@ async function publicarImagemUnica(imagemUrl, caption) {
       body: JSON.stringify({
         image_url: imagemUrl,
         caption: caption,
-        access_token: IG_TOKEN
+        access_token: token
       }),
     });
 
     const createData = await createResponse.json();
+    console.log("Resposta criação container:", JSON.stringify(createData));
     
     if (createData.error) {
       throw new Error(`Erro ao criar container: ${createData.error.message}`);
@@ -187,8 +166,8 @@ async function publicarImagemUnica(imagemUrl, caption) {
 
     console.log("Container criado:", createData.id);
 
-    // Depois, publica o container
-    const publishUrl = `https://graph.instagram.com/v21.0/${IG_BUSINESS_ID}/media_publish`;
+    // Publica o container
+    const publishUrl = `https://graph.instagram.com/v21.0/${businessId}/media_publish`;
     const publishResponse = await fetch(publishUrl, {
       method: "POST",
       headers: {
@@ -196,11 +175,12 @@ async function publicarImagemUnica(imagemUrl, caption) {
       },
       body: JSON.stringify({
         creation_id: createData.id,
-        access_token: IG_TOKEN
+        access_token: token
       }),
     });
 
     const publishData = await publishResponse.json();
+    console.log("Resposta publicação:", JSON.stringify(publishData));
     
     if (publishData.error) {
       throw new Error(`Erro ao publicar: ${publishData.error.message}`);
@@ -223,15 +203,17 @@ async function publicarImagemUnica(imagemUrl, caption) {
 }
 
 // Publica carrossel de imagens
-async function publicarCarrossel(imagens, caption) {
+async function publicarCarrossel(imagens, caption, token, businessId) {
   try {
     console.log("Publicando carrossel...");
     
-    // Primeiro, cria containers para cada imagem
+    // Cria containers para cada imagem
     const containerIds = [];
     
     for (let i = 0; i < imagens.length; i++) {
-      const createUrl = `https://graph.instagram.com/v21.0/${IG_BUSINESS_ID}/media`;
+      console.log(`Criando container para imagem ${i + 1}...`);
+      
+      const createUrl = `https://graph.instagram.com/v21.0/${businessId}/media`;
       const createResponse = await fetch(createUrl, {
         method: "POST",
         headers: {
@@ -240,7 +222,7 @@ async function publicarCarrossel(imagens, caption) {
         body: JSON.stringify({
           image_url: imagens[i],
           is_carousel_item: true,
-          access_token: IG_TOKEN
+          access_token: token
         }),
       });
 
@@ -252,10 +234,16 @@ async function publicarCarrossel(imagens, caption) {
 
       containerIds.push(createData.id);
       console.log(`Container ${i + 1} criado:`, createData.id);
+      
+      // Pequeno delay entre containers
+      if (i < imagens.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
 
-    // Depois, cria o container do carrossel
-    const carouselUrl = `https://graph.instagram.com/v21.0/${IG_BUSINESS_ID}/media`;
+    // Cria o container do carrossel
+    console.log("Criando container do carrossel...");
+    const carouselUrl = `https://graph.instagram.com/v21.0/${businessId}/media`;
     const carouselResponse = await fetch(carouselUrl, {
       method: "POST",
       headers: {
@@ -265,7 +253,7 @@ async function publicarCarrossel(imagens, caption) {
         media_type: "CAROUSEL",
         children: containerIds,
         caption: caption,
-        access_token: IG_TOKEN
+        access_token: token
       }),
     });
 
@@ -277,8 +265,9 @@ async function publicarCarrossel(imagens, caption) {
 
     console.log("Carrossel criado:", carouselData.id);
 
-    // Finalmente, publica o carrossel
-    const publishUrl = `https://graph.instagram.com/v21.0/${IG_BUSINESS_ID}/media_publish`;
+    // Publica o carrossel
+    console.log("Publicando carrossel...");
+    const publishUrl = `https://graph.instagram.com/v21.0/${businessId}/media_publish`;
     const publishResponse = await fetch(publishUrl, {
       method: "POST",
       headers: {
@@ -286,7 +275,7 @@ async function publicarCarrossel(imagens, caption) {
       },
       body: JSON.stringify({
         creation_id: carouselData.id,
-        access_token: IG_TOKEN
+        access_token: token
       }),
     });
 
@@ -315,6 +304,6 @@ async function publicarCarrossel(imagens, caption) {
 export const config = { 
   api: { 
     bodyParser: true,
-    maxDuration: 120, // Aumentado para 2 minutos
+    maxDuration: 120,
   } 
 };
