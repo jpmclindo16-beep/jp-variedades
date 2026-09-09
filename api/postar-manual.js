@@ -1,8 +1,36 @@
 // ======================================================
+// HELPERS
+// ======================================================
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function aguardarProcessamentoInstagram(containerId, token) {
+  const maxTentativas = 10;
+  const intervalo = 2000;
+
+  for (let i = 0; i < maxTentativas; i++) {
+    const status = await graphGet(`${containerId}`, {
+      fields: "status_code",
+      access_token: token,
+    });
+
+    if (status?.status_code === "FINISHED") {
+      return true;
+    }
+
+    if (status?.status_code === "ERROR") {
+      throw new Error(`Container do Instagram com erro: ${containerId}`);
+    }
+
+    await delay(intervalo);
+  }
+
+  throw new Error(`Timeout aguardando processamento do container ${containerId}`);
+}
+
+// ======================================================
 // PUBLICAR IMAGEM ÚNICA NO INSTAGRAM
 // ======================================================
 async function publicarImagemUnicaInstagram(imageUrl, caption, token, instagramId) {
-  // 1. Criar container de mídia
   const container = await graphPost(`${instagramId}/media`, {
     image_url: imageUrl,
     caption: caption,
@@ -13,10 +41,8 @@ async function publicarImagemUnicaInstagram(imageUrl, caption, token, instagramI
     throw new Error("Falha ao criar o container de mídia do Instagram.");
   }
 
-  // Aguardar processamento do container
-  await delay(3000);
+  await aguardarProcessamentoInstagram(container.id, token);
 
-  // 2. Publicar container criado
   const publish = await graphPost(`${instagramId}/media_publish`, {
     creation_id: container.id,
     access_token: token,
@@ -32,30 +58,37 @@ async function publicarImagemUnicaInstagram(imageUrl, caption, token, instagramI
 // PUBLICAR CARROSSEL NO INSTAGRAM
 // ======================================================
 async function publicarCarrosselInstagram(imagens, caption, token, instagramId) {
-  // 1. Criar containers individuais para cada imagem do carrossel
+  if (!Array.isArray(imagens) || imagens.length < 2) {
+    throw new Error("Carrossel do Instagram exige no mínimo 2 imagens.");
+  }
+
+  if (imagens.length > 10) {
+    throw new Error("Carrossel do Instagram permite no máximo 10 itens.");
+  }
+
   const itemIds = [];
 
   for (const imageUrl of imagens) {
     const itemContainer = await graphPost(`${instagramId}/media`, {
       image_url: imageUrl,
-      is_carousel_item: "true",
+      is_carousel_item: true,
       access_token: token,
     });
 
-    if (itemContainer.id) {
-      itemIds.push(itemContainer.id);
+    if (!itemContainer.id) {
+      throw new Error("Falha ao criar item do carrossel no Instagram.");
     }
-    await delay(1000);
+
+    itemIds.push(itemContainer.id);
   }
 
-  if (itemIds.length === 0) {
-    throw new Error("Nenhum item do carrossel pôde ser processado.");
+  for (const itemId of itemIds) {
+    await aguardarProcessamentoInstagram(itemId, token);
   }
 
-  // 2. Criar container principal do carrossel
   const carouselContainer = await graphPost(`${instagramId}/media`, {
     media_type: "CAROUSEL",
-    children: itemIds.join(","),
+    children: itemIds,
     caption: caption,
     access_token: token,
   });
@@ -64,10 +97,8 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
     throw new Error("Falha ao criar container do carrossel no Instagram.");
   }
 
-  // Aguardar processamento da montagem
-  await delay(3000);
+  await aguardarProcessamentoInstagram(carouselContainer.id, token);
 
-  // 3. Publicar container principal
   const publish = await graphPost(`${instagramId}/media_publish`, {
     creation_id: carouselContainer.id,
     access_token: token,
@@ -77,6 +108,45 @@ async function publicarCarrosselInstagram(imagens, caption, token, instagramId) 
     success: true,
     id: publish.id,
   };
+}
+
+// ======================================================
+// PUBLICAR NO INSTAGRAM
+// ======================================================
+async function publicarNoInstagram(imagens, caption) {
+  try {
+    const token = process.env.INSTAGRAM_TOKEN;
+    const instagramId = process.env.INSTAGRAM_ID;
+
+    if (!token || !instagramId) {
+      return {
+        success: false,
+        skipped: true,
+        error: "Credenciais do Instagram não configuradas.",
+      };
+    }
+
+    if (!imagens || imagens.length === 0) {
+      if (!caption) {
+        return {
+          success: false,
+          skipped: true,
+          error: "Sem imagem e sem legenda para publicar no Instagram.",
+        };
+      }
+
+      throw new Error("Instagram não suporta publicação apenas com texto via Graph API.");
+    }
+
+    if (imagens.length === 1) {
+      return await publicarImagemUnicaInstagram(imagens[0], caption, token, instagramId);
+    }
+
+    return await publicarCarrosselInstagram(imagens, caption, token, instagramId);
+  } catch (err) {
+    console.error("Instagram erro:", err.message);
+    return { success: false, error: err.message };
+  }
 }
 
 // ======================================================
@@ -96,7 +166,6 @@ async function publicarNoFacebook(imagens, caption) {
     }
 
     if (!imagens || imagens.length === 0) {
-      // Postagem apenas de texto
       const post = await graphPost(`${pageId}/feed`, {
         message: caption,
         access_token: token,
@@ -106,29 +175,32 @@ async function publicarNoFacebook(imagens, caption) {
     }
 
     if (imagens.length === 1) {
-      // Imagem única
       const post = await graphPost(`${pageId}/photos`, {
         url: imagens[0],
         caption: caption,
+        published: true,
         access_token: token,
       });
 
       return { success: true, id: post.id || post.post_id };
     }
 
-    // Múltiplas imagens (Carrossel / Álbum)
     const attachedMedia = [];
 
     for (const url of imagens) {
       const upload = await graphPost(`${pageId}/photos`, {
         url: url,
-        published: "false",
+        published: false,
         access_token: token,
       });
 
       if (upload.id) {
         attachedMedia.push({ media_fbid: upload.id });
       }
+    }
+
+    if (attachedMedia.length === 0) {
+      throw new Error("Nenhuma imagem foi enviada para o Facebook.");
     }
 
     const payload = {
@@ -166,38 +238,49 @@ async function publicarNoTelegram(imagens, caption) {
     }
 
     if (!imagens || imagens.length === 0) {
-      const resp = await telegramPost("sendMessage", {
-        chat_id: chatId,
-        text: caption,
-        parse_mode: "HTML",
-      }, token);
+      const resp = await telegramPost(
+        "sendMessage",
+        {
+          chat_id: chatId,
+          text: caption,
+          parse_mode: "HTML",
+        },
+        token
+      );
 
       return { success: true, result: resp.result };
     }
 
     if (imagens.length === 1) {
-      const resp = await telegramPost("sendPhoto", {
-        chat_id: chatId,
-        photo: imagens[0],
-        caption: caption,
-        parse_mode: "HTML",
-      }, token);
+      const resp = await telegramPost(
+        "sendPhoto",
+        {
+          chat_id: chatId,
+          photo: imagens[0],
+          caption: caption,
+          parse_mode: "HTML",
+        },
+        token
+      );
 
       return { success: true, result: resp.result };
     }
 
-    // Grupo de mídias (Carrossel no Telegram)
-    const media = imagens.map((img, index) => ({
+    const media = imagens.slice(0, 10).map((img, index) => ({
       type: "photo",
       media: img,
       caption: index === 0 ? caption : undefined,
       parse_mode: "HTML",
     }));
 
-    const resp = await telegramPost("sendMediaGroup", {
-      chat_id: chatId,
-      media: media,
-    }, token);
+    const resp = await telegramPost(
+      "sendMediaGroup",
+      {
+        chat_id: chatId,
+        media: media,
+      },
+      token
+    );
 
     return { success: true, result: resp.result };
   } catch (err) {
@@ -223,11 +306,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Nenhum conteúdo (imagem ou texto) fornecido." });
     }
 
-    // Processamento de imagens via ImgBB se aplicável
-    const imagensProntas = await processarImagensParaMeta(imagensOriginais);
+    const imagensProntas = imagensOriginais.length > 0
+      ? await processarImagensParaMeta(imagensOriginais)
+      : [];
 
-    // Executa as postagens em paralelo para otimizar tempo
-    const [instagramResult, facebookResult, telegramResult] = await Promise.all([
+    const [instagramResult, facebookResult, telegramResult] = await Promise.allSettled([
       publicarNoInstagram(imagensProntas, legenda),
       publicarNoFacebook(imagensProntas, legenda),
       publicarNoTelegram(imagensOriginais, legenda),
@@ -236,9 +319,18 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       results: {
-        instagram: instagramResult,
-        facebook: facebookResult,
-        telegram: telegramResult,
+        instagram:
+          instagramResult.status === "fulfilled"
+            ? instagramResult.value
+            : { success: false, error: instagramResult.reason?.message || "Falha desconhecida" },
+        facebook:
+          facebookResult.status === "fulfilled"
+            ? facebookResult.value
+            : { success: false, error: facebookResult.reason?.message || "Falha desconhecida" },
+        telegram:
+          telegramResult.status === "fulfilled"
+            ? telegramResult.value
+            : { success: false, error: telegramResult.reason?.message || "Falha desconhecida" },
       },
     });
   } catch (error) {
