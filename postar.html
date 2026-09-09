@@ -15,13 +15,20 @@
   textarea { resize: vertical; min-height: 70px; }
   button {
     margin-top: 20px; width: 100%; padding: 14px; border-radius: 8px; border: none;
-    background: #2ea043; color: white; font-size: 16px; font-weight: bold;
+    background: #2ea043; color: white; font-size: 16px; font-weight: bold; cursor: pointer;
   }
-  button:disabled { background: #444; }
+  button:disabled { background: #444; cursor: not-allowed; }
   #resultado { margin-top: 16px; padding: 12px; border-radius: 8px; display: none; font-size: 14px; }
   .sucesso { background: #0d3320; color: #4dd47e; display: block !important; }
   .erro { background: #3d1116; color: #ff7b72; display: block !important; }
   .hint { font-size: 12px; color: #6e7681; margin-top: 4px; }
+  .loading { 
+    display: inline-block; width: 16px; height: 16px; 
+    border: 2px solid #fff; border-top-color: transparent; 
+    border-radius: 50%; animation: spin 0.8s linear infinite; 
+    margin-right: 8px; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -42,82 +49,87 @@
   <input type="url" id="link" required>
 
   <label>Imagem 1 — opcional (obrigatória p/ Instagram e Threads)</label>
-  <input type="url" id="imagem1">
+  <input type="url" id="imagem1" placeholder="https://...">
 
   <label>Imagem 2 — opcional</label>
-  <input type="url" id="imagem2">
+  <input type="url" id="imagem2" placeholder="https://...">
 
   <label>Imagem 3 — opcional</label>
-  <input type="url" id="imagem3">
-  <div class="hint">Com 2 ou 3 imagens, o post vira um carrossel/álbum em todas as plataformas.</div>
+  <input type="url" id="imagem3" placeholder="https://...">
 
-  <button type="submit" id="botao-enviar">Postar</button>
+  <button type="submit" id="btn-postar">Postar</button>
 </form>
 
 <div id="resultado"></div>
 
 <script>
-document.getElementById('form-oferta').addEventListener('submit', async (e) => {
+document.getElementById('form-oferta').addEventListener('submit', async function(e) {
   e.preventDefault();
-
-  const botao = document.getElementById('botao-enviar');
+  
+  const btn = document.getElementById('btn-postar');
   const resultado = document.getElementById('resultado');
-  botao.disabled = true;
-  botao.textContent = 'Enviando...';
-  resultado.className = '';
+  
+  // Desabilita o botão e mostra loading
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span>Postando...';
   resultado.style.display = 'none';
-
-  const imagens = [
-    document.getElementById('imagem1').value,
-    document.getElementById('imagem2').value,
-    document.getElementById('imagem3').value,
-  ].filter(Boolean);
-
-  const dados = {
-    legenda: document.getElementById('legenda').value,
-    precoAtual: document.getElementById('precoAtual').value,
-    precoOriginal: document.getElementById('precoOriginal').value || null,
-    link: document.getElementById('link').value,
-    imagens,
+  
+  // Coleta os dados do formulário
+  const legenda = document.getElementById('legenda').value.trim();
+  const precoAtual = document.getElementById('precoAtual').value;
+  const precoOriginal = document.getElementById('precoOriginal').value;
+  const link = document.getElementById('link').value.trim();
+  
+  // Coleta imagens (apenas as preenchidas)
+  const imagens = [];
+  const imagem1 = document.getElementById('imagem1').value.trim();
+  const imagem2 = document.getElementById('imagem2').value.trim();
+  const imagem3 = document.getElementById('imagem3').value.trim();
+  
+  if (imagem1) imagens.push(imagem1);
+  if (imagem2) imagens.push(imagem2);
+  if (imagem3) imagens.push(imagem3);
+  
+  // Monta o payload com os nomes corretos
+  const payload = {
+    caption: legenda,
+    precoAtual: precoAtual,
+    precoOriginal: precoOriginal || "",
+    linkAfiliado: link,
+    imagens: imagens
   };
-
+  
+  console.log('Enviando payload:', payload);
+  
   try {
-    const resp = await fetch('/api/postar-manual', {
+    const response = await fetch('/api/postar-manual', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dados),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
     });
-
-    const json = await resp.json();
-
-    if (json.ok) {
-      let partes = [];
-      if (json.telegram) partes.push('Telegram');
-      if (json.facebook) partes.push('Facebook');
-      if (json.instagram) partes.push('Instagram');
-      if (json.threads) partes.push('Threads');
-
-      let mensagem = partes.length > 0
-        ? '✅ Postado em: ' + partes.join(', ') + '!'
-        : '⚠️ Nenhuma plataforma recebeu a postagem.';
-
-      if (!json.instagram && json.instagramMsg) mensagem += ' | Instagram: ' + json.instagramMsg;
-      if (!json.threads && json.threadsMsg) mensagem += ' | Threads: ' + json.threadsMsg;
-
-      resultado.textContent = mensagem;
-      resultado.className = partes.length > 0 ? 'sucesso' : 'erro';
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      resultado.className = 'sucesso';
+      resultado.innerHTML = `✅ ${data.message || 'Postagem realizada com sucesso!'}`;
+      
+      // Limpa o formulário
       document.getElementById('form-oferta').reset();
     } else {
-      resultado.textContent = '❌ Erro: ' + (json.error || 'algo deu errado');
       resultado.className = 'erro';
+      resultado.innerHTML = `❌ Erro: ${data.error || 'Erro desconhecido'}`;
     }
   } catch (err) {
-    resultado.textContent = '❌ Erro de conexão: ' + err.message;
     resultado.className = 'erro';
+    resultado.innerHTML = `❌ Erro de conexão: ${err.message}`;
+  } finally {
+    // Reabilita o botão
+    btn.disabled = false;
+    btn.innerHTML = 'Postar';
   }
-
-  botao.disabled = false;
-  botao.textContent = 'Postar';
 });
 </script>
 
