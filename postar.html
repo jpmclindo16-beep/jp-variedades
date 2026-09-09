@@ -1,167 +1,99 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Postar Oferta</title>
 <style>
-  body { font-family: system-ui, sans-serif; background: #0d1117; color: #e6edf3; margin: 0; padding: 20px; }
-  h1 { font-size: 20px; margin-bottom: 20px; }
-  label { display: block; margin-top: 14px; margin-bottom: 4px; font-size: 14px; color: #9198a1; }
-  input, textarea {
-    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #30363d;
-    background: #161b22; color: #e6edf3; box-sizing: border-box; font-size: 15px; font-family: inherit;
-  }
-  textarea { resize: vertical; min-height: 70px; }
-  button {
-    margin-top: 20px; width: 100%; padding: 14px; border-radius: 8px; border: none;
-    background: #2ea043; color: white; font-size: 16px; font-weight: bold; cursor: pointer;
-  }
-  button:disabled { background: #444; cursor: not-allowed; }
-  #resultado { margin-top: 16px; padding: 12px; border-radius: 8px; display: none; font-size: 14px; }
-  .sucesso { background: #0d3320; color: #4dd47e; display: block !important; }
-  .erro { background: #3d1116; color: #ff7b72; display: block !important; }
-  .hint { font-size: 12px; color: #6e7681; margin-top: 4px; }
-  .loading { 
-    display: inline-block; width: 16px; height: 16px; 
-    border: 2px solid #fff; border-top-color: transparent; 
-    border-radius: 50%; animation: spin 0.8s linear infinite; 
-    margin-right: 8px; vertical-align: middle;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#0d1117;color:#e6edf3;margin:0;padding:20px;max-width:760px;margin-inline:auto}h1{font-size:22px;margin:0 0 6px}.sub{color:#8b949e;font-size:13px;margin:0 0 20px}label{display:block;margin-top:14px;margin-bottom:6px;font-size:14px;color:#b1bac4}input,textarea{width:100%;padding:12px;border-radius:9px;border:1px solid #30363d;background:#161b22;color:#e6edf3;font-size:15px;font-family:inherit}textarea{resize:vertical;min-height:100px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.redes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.rede{border:1px solid #30363d;border-radius:10px;padding:12px;background:#161b22;cursor:pointer}.rede input{width:auto;margin-right:8px}.rede strong{font-size:14px}.hint{font-size:12px;color:#8b949e;margin-top:5px}.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.preview img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:9px;border:1px solid #30363d;background:#161b22}.preview .empty{display:none}.actions{display:flex;gap:10px;margin-top:20px}.actions button{flex:1}button{padding:14px;border-radius:9px;border:0;background:#238636;color:white;font-size:16px;font-weight:700;cursor:pointer}button.secondary{background:#30363d}button:disabled{background:#444;cursor:not-allowed}.loading{display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:-3px}@keyframes spin{to{transform:rotate(360deg)}}#resultado{margin-top:16px;padding:14px;border-radius:9px;display:none;white-space:pre-wrap}.sucesso{background:#0d3320;color:#7ee787;display:block!important}.erro{background:#3d1116;color:#ff7b72;display:block!important}.status{margin-top:10px;padding:10px;border-radius:8px;background:#161b22;border:1px solid #30363d}.status b{display:inline-block;min-width:90px}.ok{color:#7ee787}.bad{color:#ff7b72}.skip{color:#d29922}@media(max-width:600px){.grid,.redes{grid-template-columns:1fr}.preview{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-
-<h1>🔥 Postar oferta (Telegram, Facebook, Instagram e Threads)</h1>
+<h1>🔥 Postar oferta</h1>
+<p class="sub">Instagram + Facebook + Telegram</p>
 
 <form id="form-oferta">
-  <label>Legenda *</label>
-  <textarea id="legenda" required placeholder="Escreva a legenda do post..."></textarea>
+<label>Legenda *</label>
+<textarea id="legenda" required placeholder="Ex.: 🔥 OFERTA DO DIA!\nComente EU QUERO 👇"></textarea>
 
-  <label>Preço atual (R$) *</label>
-  <input type="number" step="0.01" id="precoAtual" required>
+<div class="grid">
+  <div><label>Preço atual (R$) *</label><input type="number" step="0.01" id="precoAtual" required></div>
+  <div><label>Preço original (R$)</label><input type="number" step="0.01" id="precoOriginal"></div>
+</div>
 
-  <label>Preço original (R$) — opcional, deixa em branco se não tiver desconto</label>
-  <input type="number" step="0.01" id="precoOriginal">
+<label>Link de afiliado *</label>
+<input type="url" id="link" required placeholder="https://..."><div class="hint">O link será acrescentado à legenda.</div>
 
-  <label>Link de afiliado *</label>
-  <input type="url" id="link" required>
+<label>Onde publicar?</label>
+<div class="redes">
+  <label class="rede"><input type="checkbox" id="instagram" checked><strong>📸 Instagram</strong></label>
+  <label class="rede"><input type="checkbox" id="facebook" checked><strong>📘 Facebook</strong></label>
+  <label class="rede"><input type="checkbox" id="telegram" checked><strong>✈️ Telegram</strong></label>
+</div>
 
-  <label>Imagem 1 — opcional (obrigatória p/ Instagram e Threads)</label>
-  <input type="url" id="imagem1" placeholder="https://...">
+<label>Imagem 1 *</label>
+<input type="url" id="imagem1" required placeholder="https://i.ibb.co/.../imagem.png">
+<label>Imagem 2</label>
+<input type="url" id="imagem2" placeholder="https://i.ibb.co/.../imagem.png">
+<label>Imagem 3</label>
+<input type="url" id="imagem3" placeholder="https://i.ibb.co/.../imagem.png">
 
-  <label>Imagem 2 — opcional</label>
-  <input type="url" id="imagem2" placeholder="https://...">
+<div class="hint">As imagens precisam ser links públicos e diretos, como o seu link i.ibb.co.</div>
+<div class="preview" id="preview"></div>
 
-  <label>Imagem 3 — opcional</label>
-  <input type="url" id="imagem3" placeholder="https://...">
-
-  <button type="submit" id="btn-postar">Postar</button>
+<div class="actions">
+<button type="submit" id="btn-postar">🚀 Postar agora</button>
+<button type="button" class="secondary" id="btn-limpar">Limpar</button>
+</div>
 </form>
 
 <div id="resultado"></div>
 
 <script>
-document.getElementById('form-oferta').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  
-  const btn = document.getElementById('btn-postar');
-  const resultado = document.getElementById('resultado');
-  
-  // Desabilita o botão e mostra loading
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loading"></span>Postando...';
-  resultado.style.display = 'none';
-  
-  // Coleta os dados do formulário
-  const legenda = document.getElementById('legenda').value.trim();
-  const precoAtual = document.getElementById('precoAtual').value;
-  const precoOriginal = document.getElementById('precoOriginal').value;
-  const link = document.getElementById('link').value.trim();
-  
-  // Coleta imagens (apenas as preenchidas)
-  const imagens = [];
-  const imagem1 = document.getElementById('imagem1').value.trim();
-  const imagem2 = document.getElementById('imagem2').value.trim();
-  const imagem3 = document.getElementById('imagem3').value.trim();
-  
-  if (imagem1) imagens.push(imagem1);
-  if (imagem2) imagens.push(imagem2);
-  if (imagem3) imagens.push(imagem3);
-  
-  // Monta o payload com os nomes corretos
-  const payload = {
-    caption: legenda,
-    precoAtual: precoAtual,
-    precoOriginal: precoOriginal || "",
-    linkAfiliado: link,
-    imagens: imagens
-  };
-  
-  console.log('Enviando payload:', payload);
-  
-  try {
-    const response = await fetch('/api/postar-manual', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    const data = await response.json();
-    
-    if (data.success) {
-      resultado.className = 'sucesso';
+const ids=['imagem1','imagem2','imagem3'];
+const preview=document.getElementById('preview');
+function atualizarPreview(){
+  preview.innerHTML='';
+  ids.map(id=>document.getElementById(id).value.trim()).filter(Boolean).forEach(url=>{
+    const img=document.createElement('img');
+    img.src=url; img.alt='Prévia';
+    img.onerror=()=>{img.style.opacity='.35';img.title='Não foi possível carregar esta imagem';};
+    preview.appendChild(img);
+  });
+}
+ids.forEach(id=>document.getElementById(id).addEventListener('input',atualizarPreview));
+document.getElementById('btn-limpar').addEventListener('click',()=>{document.getElementById('form-oferta').reset();document.getElementById('instagram').checked=true;document.getElementById('facebook').checked=true;document.getElementById('telegram').checked=true;preview.innerHTML='';document.getElementById('resultado').style.display='none';});
 
-      const resultados = data.resultados || {};
-      const linhas = [];
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function statusLinha(nome,r){
+  if(!r) return `<div class="status"><b>${nome}:</b> <span class="bad">❌ Sem resposta</span></div>`;
+  const cls=r.success?'ok':(r.skipped?'skip':'bad');
+  const icon=r.success?'✅':(r.skipped?'⚠️':'❌');
+  const texto=r.success?'Publicado com sucesso':(r.error||'Não publicado');
+  return `<div class="status"><b>${nome}:</b> <span class="${cls}">${icon} ${esc(texto)}</span></div>`;
+}
 
-      ['telegram', 'facebook', 'instagram'].forEach(function(rede) {
-        const r = resultados[rede];
-        if (!r) return;
-        const nome = rede.charAt(0).toUpperCase() + rede.slice(1);
-        if (r.success) {
-          linhas.push(`✅ ${nome}: publicado`);
-        } else if (r.skipped) {
-          linhas.push(`⚪ ${nome}: pulado (${r.error})`);
-        } else {
-          linhas.push(`❌ ${nome}: ${r.error || 'falhou'}`);
-        }
-      });
-
-      resultado.innerHTML = linhas.length
-        ? linhas.join('<br>')
-        : `✅ ${data.message || 'Postagem realizada com sucesso!'}`;
-
-      // Limpa o formulário
-      document.getElementById('form-oferta').reset();
-    } else {
-      resultado.className = 'erro';
-
-      const resultados = data.resultados || {};
-      const linhas = [`❌ Erro: ${data.error || 'Erro desconhecido'}`];
-
-      ['telegram', 'facebook', 'instagram'].forEach(function(rede) {
-        const r = resultados[rede];
-        if (!r) return;
-        const nome = rede.charAt(0).toUpperCase() + rede.slice(1);
-        linhas.push(`${r.success ? '✅' : '❌'} ${nome}: ${r.success ? 'publicado' : (r.error || 'falhou')}`);
-      });
-
-      resultado.innerHTML = linhas.join('<br>');
-    }
-  } catch (err) {
-    resultado.className = 'erro';
-    resultado.innerHTML = `❌ Erro de conexão: ${err.message}`;
-  } finally {
-    // Reabilita o botão
-    btn.disabled = false;
-    btn.innerHTML = 'Postar';
-  }
+document.getElementById('form-oferta').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const btn=document.getElementById('btn-postar'), resultado=document.getElementById('resultado');
+ const redes=['instagram','facebook','telegram'].filter(x=>document.getElementById(x).checked);
+ if(!redes.length){resultado.className='erro';resultado.style.display='block';resultado.textContent='❌ Selecione pelo menos uma rede.';return;}
+ const imagens=ids.map(id=>document.getElementById(id).value.trim()).filter(Boolean);
+ if(!imagens.length){resultado.className='erro';resultado.style.display='block';resultado.textContent='❌ Informe pelo menos uma imagem.';return;}
+ btn.disabled=true;btn.innerHTML='<span class="loading"></span>Publicando...';resultado.style.display='none';
+ const payload={caption:document.getElementById('legenda').value.trim(),precoAtual:document.getElementById('precoAtual').value,precoOriginal:document.getElementById('precoOriginal').value.trim(),linkAfiliado:document.getElementById('link').value.trim(),imagens,redes};
+ try{
+   const response=await fetch('/api/postar-manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+   const text=await response.text(); let data; try{data=JSON.parse(text)}catch{throw new Error(`Servidor retornou HTTP ${response.status} sem JSON: ${text.slice(0,300)}`)}
+   resultado.className=data.success?'sucesso':'erro';resultado.style.display='block';
+   let html=`<strong>${data.success?'✅ Postagem processada':'❌ Falha na postagem'}</strong>`;
+   if(data.message) html+=`<div>${esc(data.message)}</div>`;
+   if(data.resultados){html+=statusLinha('Instagram',data.resultados.instagram);html+=statusLinha('Facebook',data.resultados.facebook);html+=statusLinha('Telegram',data.resultados.telegram)}
+   if(data.success) document.getElementById('form-oferta').reset();
+   resultado.innerHTML=html; if(data.success) preview.innerHTML='';
+ }catch(err){resultado.className='erro';resultado.style.display='block';resultado.textContent='❌ Erro de conexão: '+err.message;}
+ finally{btn.disabled=false;btn.innerHTML='🚀 Postar agora';}
 });
 </script>
-
 </body>
 </html>
