@@ -695,6 +695,26 @@ async function publicarMultiplasFotosFacebook(imagens, caption, pageId, token) {
     };
   } catch (err) {
     console.error("Facebook múltiplas fotos erro:", err.message);
+    console.log("Facebook: tentando fallback com apenas a primeira foto");
+
+    try {
+      const fallback = await publicarFotoUnicaFacebook(
+        imagens[0],
+        caption,
+        pageId,
+        token
+      );
+
+      if (fallback.success) {
+        return {
+          success: true,
+          postId: fallback.postId,
+          aviso: "Publicado apenas com a primeira foto (álbum falhou): " + err.message,
+        };
+      }
+    } catch (errFallback) {
+      console.error("Facebook fallback também falhou:", errFallback.message);
+    }
 
     return {
       success: false,
