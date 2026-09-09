@@ -172,6 +172,22 @@ async function converterParaJpeg(bufferOriginal) {
 // ======================================================
 // RE-HOSPEDAR IMAGEM NO IMGBB COMO JPG
 // ======================================================
+const DOMINIOS_CONFIAVEIS = [
+  "i.ibb.co",
+  "ibb.co",
+];
+
+function urlJaConfiavel(urlOriginal) {
+  try {
+    const host = new URL(urlOriginal).hostname;
+    return DOMINIOS_CONFIAVEIS.some(
+      dominio => host === dominio || host.endsWith(`.${dominio}`)
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function rehospedarImagemNoImgBB(urlOriginal) {
   const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 
@@ -180,10 +196,22 @@ async function rehospedarImagemNoImgBB(urlOriginal) {
     return urlOriginal;
   }
 
+  if (urlJaConfiavel(urlOriginal)) {
+    console.log("Imagem já está em domínio confiável, pulando re-hospedagem:", urlOriginal);
+    return urlOriginal;
+  }
+
   try {
     console.log("Baixando imagem:", urlOriginal);
 
-    const imgResp = await fetchWithTimeout(urlOriginal, {}, 25000);
+    let imgResp;
+    try {
+      imgResp = await fetchWithTimeout(urlOriginal, {}, 25000);
+    } catch (errPrimeiraTentativa) {
+      console.error("Primeira tentativa de baixar imagem falhou, tentando de novo:", errPrimeiraTentativa.message);
+      await delay(2000);
+      imgResp = await fetchWithTimeout(urlOriginal, {}, 25000);
+    }
 
     if (!imgResp.ok) {
       console.error("Falha ao baixar imagem:", imgResp.status);
