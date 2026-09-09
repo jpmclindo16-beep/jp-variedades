@@ -114,13 +114,43 @@ document.getElementById('form-oferta').addEventListener('submit', async function
     
     if (data.success) {
       resultado.className = 'sucesso';
-      resultado.innerHTML = `✅ ${data.message || 'Postagem realizada com sucesso!'}`;
-      
+
+      const resultados = data.resultados || {};
+      const linhas = [];
+
+      ['telegram', 'facebook', 'instagram'].forEach(function(rede) {
+        const r = resultados[rede];
+        if (!r) return;
+        const nome = rede.charAt(0).toUpperCase() + rede.slice(1);
+        if (r.success) {
+          linhas.push(`✅ ${nome}: publicado`);
+        } else if (r.skipped) {
+          linhas.push(`⚪ ${nome}: pulado (${r.error})`);
+        } else {
+          linhas.push(`❌ ${nome}: ${r.error || 'falhou'}`);
+        }
+      });
+
+      resultado.innerHTML = linhas.length
+        ? linhas.join('<br>')
+        : `✅ ${data.message || 'Postagem realizada com sucesso!'}`;
+
       // Limpa o formulário
       document.getElementById('form-oferta').reset();
     } else {
       resultado.className = 'erro';
-      resultado.innerHTML = `❌ Erro: ${data.error || 'Erro desconhecido'}`;
+
+      const resultados = data.resultados || {};
+      const linhas = [`❌ Erro: ${data.error || 'Erro desconhecido'}`];
+
+      ['telegram', 'facebook', 'instagram'].forEach(function(rede) {
+        const r = resultados[rede];
+        if (!r) return;
+        const nome = rede.charAt(0).toUpperCase() + rede.slice(1);
+        linhas.push(`${r.success ? '✅' : '❌'} ${nome}: ${r.success ? 'publicado' : (r.error || 'falhou')}`);
+      });
+
+      resultado.innerHTML = linhas.join('<br>');
     }
   } catch (err) {
     resultado.className = 'erro';
