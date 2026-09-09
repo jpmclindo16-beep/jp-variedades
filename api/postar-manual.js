@@ -1,167 +1,196 @@
 // api/postar-manual.js
-// Publica imagens do ImgBB no Instagram, Facebook e Telegram.
-// Instagram: converte PNG/WebP para JPEG antes de publicar.
-// Facebook: usa o Page Access Token e valida a Página antes de criar
-// as fotos não publicadas usadas em posts com várias imagens.
 
-const jimpModule = require('jimp');
+const jimpModule = require("jimp");
+
 const Jimp = jimpModule.Jimp || jimpModule;
 const JimpMime = jimpModule.JimpMime || {};
 
-const GRAPH_VERSION = process.env.GRAPH_VERSION || 'v23.0';
+const GRAPH_VERSION = "v21.0";
 
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb'
-    }
+      sizeLimit: "10mb",
+    },
   },
-  maxDuration: 60
+  maxDuration: 60,
 };
 
+// ======================================================
+// DELAY
+// ======================================================
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ======================================================
+// FETCH COM TIMEOUT
+// ======================================================
 async function fetchWithTimeout(url, options = {}, timeout = 30000) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
     return await fetch(url, {
       ...options,
-      signal: controller.signal
+      signal: controller.signal,
     });
   } finally {
-    clearTimeout(timer);
+    clearTimeout(timeoutId);
   }
 }
 
-async function readResponse(response) {
-  const text = await response.text();
+// ======================================================
+// LER RESPOSTA COM SEGURANÇA
+// ======================================================
+async function lerResposta(response) {
+  const texto = await response.text();
 
   try {
-    return JSON.parse(text);
+    return JSON.parse(texto);
   } catch {
     return {
-      raw: text
+      raw: texto,
     };
   }
 }
 
-async function graphPost(path, params, timeout = 45000) {
+// ======================================================
+// GET GRAPH API
+// ======================================================
+async function graphGet(path, params = {}, timeout = 30000) {
+  const query = new URLSearchParams(params);
+  const url =
+    `https://graph.facebook.com/${GRAPH_VERSION}/${path}?${query.toString()}`;
+
   const response = await fetchWithTimeout(
-    `https://graph.facebook.com/${GRAPH_VERSION}/${path}`,
+    url,
     {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams(params)
+      method: "GET",
     },
     timeout
   );
 
-  const data = await readResponse(response);
+  const data = await lerResposta(response);
 
   if (!response.ok || data.error) {
     throw new Error(
       data.error?.message ||
+      data.description ||
       data.raw ||
-      `Meta HTTP ${response.status}`
+      "Erro na API Graph"
     );
   }
 
   return data;
 }
 
-async function graphGet(path, params, timeout = 30000) {
-  const qs = new URLSearchParams(params);
+// ======================================================
+// POST GRAPH API
+// ======================================================
+async function graphPost(path, params, timeout = 30000) {
+  const url =
+    `https://graph.facebook.com/${GRAPH_VERSION}/${path}`;
 
   const response = await fetchWithTimeout(
-    `https://graph.facebook.com/${GRAPH_VERSION}/${path}?${qs}`,
-    {},
+    url,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams(params),
+    },
     timeout
   );
 
-  const data = await readResponse(response);
+  const data = await lerResposta(response);
 
   if (!response.ok || data.error) {
     throw new Error(
       data.error?.message ||
+      data.description ||
       data.raw ||
-      `Meta HTTP ${response.status}`
+      "Erro na API Graph"
     );
   }
 
   return data;
 }
 
+// ======================================================
+// POST TELEGRAM
+// ======================================================
 async function telegramPost(
   method,
   payload,
   token,
-  timeout = 45000
+  timeout = 30000
 ) {
+  const url =
+    `https://api.telegram.org/bot${token}/${method}`;
+
   const response = await fetchWithTimeout(
-    `https://api.telegram.org/bot${token}/${method}`,
+    url,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     },
     timeout
   );
 
-  const data = await readResponse(response);
+  const data = await lerResposta(response);
 
   if (!response.ok || data.ok === false) {
     throw new Error(
       data.description ||
       data.raw ||
-      `Telegram HTTP ${response.status}`
+      "Erro na API do Telegram"
     );
   }
 
   return data;
 }
 
-/* =========================================================
-   IMAGEM / JPEG
-========================================================= */
-
+// ======================================================
+// PEGAR MIME JPEG DO JIMP
+// ======================================================
 function getJpegMime() {
   return (
     JimpMime.jpeg ||
     JimpMime.JPEG ||
     jimpModule.MIME_JPEG ||
     Jimp.MIME_JPEG ||
-    'image/jpeg'
+    "image/jpeg"
   );
 }
 
-async function toJpeg(buffer) {
-  const image = await Jimp.read(buffer);
+// ======================================================
+// CONVERTER BUFFER PARA JPEG
+// ======================================================
+async function converterParaJpeg(bufferOriginal) {
+  const mimeJpeg = getJpegMime();
 
-  if (typeof image.quality === 'function') {
+  const image = await Jimp.read(bufferOriginal);
+
+  if (typeof image.quality === "function") {
     image.quality(90);
   }
 
-  if (typeof image.background === 'function') {
+  if (typeof image.background === "function") {
     image.background(0xffffffff);
   }
 
-  const mime = getJpegMime();
-
-  if (typeof image.getBufferAsync === 'function') {
-    return image.getBufferAsync(mime);
+  if (typeof image.getBufferAsync === "function") {
+    return await image.getBufferAsync(mimeJpeg);
   }
 
-  const result = image.getBuffer(mime);
+  const result = image.getBuffer(mimeJpeg);
 
-  if (result && typeof result.then === 'function') {
+  if (result && typeof result.then === "function") {
     return await result;
   }
 
@@ -170,841 +199,1225 @@ async function toJpeg(buffer) {
   }
 
   return await new Promise((resolve, reject) => {
-    image.getBuffer(
-      mime,
-      (err, buffer) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(buffer);
-        }
+    image.getBuffer(mimeJpeg, (err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer);
       }
-    );
+    });
   });
 }
 
-function isDirectImageUrl(url) {
+// ======================================================
+// RE-HOSPEDAR IMAGEM NO IMGBB COMO JPG
+// ======================================================
+async function rehospedarImagemNoImgBB(urlOriginal) {
+  const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
+
+  if (!IMGBB_API_KEY) {
+    console.log(
+      "IMGBB_API_KEY não configurada. Usando imagem original."
+    );
+
+    return urlOriginal;
+  }
+
   try {
-    const u = new URL(url);
+    console.log("Baixando imagem:", urlOriginal);
 
-    return (
-      (u.protocol === 'https:' || u.protocol === 'http:') &&
-      !!u.hostname
+    const imgResp = await fetchWithTimeout(
+      urlOriginal,
+      {},
+      25000
     );
-  } catch {
-    return false;
-  }
-}
 
-/* =========================================================
-   IMGBB
-========================================================= */
+    if (!imgResp.ok) {
+      console.error(
+        "Falha ao baixar imagem:",
+        imgResp.status
+      );
 
-async function uploadImgBB(buffer, name) {
-  const key = process.env.IMGBB_API_KEY;
+      return urlOriginal;
+    }
 
-  if (!key) {
-    throw new Error(
-      'IMGBB_API_KEY não configurada. Ela é necessária para converter PNG/WebP em JPEG para o Instagram.'
-    );
-  }
+    const bufferOriginal =
+      Buffer.from(await imgResp.arrayBuffer());
 
-  const response = await fetchWithTimeout(
-    `https://api.imgbb.com/1/upload?key=${encodeURIComponent(key)}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+    let bufferFinal = bufferOriginal;
+
+    try {
+      bufferFinal =
+        await converterParaJpeg(bufferOriginal);
+
+      console.log("Imagem convertida para JPG");
+    } catch (err) {
+      console.error(
+        "Não conseguiu converter para JPG, usando original:",
+        err.message
+      );
+    }
+
+    const base64 =
+      bufferFinal.toString("base64");
+
+    const uploadResp = await fetchWithTimeout(
+      `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          image: base64,
+          name:
+            `produto-${Date.now()}.jpg`,
+        }),
       },
-      body: new URLSearchParams({
-        image: buffer.toString('base64'),
-        name
-      })
-    },
-    45000
-  );
-
-  const data = await readResponse(response);
-
-  if (
-    !response.ok ||
-    !data.success ||
-    !data.data?.url
-  ) {
-    throw new Error(
-      `ImgBB: ${
-        data.error?.message ||
-        data.raw ||
-        'falha no upload'
-      }`
+      45000
     );
-  }
 
-  return data.data.url;
+    const uploadData =
+      await lerResposta(uploadResp);
+
+    if (
+      uploadData.success &&
+      uploadData.data?.url
+    ) {
+      console.log(
+        "Imagem re-hospedada no ImgBB:",
+        uploadData.data.url
+      );
+
+      return uploadData.data.url;
+    }
+
+    console.error(
+      "ImgBB falhou:",
+      JSON.stringify(uploadData).slice(0, 500)
+    );
+
+    return urlOriginal;
+
+  } catch (err) {
+    console.error(
+      "Erro ao re-hospedar imagem:",
+      err.message
+    );
+
+    return urlOriginal;
+  }
 }
 
-async function prepararImagemInstagram(url) {
-  if (!isDirectImageUrl(url)) {
-    throw new Error(
-      `URL de imagem inválida: ${url}`
-    );
-  }
-
-  const response = await fetchWithTimeout(
-    url,
-    {
-      headers: {
-        'User-Agent': 'Mozilla/5.0'
-      }
-    },
-    30000
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Não consegui baixar a imagem (${response.status}): ${url}`
-    );
-  }
-
-  const contentType = (
-    response.headers.get('content-type') || ''
-  ).toLowerCase();
-
-  if (!contentType.startsWith('image/')) {
-    throw new Error(
-      `A URL não retornou uma imagem (${
-        contentType || 'tipo desconhecido'
-      }): ${url}`
-    );
-  }
-
-  const original = Buffer.from(
-    await response.arrayBuffer()
-  );
-
-  if (original.length === 0) {
-    throw new Error('A imagem veio vazia.');
-  }
-
-  const jpg = await toJpeg(original);
-
-  return await uploadImgBB(
-    jpg,
-    `instagram-${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2)}.jpg`
-  );
-}
-
-/* =========================================================
-   NORMALIZAÇÃO
-========================================================= */
-
-function normalizeImages(body) {
-  let arr =
+// ======================================================
+// NORMALIZAR IMAGENS DO FORMULÁRIO
+// ======================================================
+function normalizarImagens(body) {
+  let imagens =
     body.imagens ||
     body.images ||
     [];
 
-  if (!Array.isArray(arr)) {
-    arr = [arr];
+  if (!Array.isArray(imagens)) {
+    imagens = [imagens];
   }
 
-  arr = [
-    ...arr,
+  const extras = [
     body.imagem,
     body.image,
     body.imagem1,
     body.imagem2,
     body.imagem3,
     body.imagem4,
-    body.imagem5
-  ]
-    .filter(x => typeof x === 'string')
-    .map(x => x.trim())
-    .filter(Boolean)
-    .filter(isDirectImageUrl);
+    body.imagem5,
+    body.image1,
+    body.image2,
+    body.image3,
+    body.image4,
+    body.image5,
+  ];
+
+  imagens = [
+    ...imagens,
+    ...extras,
+  ];
+
+  const imagensValidas =
+    imagens
+      .filter(
+        img =>
+          typeof img === "string"
+      )
+      .map(img => img.trim())
+      .filter(img => img !== "")
+      .filter(
+        img =>
+          img.startsWith("http://") ||
+          img.startsWith("https://")
+      );
 
   return [
-    ...new Set(arr)
+    ...new Set(imagensValidas),
   ].slice(0, 10);
 }
 
-function buildCaption(body) {
-  const base = String(
+// ======================================================
+// MONTAR LEGENDA
+// ======================================================
+function montarLegenda(body) {
+  const caption =
     body.caption ||
     body.legenda ||
     body.texto ||
-    ''
-  ).trim();
+    body.legendaCompleta ||
+    "";
 
-  const current =
+  const precoAtual =
     body.precoAtual ||
     body.preco_atual ||
-    '';
+    "";
 
-  const old =
+  const precoOriginal =
     body.precoOriginal ||
     body.preco_original ||
-    '';
+    "";
 
-  const link =
+  const linkAfiliado =
     body.linkAfiliado ||
     body.link_afiliado ||
-    '';
+    "";
 
-  let c = base;
+  let legendaCompleta =
+    String(caption).trim();
 
-  if (current) {
-    c += `\n\n💰 Preço: R$ ${current}`;
+  if (precoAtual) {
+    legendaCompleta +=
+      `\n\n💰 Preço: R$ ${precoAtual}`;
   }
 
-  if (old) {
-    c += `\n📉 De: R$ ${old}`;
+  if (precoOriginal) {
+    legendaCompleta +=
+      `\n📉 De: R$ ${precoOriginal}`;
   }
 
-  if (link) {
-    c += `\n\n🔗 Link: ${link}`;
+  if (linkAfiliado) {
+    legendaCompleta +=
+      `\n\n🔗 Link: ${linkAfiliado}`;
   }
 
-  return c.trim();
+  return legendaCompleta;
 }
 
-function normalizeNetworks(body) {
-  const r =
-    body.redes ||
-    body.networks;
-
-  if (!r) {
-    return {
-      instagram: true,
-      facebook: true,
-      telegram: true
-    };
+// ======================================================
+// LIMITAR LEGENDA DO INSTAGRAM
+// ======================================================
+function limitarLegendaInstagram(caption) {
+  if (caption.length <= 2200) {
+    return caption;
   }
 
-  const a = Array.isArray(r)
-    ? r
-    : Object.entries(r)
-        .filter(([, value]) => value)
-        .map(([key]) => key);
-
-  return {
-    instagram: a.includes('instagram'),
-    facebook: a.includes('facebook'),
-    telegram: a.includes('telegram')
-  };
+  return caption.slice(0, 2190) + "...";
 }
 
-function limitedInstagramCaption(c) {
-  return c.length <= 2200
-    ? c
-    : c.slice(0, 2197) + '...';
+// ======================================================
+// PROCESSAR IMAGENS PARA META
+// ======================================================
+async function processarImagensParaMeta(imagens) {
+  const imagensProcessadas = [];
+
+  for (
+    let i = 0;
+    i < imagens.length;
+    i++
+  ) {
+    console.log(
+      `Processando imagem ${i + 1}/${imagens.length}`
+    );
+
+    const imagemFinal =
+      await rehospedarImagemNoImgBB(
+        imagens[i]
+      );
+
+    imagensProcessadas.push(
+      imagemFinal
+    );
+  }
+
+  return imagensProcessadas;
 }
 
-/* =========================================================
-   INSTAGRAM
-========================================================= */
-
-async function publishInstagram(images, caption) {
-  const token =
-    process.env.FACEBOOK_PAGE_TOKEN;
-
-  const igId =
-    process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
-
-  if (!token) {
-    return {
-      success: false,
-      skipped: true,
-      error:
-        'FACEBOOK_PAGE_TOKEN não configurado'
-    };
-  }
-
-  if (!igId) {
-    return {
-      success: false,
-      skipped: true,
-      error:
-        'INSTAGRAM_BUSINESS_ACCOUNT_ID não configurado'
-    };
-  }
-
-  if (!process.env.IMGBB_API_KEY) {
-    return {
-      success: false,
-      error:
-        'IMGBB_API_KEY não configurada. Como suas imagens podem ser PNG, é necessário converter para JPEG antes do Instagram.'
-    };
-  }
-
+// ======================================================
+// PUBLICAR NO INSTAGRAM
+// USA O MESMO TOKEN DO FACEBOOK
+// ======================================================
+async function publicarNoInstagram(
+  imagens,
+  caption
+) {
   try {
-    const jpgUrls = [];
+    const token =
+      process.env.FACEBOOK_PAGE_TOKEN;
 
-    for (const url of images) {
-      jpgUrls.push(
-        await prepararImagemInstagram(url)
-      );
-    }
+    const instagramId =
+      process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
 
-    const finalCaption =
-      limitedInstagramCaption(caption);
-
-    /* UMA IMAGEM */
-    if (jpgUrls.length === 1) {
-      const media = await graphPost(
-        `${igId}/media`,
-        {
-          image_url: jpgUrls[0],
-          caption: finalCaption,
-          access_token: token
-        }
-      );
-
-      const published =
-        await publishInstagramContainer(
-          media.id,
-          token
-        );
-
+    if (!token) {
       return {
-        success: true,
-        postId: published.id
+        success: false,
+        skipped: true,
+        error:
+          "FACEBOOK_PAGE_TOKEN não configurado",
       };
     }
 
-    /* VÁRIAS IMAGENS */
-    const children = [];
-
-    for (const url of jpgUrls) {
-      const child = await graphPost(
-        `${igId}/media`,
-        {
-          image_url: url,
-          is_carousel_item: 'true',
-          access_token: token
-        }
-      );
-
-      children.push(child.id);
-
-      await delay(1200);
+    if (!instagramId) {
+      return {
+        success: false,
+        skipped: true,
+        error:
+          "INSTAGRAM_BUSINESS_ACCOUNT_ID não configurado",
+      };
     }
 
-    const carousel = await graphPost(
-      `${igId}/media`,
-      {
-        media_type: 'CAROUSEL',
-        children: children.join(','),
-        caption: finalCaption,
-        access_token: token
-      }
+    if (
+      !imagens ||
+      imagens.length === 0
+    ) {
+      return {
+        success: false,
+        error:
+          "Nenhuma imagem para postar no Instagram",
+      };
+    }
+
+    const legendaInstagram =
+      limitarLegendaInstagram(
+        caption
+      );
+
+    console.log(
+      `Instagram: publicando ${imagens.length} imagem(ns)`
     );
 
-    const published =
-      await publishInstagramContainer(
-        carousel.id,
-        token
+    if (imagens.length === 1) {
+      return await publicarImagemUnicaInstagram(
+        imagens[0],
+        legendaInstagram,
+        token,
+        instagramId
+      );
+    }
+
+    return await publicarCarrosselInstagram(
+      imagens,
+      legendaInstagram,
+      token,
+      instagramId
+    );
+
+  } catch (err) {
+    console.error(
+      "Instagram erro:",
+      err.message
+    );
+
+    return {
+      success: false,
+      error: err.message,
+    };
+  }
+}
+
+// ======================================================
+// INSTAGRAM - IMAGEM ÚNICA
+// ======================================================
+async function publicarImagemUnicaInstagram(
+  imagemUrl,
+  caption,
+  token,
+  instagramId
+) {
+  try {
+    console.log(
+      "Instagram: criando container de imagem única"
+    );
+
+    const media =
+      await graphPost(
+        `${instagramId}/media`,
+        {
+          image_url: imagemUrl,
+          caption,
+          access_token: token,
+        },
+        45000
+      );
+
+    console.log(
+      "Instagram: container criado:",
+      media.id
+    );
+
+    const publicado =
+      await publicarContainerInstagramComRetry(
+        media.id,
+        token,
+        instagramId
       );
 
     return {
       success: true,
-      postId: published.id
+      postId: publicado.id,
     };
 
   } catch (err) {
+    console.error(
+      "Instagram imagem única erro:",
+      err.message
+    );
+
     return {
       success: false,
-      error: err.message
+      error: err.message,
     };
   }
 }
 
-async function publishInstagramContainer(
-  creationId,
-  token
+// ======================================================
+// INSTAGRAM - CARROSSEL
+// ======================================================
+async function publicarCarrosselInstagram(
+  imagens,
+  caption,
+  token,
+  instagramId
 ) {
-  for (let i = 0; i < 8; i++) {
-    try {
-      const status = await graphGet(
-        creationId,
-        {
-          fields:
-            'status_code,status',
-          access_token: token
-        }
+  try {
+    console.log(
+      "Instagram: criando carrossel"
+    );
+
+    const containerIds = [];
+
+    for (
+      let i = 0;
+      i < imagens.length;
+      i++
+    ) {
+      console.log(
+        `Instagram: criando container filho ${i + 1}`
       );
 
-      const code =
-        status.status_code;
-
-      if (
-        code === 'ERROR' ||
-        code === 'EXPIRED'
-      ) {
-        throw new Error(
-          status.status ||
-          `Container ${code}`
+      const media =
+        await graphPost(
+          `${instagramId}/media`,
+          {
+            image_url: imagens[i],
+            is_carousel_item: "true",
+            access_token: token,
+          },
+          45000
         );
-      }
 
-      if (
-        code === 'FINISHED' ||
-        !code
-      ) {
-        break;
-      }
+      containerIds.push(
+        media.id
+      );
 
-    } catch (err) {
-      // Continua tentando até o limite.
+      console.log(
+        `Instagram: container filho ${i + 1} criado:`,
+        media.id
+      );
+
+      await delay(1500);
     }
 
-    await delay(3000);
-  }
-
-  const published =
-    await graphPost(
-      `${process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID}/media_publish`,
-      {
-        creation_id: creationId,
-        access_token: token
-      }
+    console.log(
+      "Instagram: criando container principal do carrossel"
     );
 
-  return published;
+    const carousel =
+      await graphPost(
+        `${instagramId}/media`,
+        {
+          media_type: "CAROUSEL",
+          children:
+            containerIds.join(","),
+          caption,
+          access_token: token,
+        },
+        45000
+      );
+
+    console.log(
+      "Instagram: container principal criado:",
+      carousel.id
+    );
+
+    const publicado =
+      await publicarContainerInstagramComRetry(
+        carousel.id,
+        token,
+        instagramId
+      );
+
+    return {
+      success: true,
+      postId: publicado.id,
+    };
+
+  } catch (err) {
+    console.error(
+      "Instagram carrossel erro:",
+      err.message
+    );
+
+    return {
+      success: false,
+      error: err.message,
+    };
+  }
 }
 
-/* =========================================================
-   FACEBOOK
-========================================================= */
-
-async function validateFacebookPage(
-  pageId,
-  token
+// ======================================================
+// INSTAGRAM - PUBLICAR COM RETRY
+// ======================================================
+async function publicarContainerInstagramComRetry(
+  creationId,
+  token,
+  instagramId
 ) {
-  const page = await graphGet(
-    pageId,
-    {
-      fields: 'id,name',
-      access_token: token
-    },
-    30000
-  );
+  let ultimoErro = null;
 
-  if (!page.id) {
-    throw new Error(
-      'A Meta não conseguiu validar o FACEBOOK_PAGE_ID.'
-    );
+  for (
+    let tentativa = 1;
+    tentativa <= 5;
+    tentativa++
+  ) {
+    try {
+      const espera =
+        tentativa === 1
+          ? 5000
+          : 4000;
+
+      console.log(
+        `Instagram: aguardando ${espera / 1000}s antes da tentativa ${tentativa}`
+      );
+
+      await delay(espera);
+
+      console.log(
+        `Instagram: publicando container, tentativa ${tentativa}`
+      );
+
+      const publicado =
+        await graphPost(
+          `${instagramId}/media_publish`,
+          {
+            creation_id: creationId,
+            access_token: token,
+          },
+          45000
+        );
+
+      console.log(
+        "Instagram: publicado com sucesso:",
+        publicado.id
+      );
+
+      return publicado;
+
+    } catch (err) {
+      ultimoErro = err;
+
+      console.error(
+        `Instagram: tentativa ${tentativa} falhou:`,
+        err.message
+      );
+    }
   }
 
-  return page;
+  throw (
+    ultimoErro ||
+    new Error(
+      "Não conseguiu publicar no Instagram"
+    )
+  );
 }
 
-async function publishFacebook(
-  images,
+// ======================================================
+// PUBLICAR NO FACEBOOK
+// ======================================================
+async function publicarNoFacebook(
+  imagens,
   caption
 ) {
-  const pageId =
-    process.env.FACEBOOK_PAGE_ID;
-
-  const token =
-    process.env.FACEBOOK_PAGE_TOKEN;
-
-  if (!pageId) {
-    return {
-      success: false,
-      skipped: true,
-      error:
-        'FACEBOOK_PAGE_ID não configurado'
-    };
-  }
-
-  if (!token) {
-    return {
-      success: false,
-      skipped: true,
-      error:
-        'FACEBOOK_PAGE_TOKEN não configurado'
-    };
-  }
-
   try {
-    /*
-     * PRIMEIRO:
-     * confirma que o token consegue acessar
-     * a Página informada.
-     */
-    const page =
-      await validateFacebookPage(
+    const pageId =
+      String(
+        process.env.FACEBOOK_PAGE_ID || ""
+      ).trim();
+
+    const token =
+      String(
+        process.env.FACEBOOK_PAGE_TOKEN || ""
+      ).trim();
+
+    if (!pageId) {
+      return {
+        success: false,
+        skipped: true,
+        error:
+          "FACEBOOK_PAGE_ID não configurado na Vercel.",
+      };
+    }
+
+    if (!token) {
+      return {
+        success: false,
+        skipped: true,
+        error:
+          "FACEBOOK_PAGE_TOKEN não configurado na Vercel.",
+      };
+    }
+
+    if (
+      !imagens ||
+      imagens.length === 0
+    ) {
+      return {
+        success: false,
+        error:
+          "Nenhuma imagem para postar no Facebook.",
+      };
+    }
+
+    // ==================================================
+    // VALIDAR O TOKEN COM A META
+    // ==================================================
+    console.log(
+      "Facebook: validando Page Access Token..."
+    );
+
+    const pageIdentity =
+      await graphGet(
+        "me",
+        {
+          fields: "id,name",
+          access_token: token,
+        },
+        30000
+      );
+
+    if (
+      !pageIdentity ||
+      !pageIdentity.id
+    ) {
+      return {
+        success: false,
+        error:
+          "A Meta não retornou a identidade da Página para o FACEBOOK_PAGE_TOKEN. Gere um Page Access Token válido para essa Página.",
+      };
+    }
+
+    console.log(
+      `Facebook: token pertence a "${pageIdentity.name || "Página"}" (${pageIdentity.id})`
+    );
+
+    // ==================================================
+    // CONFIRMAR MESMA PÁGINA
+    // ==================================================
+    if (
+      String(pageIdentity.id) !==
+      String(pageId)
+    ) {
+      return {
+        success: false,
+        error:
+          `O FACEBOOK_PAGE_TOKEN pertence à Página "${pageIdentity.name || "sem nome"}" (ID ${pageIdentity.id}), mas FACEBOOK_PAGE_ID está configurado como ${pageId}. Use o Page Access Token da Página correspondente ao FACEBOOK_PAGE_ID.`,
+      };
+    }
+
+    console.log(
+      `Facebook: Page Access Token confirmado para ${pageIdentity.name || pageId}`
+    );
+
+    console.log(
+      `Facebook: publicando ${imagens.length} imagem(ns)`
+    );
+
+    // ==================================================
+    // UMA IMAGEM
+    // ==================================================
+    if (imagens.length === 1) {
+      return await publicarFotoUnicaFacebook(
+        imagens[0],
+        caption,
         pageId,
         token
       );
-
-    /* UMA IMAGEM */
-    if (images.length === 1) {
-      const data = await graphPost(
-        `${pageId}/photos`,
-        {
-          url: images[0],
-          message: caption,
-          access_token: token
-        }
-      );
-
-      return {
-        success: true,
-        postId:
-          data.post_id ||
-          data.id,
-        pageId: page.id,
-        pageName: page.name
-      };
     }
 
-    /*
-     * VÁRIAS IMAGENS
-     *
-     * As fotos são criadas como não publicadas
-     * e depois anexadas ao post da Página.
-     *
-     * IMPORTANTE:
-     * FACEBOOK_PAGE_TOKEN precisa ser um
-     * Page Access Token da própria Página.
-     */
-    const ids = [];
-
-    for (const url of images) {
-      const photo =
-        await graphPost(
-          `${pageId}/photos`,
-          {
-            url,
-            published: 'false',
-            access_token: token
-          }
-        );
-
-      if (!photo.id) {
-        throw new Error(
-          'A Meta não retornou o ID da foto do Facebook.'
-        );
-      }
-
-      ids.push(photo.id);
-
-      await delay(1000);
-    }
-
-    const params = {
-      message: caption,
-      access_token: token
-    };
-
-    ids.forEach((id, index) => {
-      params[`attached_media[${index}]`] =
-        JSON.stringify({
-          media_fbid: id
-        });
-    });
-
-    const feed =
-      await graphPost(
-        `${pageId}/feed`,
-        params
-      );
-
-    return {
-      success: true,
-      postId: feed.id,
-      pageId: page.id,
-      pageName: page.name,
-      images: ids.length
-    };
+    // ==================================================
+    // VÁRIAS IMAGENS
+    // ==================================================
+    return await publicarMultiplasFotosFacebook(
+      imagens,
+      caption,
+      pageId,
+      token
+    );
 
   } catch (err) {
-    let message = err.message || 'Erro desconhecido';
-
-    /*
-     * Deixa o erro do Meta mais claro para você.
-     */
-    if (
-      message.includes(
-        'Unpublished posts must be posted to a page as the page itself'
-      )
-    ) {
-      message =
-        'O FACEBOOK_PAGE_TOKEN não está sendo reconhecido pela Meta como Page Access Token da própria Página. Gere/coloque o Page Access Token correto dessa Página nas variáveis da Vercel.';
-    }
+    console.error(
+      "Facebook erro:",
+      err.message
+    );
 
     return {
       success: false,
-      error: message
+      error:
+        `Facebook: ${err.message}`,
     };
   }
 }
 
-/* =========================================================
-   TELEGRAM
-========================================================= */
-
-async function publishTelegram(
-  images,
-  caption
+// ======================================================
+// FACEBOOK - FOTO ÚNICA
+// ======================================================
+async function publicarFotoUnicaFacebook(
+  imagemUrl,
+  caption,
+  pageId,
+  token
 ) {
-  const token =
-    process.env.TELEGRAM_BOT_TOKEN;
-
-  const chatId =
-    process.env.TELEGRAM_CHAT_ID;
-
-  if (!token) {
-    return {
-      success: false,
-      skipped: true,
-      error:
-        'TELEGRAM_BOT_TOKEN não configurado'
-    };
-  }
-
-  if (!chatId) {
-    return {
-      success: false,
-      skipped: true,
-      error:
-        'TELEGRAM_CHAT_ID não configurado'
-    };
-  }
-
   try {
-    /* UMA IMAGEM */
-    if (images.length === 1) {
-      if (caption.length <= 1024) {
-        const data =
-          await telegramPost(
-            'sendPhoto',
-            {
-              chat_id: chatId,
-              photo: images[0],
-              caption
-            },
-            token
-          );
-
-        return {
-          success: true,
-          postId:
-            data.result?.message_id
-        };
-      }
-
-      const data =
-        await telegramPost(
-          'sendPhoto',
-          {
-            chat_id: chatId,
-            photo: images[0]
-          },
-          token
-        );
-
-      await telegramPost(
-        'sendMessage',
-        {
-          chat_id: chatId,
-          text: caption
-        },
-        token
-      );
-
-      return {
-        success: true,
-        postId:
-          data.result?.message_id
-      };
-    }
-
-    /* VÁRIAS IMAGENS */
-    const media = images.map(
-      (url, index) => ({
-        type: 'photo',
-        media: url,
-        ...(index === 0 &&
-        caption.length <= 1024
-          ? { caption }
-          : {})
-      })
+    console.log(
+      "Facebook: publicando foto única"
     );
 
     const data =
-      await telegramPost(
-        'sendMediaGroup',
+      await graphPost(
+        `${pageId}/photos`,
         {
-          chat_id: chatId,
-          media
+          url: imagemUrl,
+          message: caption,
+          access_token: token,
         },
-        token
+        45000
       );
 
-    if (caption.length > 1024) {
-      await telegramPost(
-        'sendMessage',
-        {
-          chat_id: chatId,
-          text: caption
-        },
-        token
-      );
-    }
+    console.log(
+      "Facebook: foto publicada:",
+      data.post_id || data.id
+    );
 
     return {
       success: true,
       postId:
-        data.result?.[0]?.message_id
+        data.post_id || data.id,
     };
 
   } catch (err) {
+    console.error(
+      "Facebook foto única erro:",
+      err.message
+    );
+
     return {
       success: false,
-      error: err.message
+      error: err.message,
     };
   }
 }
 
-/* =========================================================
-   RESULTADO
-========================================================= */
+// ======================================================
+// FACEBOOK - MÚLTIPLAS FOTOS
+// ======================================================
+async function publicarMultiplasFotosFacebook(
+  imagens,
+  caption,
+  pageId,
+  token
+) {
+  try {
+    console.log(
+      "Facebook: publicando múltiplas fotos"
+    );
 
-function settled(result) {
-  if (result.status === 'fulfilled') {
-    return result.value;
+    const mediaFbids = [];
+
+    for (
+      let i = 0;
+      i < imagens.length;
+      i++
+    ) {
+      console.log(
+        `Facebook: enviando imagem ${i + 1}`
+      );
+
+      const photo =
+        await graphPost(
+          `${pageId}/photos`,
+          {
+            url: imagens[i],
+            published: "false",
+            access_token: token,
+          },
+          45000
+        );
+
+      mediaFbids.push(
+        photo.id
+      );
+
+      console.log(
+        `Facebook: imagem ${i + 1} enviada:`,
+        photo.id
+      );
+    }
+
+    const params = {
+      message: caption,
+      access_token: token,
+    };
+
+    mediaFbids.forEach(
+      (id, index) => {
+        params[
+          `attached_media[${index}]`
+        ] = JSON.stringify({
+          media_fbid: id,
+        });
+      }
+    );
+
+    const feed =
+   await graphPost(
+        `${pageId}/feed`,
+        params,
+        45000
+      );
+
+    console.log(
+      "Facebook: post publicado:",
+      feed.id
+    );
+
+    return {
+      success: true,
+      postId: feed.id,
+    };
+
+  } catch (err) {
+    console.error(
+      "Facebook múltiplas fotos erro:",
+      err.message
+    );
+
+    return {
+      success: false,
+      error: err.message,
+    };
+  }
+}
+
+// ======================================================
+// PUBLICAR NO TELEGRAM
+// ======================================================
+async function publicarNoTelegram(
+  imagens,
+  caption
+) {
+  try {
+    const token =
+      process.env.TELEGRAM_BOT_TOKEN;
+
+    const chatId =
+      process.env.TELEGRAM_CHAT_ID;
+
+    if (!token) {
+      return {
+        success: false,
+        skipped: true,
+        error:
+          "TELEGRAM_BOT_TOKEN não configurado",
+      };
+    }
+
+    if (!chatId) {
+      return {
+        success: false,
+        skipped: true,
+        error:
+          "TELEGRAM_CHAT_ID não configurado",
+      };
+    }
+
+    if (
+      !imagens ||
+      imagens.length === 0
+    ) {
+      return {
+        success: false,
+        error:
+          "Nenhuma imagem para postar no Telegram",
+      };
+    }
+
+    console.log(
+      `Telegram: publicando ${imagens.length} imagem(ns)`
+    );
+
+    if (imagens.length === 1) {
+      return await publicarFotoUnicaTelegram(
+        imagens[0],
+        caption,
+        token,
+        chatId
+      );
+    }
+
+    return await publicarAlbumTelegram(
+      imagens,
+      caption,
+      token,
+      chatId
+    );
+
+  } catch (err) {
+    console.error(
+      "Telegram erro:",
+      err.message
+    );
+
+    return {
+      success: false,
+      error: err.message,
+    };
+  }
+}
+
+// ======================================================
+// TELEGRAM - FOTO ÚNICA
+// ======================================================
+async function publicarFotoUnicaTelegram(
+  imagemUrl,
+  caption,
+  token,
+  chatId
+) {
+  try {
+    console.log(
+      "Telegram: publicando foto única"
+    );
+
+    const captionCurta =
+      caption.length <= 1024;
+
+    const data =
+      await telegramPost(
+        "sendPhoto",
+        {
+          chat_id: chatId,
+          photo: imagemUrl,
+          caption:
+            captionCurta
+              ? caption
+              : undefined,
+        },
+        token,
+        30000
+      );
+
+    if (!captionCurta) {
+      await enviarMensagemTelegram(
+        caption,
+        token,
+        chatId
+      );
+    }
+
+    console.log(
+      "Telegram: foto publicada:",
+      data.result?.message_id
+    );
+
+    return {
+      success: true,
+      postId:
+        data.result?.message_id,
+    };
+
+  } catch (err) {
+    console.error(
+      "Telegram foto erro:",
+      err.message
+    );
+
+    return {
+      success: false,
+      error: err.message,
+    };
+  }
+}
+
+// ======================================================
+// TELEGRAM - ÁLBUM
+// ======================================================
+async function publicarAlbumTelegram(
+  imagens,
+  caption,
+  token,
+  chatId
+) {
+  try {
+    console.log(
+      "Telegram: publicando álbum"
+    );
+
+    const captionCurta =
+      caption.length <= 1024;
+
+    const media =
+      imagens.map(
+        (imagemUrl, index) => ({
+          type: "photo",
+          media: imagemUrl,
+          caption:
+            index === 0 &&
+            captionCurta
+              ? caption
+              : undefined,
+        })
+      );
+
+    const data =
+      await telegramPost(
+        "sendMediaGroup",
+        {
+          chat_id: chatId,
+          media,
+        },
+        token,
+        45000
+      );
+
+    if (!captionCurta) {
+      await enviarMensagemTelegram(
+        caption,
+        token,
+        chatId
+      );
+    }
+
+    console.log(
+      "Telegram: álbum publicado"
+    );
+
+    return {
+      success: true,
+      postId:
+        data.result?.[0]?.message_id,
+    };
+
+  } catch (err) {
+    console.error(
+      "Telegram álbum erro:",
+      err.message
+    );
+
+    return {
+      success: false,
+      error: err.message,
+    };
+  }
+}
+
+// ======================================================
+// TELEGRAM - MENSAGEM SEPARADA
+// ======================================================
+async function enviarMensagemTelegram(
+  texto,
+  token,
+  chatId
+) {
+  return await telegramPost(
+    "sendMessage",
+    {
+      chat_id: chatId,
+      text: texto,
+    },
+    token,
+    30000
+  );
+}
+
+// ======================================================
+// NORMALIZAR RESULTADO
+// ======================================================
+function normalizarResultado(
+  resultado
+) {
+  if (
+    resultado.status ===
+    "fulfilled"
+  ) {
+    return resultado.value;
   }
 
   return {
     success: false,
     error:
-      result.reason?.message ||
-      'Erro desconhecido'
+      resultado.reason?.message ||
+      "Erro desconhecido",
   };
 }
 
-/* =========================================================
-   HANDLER
-========================================================= */
-
+// ======================================================
+// HANDLER PRINCIPAL
+// ======================================================
 export default async function handler(
   req,
   res
 ) {
-  if (req.method !== 'POST') {
+  if (req.method !== "POST") {
     return res.status(405).json({
       success: false,
-      error: 'Método não permitido'
+      error:
+        "Método não permitido",
     });
   }
 
   try {
-    const body = req.body || {};
+    const body =
+      req.body || {};
 
-    const caption =
-      buildCaption(body);
+    console.log(
+      "Body recebido:",
+      JSON.stringify(body).slice(
+        0,
+        1000
+      )
+    );
 
-    const images =
-      normalizeImages(body);
+    const legendaCompleta =
+      montarLegenda(body);
 
-    const networks =
-      normalizeNetworks(body);
+    const imagensOriginais =
+      normalizarImagens(body);
 
-    if (!caption) {
+    if (
+      !legendaCompleta ||
+      legendaCompleta.trim() === ""
+    ) {
       return res.status(400).json({
         success: false,
         error:
-          'É necessário enviar uma legenda.'
+          "É necessário enviar uma legenda",
       });
     }
 
-    if (!images.length) {
+    if (
+      imagensOriginais.length === 0
+    ) {
       return res.status(400).json({
         success: false,
         error:
-          'É necessário enviar pelo menos uma URL de imagem válida.'
+          "É necessário enviar pelo menos uma imagem válida",
       });
     }
 
-    const tasks = [
-      networks.instagram
-        ? publishInstagram(
-            images,
-            caption
-          )
-        : Promise.resolve({
-            success: false,
-            skipped: true,
-            error: 'Não selecionado'
-          }),
+    console.log(
+      "Legenda:",
+      legendaCompleta.slice(0, 300)
+    );
 
-      networks.facebook
-        ? publishFacebook(
-            images,
-            caption
-          )
-        : Promise.resolve({
-            success: false,
-            skipped: true,
-            error: 'Não selecionado'
-          }),
+    console.log(
+      "Imagens originais:",
+      imagensOriginais
+    );
 
-      networks.telegram
-        ? publishTelegram(
-            images,
-            caption
-          )
-        : Promise.resolve({
-            success: false,
-            skipped: true,
-            error: 'Não selecionado'
-          })
-    ];
+    const imagensMeta =
+      await processarImagensParaMeta(
+        imagensOriginais
+      );
 
-    const raw =
-      await Promise.allSettled(
-        tasks
+    console.log(
+      "Imagens para Meta:",
+      imagensMeta
+    );
+
+    const resultadosRaw =
+      await Promise.allSettled([
+        publicarNoInstagram(
+          imagensMeta,
+          legendaCompleta
+        ),
+
+        publicarNoFacebook(
+          imagensMeta,
+          legendaCompleta
+        ),
+
+        publicarNoTelegram(
+          imagensOriginais,
+          legendaCompleta
+        ),
+      ]);
+
+    const instagram =
+      normalizarResultado(
+        resultadosRaw[0]
+      );
+
+    const facebook =
+      normalizarResultado(
+        resultadosRaw[1]
+      );
+
+    const telegram =
+      normalizarResultado(
+        resultadosRaw[2]
       );
 
     const resultados = {
-      instagram:
-        settled(raw[0]),
-
-      facebook:
-        settled(raw[1]),
-
-      telegram:
-        settled(raw[2])
+      instagram,
+      facebook,
+      telegram,
     };
 
-    const success =
-      resultados.instagram.success ||
-      resultados.facebook.success ||
-      resultados.telegram.success;
+    const sucessoGeral =
+      instagram.success ||
+      facebook.success ||
+      telegram.success;
 
-    return res.status(
-      success ? 200 : 500
-    ).json({
-      success,
+    if (sucessoGeral) {
+      return res.status(200).json({
+        success: true,
+        message:
+          "Postagem processada.",
+        resultados,
+      });
+    }
 
-      message: success
-        ? 'Postagem processada.'
-        : 'Nenhuma rede conseguiu publicar.',
-
-      resultados
-    });
-
-  } catch (err) {
     return res.status(500).json({
       success: false,
       error:
-        err.message ||
-        'Erro interno do servidor.'
+        "Nenhuma rede conseguiu publicar.",
+      resultados,
+    });
+
+  } catch (err) {
+    console.error(
+      "Erro geral:",
+      err.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      error: err.message,
     });
   }
-}
+  }
