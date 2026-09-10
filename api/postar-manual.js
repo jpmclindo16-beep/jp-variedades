@@ -994,7 +994,7 @@ async function publicarMultiplasFotosFacebook(
     );
 
     const feed =
-   await graphPost(
+     await graphPost(
         `${pageId}/feed`,
         params,
         45000
@@ -1276,6 +1276,73 @@ function normalizarResultado(
 }
 
 // ======================================================
+// SALVAR VÍNCULO PRODUTO x POST NO SUPABASE
+// ======================================================
+async function salvarLinkProdutoInstagram(
+  mediaId,
+  linkAfiliado,
+  nomeProduto
+) {
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.log(
+      "SUPABASE_URL/SUPABASE_KEY não configurados, pulando salvamento do link"
+    );
+    return { success: false, skipped: true };
+  }
+
+  if (!mediaId || !linkAfiliado) {
+    console.log(
+      "mediaId ou linkAfiliado ausente, pulando salvamento do link"
+    );
+    return { success: false, skipped: true };
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      `${SUPABASE_URL}/rest/v1/produtos_instagram`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({
+          media_id: String(mediaId),
+          link_afiliado: linkAfiliado,
+          nome_produto: nomeProduto || null,
+        }),
+      },
+      15000
+    );
+
+    if (!response.ok) {
+      const texto = await response.text();
+      console.error(
+        "Supabase: falha ao salvar link do produto:",
+        texto.slice(0, 300)
+      );
+      return { success: false, error: texto };
+    }
+
+    console.log(
+      `Supabase: link salvo para o post ${mediaId}`
+    );
+    return { success: true };
+  } catch (err) {
+    console.error(
+      "Supabase: erro ao salvar link do produto:",
+      err.message
+    );
+    return { success: false, error: err.message };
+  }
+}
+
+// ======================================================
 // HANDLER PRINCIPAL
 // ======================================================
 export default async function handler(
@@ -1372,6 +1439,20 @@ export default async function handler(
         resultadosRaw[0]
       );
 
+    // Salva o vínculo post → link de afiliado no Supabase
+    if (instagram.success && instagram.postId) {
+      const linkAfiliado =
+        body.linkAfiliado || body.link_afiliado || "";
+      const nomeProduto =
+        body.nomeProduto || body.nome_produto || "";
+
+      await salvarLinkProdutoInstagram(
+        instagram.postId,
+        linkAfiliado,
+        nomeProduto
+      );
+    }
+
     const facebook =
       normalizarResultado(
         resultadosRaw[1]
@@ -1420,4 +1501,4 @@ export default async function handler(
       error: err.message,
     });
   }
-  }
+}
