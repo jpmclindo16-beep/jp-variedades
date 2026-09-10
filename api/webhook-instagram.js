@@ -1,8 +1,12 @@
-// api/webhook-instagram.js - VERSÃO COM DELAY ANTI-BLOQUEIO
+// api/webhook-instagram.js - VERSÃO COM LINK POR PRODUTO (via Supabase) + DM PRIVADO
 const VERIFY_TOKEN = process.env.IG_WEBHOOK_VERIFY_TOKEN || "jp_shoppew_2026";
 const IG_TOKEN = process.env.IG_ACCESS_TOKEN;
 const PAGE_TOKEN = process.env.FACEBOOK_PAGE_TOKEN;
 const IG_BUSINESS_ID = "17841467530671368";
+
+// Credenciais do Supabase (adicionar na Vercel: Settings > Environment Variables)
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
 const KEYWORDS = [
   "QUERO",
@@ -25,6 +29,7 @@ const KEYWORDS = [
 ];
 
 const PUBLIC_REPLY_MESSAGE = "Já te chamei no Direct 📩 Segue nosso Instagram pra não perder as próximas promoções! 🔥";
+const FALLBACK_DM_MESSAGE = "Oi! Vi seu comentário 😊 Ainda não configurei o link desse produto específico, mas dá uma olhada no nosso perfil que tem tudo por lá!";
 
 const processedCommentIds = new Map();
 const MAX_CACHE_SIZE = 1000;
@@ -62,7 +67,7 @@ export default async function handler(req, res) {
           }
         }
       }
-      
+
       return res.status(200).send("EVENT_RECEIVED");
     } catch (err) {
       console.error("Erro no processamento:", err);
@@ -92,8 +97,9 @@ async function processComment(comment) {
     const commentId = comment.id;
     const fromId = comment.from?.id?.toString();
     const text = (comment.text || "").toUpperCase().trim();
+    const mediaId = comment.media?.id; // ID do post/reel comentado
 
-    console.log("Comentário recebido:", { commentId, fromId, text });
+    console.log("Comentário recebido:", { commentId, fromId, text, mediaId });
 
     if (!commentId || !fromId) {
       console.log("Comentário sem ID ou autor");
@@ -107,7 +113,7 @@ async function processComment(comment) {
 
     const now = Date.now();
     const lastProcessed = processedCommentIds.get(commentId);
-    
+
     if (lastProcessed && (now - lastProcessed) < CACHE_EXPIRY) {
       console.log(`Comentário processado recentemente, ignorando...`);
       return;
@@ -116,14 +122,12 @@ async function processComment(comment) {
     addToCache(processedCommentIds, commentId, now);
 
     const hasKeyword = KEYWORDS.some(keyword => text.includes(keyword));
-    
+
     if (hasKeyword) {
       console.log(`Palavra-chave detectada, adicionando à fila...`);
-      
-      // Adiciona à fila de processamento
-      processingQueue.push({ commentId, fromId });
-      
-      // Processa a fila
+
+      processingQueue.push({ commentId, fromId, mediaId });
+
       await processQueue();
     }
   } catch (err) {
@@ -143,18 +147,27 @@ async function processQueue() {
   try {
     while (processingQueue.length > 0) {
       const item = processingQueue.shift();
-      
+
       console.log(`Processando comentário ${item.commentId}...`);
-      
-      // Tenta responder ao comentário
+
+      // 1. Busca o link de afiliado do produto vinculado a esse post
+      const link = await getLinkByMediaId(item.mediaId);
+      const dmMessage = link
+        ? `Oi! Aqui está o link do produto 🛍️\n\n${link}`
+        : FALLBACK_DM_MESSAGE;
+
+      // 2. Envia a resposta PÚBLICA no comentário
       const replySent = await sendCommentReply(item.commentId, PUBLIC_REPLY_MESSAGE);
-      
-      if (replySent) {
-        console.log(`✅ Resposta enviada com sucesso!`);
+
+      // 3. Envia o link (ou fallback) no DIRECT (DM privado)
+      const dmSent = await sendPrivateReply(item.commentId, dmMessage);
+
+      if (replySent && dmSent) {
+        console.log(`✅ Resposta e DM enviados com sucesso!`);
       } else {
-        console.error(`❌ Falha ao responder comentário ${item.commentId}`);
+        console.error(`❌ Falha ao enviar resposta/DM para o comentário ${item.commentId}`);
       }
-      
+
       // Delay entre respostas (5 segundos)
       if (processingQueue.length > 0) {
         console.log("Aguardando 5 segundos antes da próxima resposta...");
@@ -166,33 +179,60 @@ async function processQueue() {
   }
 }
 
-// Função para responder comentário
-// CORRIGIDO: agora usa IG_TOKEN (token do Instagram) em vez de PAGE_TOKEN (token do Facebook)
+// Busca o link de afiliado cadastrado para o post (media_id) no Supabase
+async function getLinkByMediaId(mediaId) {
+  if (!mediaId || !SUPABASE_URL || !SUPABASE_KEY) {
+    console.log("mediaId ou credenciais do Supabase ausentes, usando fallback");
+    return null;
+  }
+
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/produtos_instagram?media_id=eq.${mediaId}&select=link_afiliado`;
+
+    const response = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (Array.isArray(data) && data.length > 0) {
+      console.log(`Link encontrado para o post ${mediaId}: ${data[0].link_afiliado}`);
+      return data[0].link_afiliado;
+    }
+
+    console.log(`Nenhum link cadastrado pro post ${mediaId}`);
+    return null;
+  } catch (err) {
+    console.error("Erro ao buscar link no Supabase:", err.message);
+    return null;
+  }
+}
+
+// Responde publicamente o comentário
 async function sendCommentReply(commentId, text) {
   try {
-    console.log(`Respondendo comentário ${commentId}...`);
-    
     const url = `https://graph.facebook.com/v21.0/${commentId}/replies`;
-    
+
     const response = await fetch(url, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json", 
-        "Authorization": `Bearer ${IG_TOKEN}` 
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${IG_TOKEN}`
       },
-      body: JSON.stringify({ 
-        message: text 
-      }),
+      body: JSON.stringify({ message: text }),
     });
 
     const data = await response.json();
     console.log("Resposta comentário:", JSON.stringify(data));
-    
+
     if (!data.error) {
       console.log("✅ Resposta ao comentário enviada");
       return true;
     }
-    
+
     console.error("Erro resposta comentário:", data.error);
     return false;
   } catch (err) {
@@ -201,18 +241,48 @@ async function sendCommentReply(commentId, text) {
   }
 }
 
+// Envia mensagem privada (DM) em resposta ao comentário, com o link do produto
+async function sendPrivateReply(commentId, text) {
+  try {
+    const url = `https://graph.facebook.com/v21.0/${commentId}/private_replies`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${IG_TOKEN}`
+      },
+      body: JSON.stringify({ message: text }),
+    });
+
+    const data = await response.json();
+    console.log("Resposta private reply:", JSON.stringify(data));
+
+    if (!data.error) {
+      console.log("✅ DM enviado com sucesso");
+      return true;
+    }
+
+    console.error("Erro DM:", data.error);
+    return false;
+  } catch (err) {
+    console.error("Exceção DM:", err.message);
+    return false;
+  }
+}
+
 function addToCache(cacheMap, item, timestamp) {
   cacheMap.set(item, timestamp);
-  
+
   if (cacheMap.size > MAX_CACHE_SIZE) {
     const firstKey = cacheMap.keys().next().value;
     cacheMap.delete(firstKey);
   }
 }
 
-export const config = { 
-  api: { 
+export const config = {
+  api: {
     bodyParser: true,
     maxDuration: 60,
-  } 
+  }
 };
