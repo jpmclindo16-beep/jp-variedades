@@ -167,6 +167,7 @@ async function processQueue() {
 }
 
 // Função para responder comentário
+// CORRIGIDO: agora usa IG_TOKEN (token do Instagram) em vez de PAGE_TOKEN (token do Facebook)
 async function sendCommentReply(commentId, text) {
   try {
     console.log(`Respondendo comentário ${commentId}...`);
@@ -177,7 +178,7 @@ async function sendCommentReply(commentId, text) {
       method: "POST",
       headers: { 
         "Content-Type": "application/json", 
-        "Authorization": `Bearer ${PAGE_TOKEN}` 
+        "Authorization": `Bearer ${IG_TOKEN}` 
       },
       body: JSON.stringify({ 
         message: text 
