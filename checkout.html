@@ -108,6 +108,37 @@ input:focus{
   border-color:#00e676;
 }
 
+input:disabled{
+  opacity:.7;
+}
+
+.cep-wrap{
+  position:relative;
+}
+
+.cep-status{
+  font-size:12px;
+  margin-top:5px;
+  color:#999;
+  display:none;
+}
+
+.cep-status.mostrar{
+  display:block;
+}
+
+.cep-status.buscando{
+  color:#ffc107;
+}
+
+.cep-status.ok{
+  color:#00e676;
+}
+
+.cep-status.erro{
+  color:#ff8a8a;
+}
+
 button{
   width:100%;
   border:0;
@@ -203,7 +234,10 @@ button:disabled{
     <input id="telefone" type="tel" placeholder="(00) 00000-0000">
 
     <label>CEP</label>
-    <input id="cep" type="text" inputmode="numeric" placeholder="00000-000">
+    <div class="cep-wrap">
+      <input id="cep" type="text" inputmode="numeric" placeholder="00000-000" maxlength="9">
+      <div id="cepStatus" class="cep-status"></div>
+    </div>
 
     <label>Endereço</label>
     <input id="endereco" type="text" placeholder="Rua, avenida...">
@@ -275,6 +309,99 @@ function preencherSalvos(){
 }
 
 function getCart(){try{return JSON.parse(localStorage.getItem('jp_cart')||'[]')}catch(e){return[]}}
+
+// ======================================================
+// BUSCA AUTOMÁTICA DE ENDEREÇO PELO CEP (API ViaCEP)
+// ======================================================
+function mostrarStatusCep(texto, tipo){
+  const status=document.getElementById('cepStatus');
+  status.textContent=texto;
+  status.className='cep-status mostrar'+(tipo?(' '+tipo):'');
+}
+
+function limparStatusCep(){
+  const status=document.getElementById('cepStatus');
+  status.textContent='';
+  status.className='cep-status';
+}
+
+async function buscarEnderecoPorCep(cepDigitado){
+  const cepLimpo=cepDigitado.replace(/\D/g,'');
+
+  if(cepLimpo.length!==8){
+    return;
+  }
+
+  const camposAuto=['endereco','bairro','cidade','estado'];
+
+  mostrarStatusCep('🔎 Buscando endereço...','buscando');
+  camposAuto.forEach(function(id){
+    document.getElementById(id).disabled=true;
+  });
+
+  try{
+    const resposta=await fetch('https://viacep.com.br/ws/'+cepLimpo+'/json/');
+
+    if(!resposta.ok){
+      throw new Error('Não foi possível consultar o CEP.');
+    }
+
+    const dados=await resposta.json();
+
+    if(dados.erro){
+      mostrarStatusCep('CEP não encontrado. Preencha manualmente.','erro');
+      return;
+    }
+
+    document.getElementById('endereco').value=dados.logradouro||'';
+    document.getElementById('bairro').value=dados.bairro||'';
+    document.getElementById('cidade').value=dados.localidade||'';
+    document.getElementById('estado').value=dados.uf||'';
+
+    mostrarStatusCep('✅ Endereço encontrado','ok');
+
+    // Leva o foco pro número, que o ViaCEP não preenche
+    document.getElementById('numero').focus();
+
+    setTimeout(limparStatusCep, 3000);
+
+  }catch(e){
+    mostrarStatusCep('Não foi possível buscar o CEP. Preencha manualmente.','erro');
+  }finally{
+    camposAuto.forEach(function(id){
+      document.getElementById(id).disabled=false;
+    });
+  }
+}
+
+function formatarCepInput(valor){
+  const digitos=valor.replace(/\D/g,'').slice(0,8);
+  if(digitos.length>5){
+    return digitos.slice(0,5)+'-'+digitos.slice(5);
+  }
+  return digitos;
+}
+
+function configurarCep(){
+  const campoCep=document.getElementById('cep');
+
+  campoCep.addEventListener('input', function(){
+    const posicao=campoCep.selectionStart;
+    const valorFormatado=formatarCepInput(campoCep.value);
+    campoCep.value=valorFormatado;
+
+    const digitos=valorFormatado.replace(/\D/g,'');
+    if(digitos.length===8){
+      buscarEnderecoPorCep(valorFormatado);
+    }else{
+      limparStatusCep();
+    }
+  });
+
+  campoCep.addEventListener('blur', function(){
+    buscarEnderecoPorCep(campoCep.value);
+  });
+}
 
 async function carregarProduto(){
 
@@ -537,6 +664,7 @@ async function comprar(){
 }
 
 preencherSalvos();
+configurarCep();
 carregarProduto();
 
 </script>
