@@ -124,17 +124,17 @@ body.light{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   </div>
 </div>
 
+<div class="banner-section" id="bannerSection" style="display:none">
+  <div class="banner-carousel" id="bannerCarousel"></div>
+  <div class="banner-dots" id="bannerDots"></div>
+</div>
+
 <div class="search">
   <input type="text" id="search" placeholder="Buscar achadinhos..." oninput="renderSuggestions()" onfocus="renderSuggestions()" autocomplete="off">
   <div id="suggestions" class="suggestions"></div>
 </div>
 
 <div id="mainPage">
-  <div class="banner-section" id="bannerSection" style="display:none">
-    <div class="banner-carousel" id="bannerCarousel"></div>
-    <div class="banner-dots" id="bannerDots"></div>
-  </div>
-
   <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;padding:0 16px 12px;font-size:11px;color:var(--muted)">
     <span style="background:var(--card);border:1px solid var(--border);border-radius:50px;padding:6px 12px">✅ Compra Segura</span>
     <span style="background:var(--card);border:1px solid var(--border);border-radius:50px;padding:6px 12px">🚚 Entrega p/ Brasil</span>
@@ -340,11 +340,15 @@ function getSortedList(list) {
   return list;
 }
 
+function normalizeCat(s) {
+  return (s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function render() {
   let list = products;
 
   if (cat === 'fav') list = list.filter(p => favorites.includes(p.id));
-  else if (cat !== 'todos') list = list.filter(p => p.categoria.toLowerCase() === cat.toLowerCase());
+  else if (cat !== 'todos') list = list.filter(p => normalizeCat(p.categoria) === normalizeCat(cat));
 
   const q = document.getElementById('search').value.toLowerCase().trim();
   if (q) list = list.filter(p => p.name.toLowerCase().includes(q));
@@ -487,12 +491,20 @@ function shareSite() {
 
 function renderCats() {
   const box = document.getElementById('cats');
-  const cats = [...new Set(products.map(p => p.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  const seen = new Map(); // chave normalizada -> primeiro texto encontrado (pra exibir)
+  products.forEach(p => {
+    const raw = (p.categoria || '').trim();
+    if (!raw) return;
+    const key = normalizeCat(raw);
+    if (!seen.has(key)) seen.set(key, raw);
+  });
+  const cats = [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
 
   let html = `<button class="${cat === 'todos' ? 'active' : ''}" onclick="setCat('todos',this)">Todos</button>`;
-  cats.forEach(c => {
-    const isActive = cat.toLowerCase() === c.toLowerCase();
-    html += `<button class="${isActive ? 'active' : ''}" onclick="setCat('${c.replace(/'/g, "\\'")}',this)">${escapeHtml(c)}</button>`;
+  cats.forEach(([key, label]) => {
+    const isActive = normalizeCat(cat) === key;
+    html += `<button class="${isActive ? 'active' : ''}" onclick="setCat('${label.replace(/'/g, "\\'")}',this)">${escapeHtml(label)}</button>`;
   });
   html += `<button class="${cat === 'fav' ? 'active' : ''}" onclick="setCat('fav',this)">❤️ Favoritos</button>`;
 
