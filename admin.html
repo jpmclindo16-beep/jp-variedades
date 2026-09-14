@@ -173,7 +173,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
 https://...foto1.webp
 https://...foto2.webp
 https://...foto3.webp"></textarea><small style="color:#999;display:block;margin-top:5px">A primeira URL será a foto principal. Você pode colocar várias fotos, uma URL por linha.</small></div>
-    <div class="form-row"><div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div><div class="form-group"><label>Categoria</label><input type="text" id="pCat" placeholder="Ex: Academia, Eletrônicos, Casa"></div></div>
+    <div class="form-row"><div class="form-group"><label>Loja *</label><select id="pLoja"><option>Mercado Livre</option><option>Shopee</option><option>Shein</option><option>Outro</option></select></div><div class="form-group"><label>Categoria</label><select id="pCat" onchange="document.getElementById('pCatOutro').style.display=this.value==='Outro'?'block':'none'"><option value="">Selecione...</option><option>Masculino</option><option>Feminino</option><option>Eletrônicos</option><option>Casa</option><option>Academia</option><option>Acessórios</option><option>Beleza</option><option>Infantil</option><option>Pet</option><option>Outro</option></select><input type="text" id="pCatOutro" placeholder="Digite a categoria" style="display:none;margin-top:8px"></div></div>
     <div class="form-group"><label>Descrição do produto</label><textarea id="pDescricao" rows="5" placeholder="Descreva o produto, benefícios, características e informações importantes..."></textarea></div>
     <div class="form-group"><label>Opções do produto</label><textarea id="pTamanhos" rows="5" placeholder="Ex. roupa:
 Tamanho: P, M, G, GG
