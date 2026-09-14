@@ -87,6 +87,7 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
   <div class="nav">
     <button class="nav-item active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
     <button class="nav-item" onclick="showPage('produtos',this)">🛍️ Produtos</button>
+    <button class="nav-item" onclick="showPage('anuncios',this)">🖼️ Anúncios</button>
     <button class="nav-item" onclick="showPage('pedidos',this)">📦 Pedidos</button>
     <button class="nav-item" onclick="showPage('fornecedores',this)">🏭 Fornecedores</button>
     <button class="nav-item" onclick="showPage('config',this)">⚙️ Config</button>
@@ -110,6 +111,12 @@ td{padding:12px 8px;border-bottom:1px solid #222;color:#ccc}tr:last-child td{bor
         <div class="stat"><b id="stTotal">0</b><span>Total</span></div><div class="stat"><b id="stAtivo">0</b><span>Ativos</span></div><div class="stat"><b id="stDest">0</b><span>Destaques</span></div><div class="stat"><b id="stClick">0</b><span>Cliques</span></div>
       </div>
       <div id="lista"></div><button class="fab" onclick="openForm()">+</button>
+    </div>
+
+    <div class="page" id="page-anuncios">
+      <div class="page-title">Anúncios (carrossel da home)</div>
+      <div class="import-help" style="margin-bottom:14px">Essas imagens aparecem no carrossel do topo do site, no lugar onde antes ficava a logo. Use imagens 16:9 (ex: 1200x675). O link é opcional — pode levar pra um produto, categoria ou WhatsApp.</div>
+      <div id="listaAnuncios"></div><button class="fab" onclick="openBannerForm()">+</button>
     </div>
 
     <div class="page" id="page-pedidos">
@@ -181,6 +188,17 @@ Comprimento: 1m, 2m"></textarea><small style="color:#999;display:block;margin-to
     <div class="form-check"><input type="checkbox" id="pDest"><label for="pDest">Destacar produto</label></div>
     <div class="form-check"><input type="checkbox" id="pAtivo" checked><label for="pAtivo">Produto ativo</label></div>
     <button class="save-btn" onclick="saveProd()">Salvar Produto</button>
+  </div>
+</div>
+<div class="modal" id="bannerFormModal">
+  <div class="modal-h"><h3 id="bannerFormTitle">Novo Anúncio</h3><button onclick="closeBannerForm()">&times;</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="bid">
+    <div class="form-group"><label>URL da imagem *</label><input type="url" id="bImg" placeholder="https://...imagem.jpg"></div>
+    <div class="form-group"><label>Link ao clicar (opcional)</label><input type="text" id="bLink" placeholder="https://... ou produto.html?id=..."></div>
+    <div class="form-group"><label>Ordem</label><input type="number" id="bOrdem" placeholder="1" step="1" min="0"></div>
+    <div class="form-check"><input type="checkbox" id="bAtivo" checked><label for="bAtivo">Anúncio ativo</label></div>
+    <button class="save-btn" onclick="saveBanner()">Salvar Anúncio</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -300,7 +318,7 @@ function showAdmin(){
   document.getElementById('loginScreen').style.display='none';
   const admin=document.getElementById('adminScreen');
   admin.style.display='block';admin.classList.add('on');
-  loadProds();loadPedidos();renderSuppliers();
+  loadProds();loadPedidos();renderSuppliers();loadBanners();
 }
 
 async function loadPedidos(){
@@ -499,6 +517,88 @@ async function saveProd(){
   }catch(e){toast('Erro ao salvar: '+e.message,false)}
 }
 
+
+/* ANÚNCIOS (carrossel da home) */
+let anuncios=[];
+
+async function loadBanners(){
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/banners?order=ordem.asc',{headers});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    anuncios=await res.json()||[];
+    renderBanners();
+  }catch(e){
+    if(e.message.includes('Sessao')){await logout();return;}
+    document.getElementById('listaAnuncios').innerHTML='<div class="empty">Não foi possível carregar. Confira se a tabela "banners" já existe no Supabase.</div>';
+  }
+}
+
+function renderBanners(){
+  const lista=document.getElementById('listaAnuncios');
+  if(!anuncios.length){lista.innerHTML='<div class="empty">Nenhum anúncio cadastrado ainda.</div>';return}
+  lista.innerHTML=anuncios.map(b=>{
+    const statusTxt=b.ativo!==false?'Ativo':'Inativo';
+    const statusCls=b.ativo!==false?'status-ativo':'status-inativo';
+    return `<div class="item">
+      <img src="${escapeHtml(b.imagem_url)}" onerror="this.src='https://via.placeholder.com/56'">
+      <div class="item-info"><h4>Ordem ${escapeHtml(b.ordem??0)}</h4><div class="loja">${escapeHtml(b.link||'sem link')}</div><span class="status ${statusCls}" style="margin-top:4px">${statusTxt}</span></div>
+      <div class="item-actions"><button onclick="editBanner('${String(b.id).replace(/'/g,"\\'")}')">✏️</button><button onclick="deleteBanner('${String(b.id).replace(/'/g,"\\'")}')">🗑️</button></div>
+    </div>`;
+  }).join('');
+}
+
+function openBannerForm(){
+  document.getElementById('bannerFormTitle').textContent='Novo Anúncio';
+  ['bid','bImg','bLink','bOrdem'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bAtivo').checked=true;
+  document.getElementById('bannerFormModal').classList.add('on');
+}
+function closeBannerForm(){document.getElementById('bannerFormModal').classList.remove('on')}
+
+function editBanner(id){
+  const b=anuncios.find(x=>x.id==id);if(!b)return;
+  document.getElementById('bannerFormTitle').textContent='Editar Anúncio';
+  document.getElementById('bid').value=b.id;
+  document.getElementById('bImg').value=b.imagem_url||'';
+  document.getElementById('bLink').value=b.link||'';
+  document.getElementById('bOrdem').value=b.ordem??'';
+  document.getElementById('bAtivo').checked=b.ativo!==false;
+  document.getElementById('bannerFormModal').classList.add('on');
+}
+
+async function saveBanner(){
+  const imagem_url=document.getElementById('bImg').value.trim();
+  if(!imagem_url){toast('Cole a URL da imagem',false);return}
+  const body={
+    imagem_url,
+    link:document.getElementById('bLink').value.trim(),
+    ordem:document.getElementById('bOrdem').value?parseInt(document.getElementById('bOrdem').value):0,
+    ativo:document.getElementById('bAtivo').checked
+  };
+  try{
+    const headers=await getAuthHeaders();
+    const id=document.getElementById('bid').value;
+    const url=id?SUPABASE_URL+'/rest/v1/banners?id=eq.'+encodeURIComponent(id):SUPABASE_URL+'/rest/v1/banners';
+    const res=await fetch(url,{method:id?'PATCH':'POST',headers,body:JSON.stringify(body)});
+    if(!res.ok){
+      let msg='Erro '+res.status;
+      try{const e=await res.json();if(e.message)msg=e.message;}catch(_){}
+      throw new Error(msg);
+    }
+    toast('Anúncio salvo!',true);closeBannerForm();loadBanners();
+  }catch(e){toast('Erro ao salvar: '+e.message,false)}
+}
+
+async function deleteBanner(id){
+  if(!confirm('Excluir este anúncio?'))return;
+  try{
+    const headers=await getAuthHeaders();
+    const res=await fetch(SUPABASE_URL+'/rest/v1/banners?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers});
+    if(!res.ok)throw new Error('Erro '+res.status);
+    toast('Anúncio excluído!',true);loadBanners();
+  }catch(e){toast('Erro: '+e.message,false)}
+}
 
 let importProdutoSelecionado=null;
 
