@@ -22,7 +22,8 @@
 :root{--bg:#0a0a0a;--card:#1a1a1a;--border:#2a2a2a;--text:#fff;--muted:#a0a0a0;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252}
 body.light{--bg:#f5f5f5;--card:#fff;--border:#ddd;--text:#1a1a1a;--muted:#666;--accent:#00c853;--accent-dark:#009624}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background-color:var(--bg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Ctext x='70' y='78' font-family='Arial, sans-serif' font-weight='800' font-size='28' fill='%23ffffff' fill-opacity='0.045' text-anchor='middle' transform='rotate(-15 70 70)'%3EJP%3C/text%3E%3C/svg%3E");background-repeat:repeat;color:var(--text);min-height:100vh;transition:background-color .3s,color .3s}
+body.light{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Ctext x='70' y='78' font-family='Arial, sans-serif' font-weight='800' font-size='28' fill='%23000000' fill-opacity='0.045' text-anchor='middle' transform='rotate(-15 70 70)'%3EJP%3C/text%3E%3C/svg%3E")}
 
 .banner{background:linear-gradient(90deg,var(--accent-dark),var(--accent));color:#000;text-align:center;padding:10px;font-size:13px;font-weight:700}
 
@@ -43,13 +44,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .suggestion-item img{width:36px;height:36px;border-radius:6px;object-fit:cover}
 .suggestion-item span{font-size:13px;color:var(--text)}
 
-.hero{text-align:center;padding:20px 16px}
-.hero .big-logo{width:80px;height:80px;margin:0 auto 12px;border-radius:50%;background:url('logo%20(2).png') center/cover;cursor:pointer}
-.hero h2{font-size:22px;margin-bottom:6px}
-.hero p{color:var(--muted);font-size:13px;max-width:300px;margin:0 auto 16px}
-.stats{display:flex;justify-content:center;gap:12px}
-.stat{background:var(--card);padding:10px 16px;border-radius:10px;border:1px solid var(--border);text-align:center;min-width:80px}
-.stat b{font-size:16px;color:var(--accent)}.stat span{font-size:10px;color:var(--muted)}
+.banner-section{padding:14px 0 4px}
+.banner-carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 16px;scrollbar-width:none}
+.banner-carousel::-webkit-scrollbar{display:none}
+.banner-slide{flex:0 0 calc(100% - 32px);scroll-snap-align:center;border-radius:14px;overflow:hidden;background:var(--card);border:1px solid var(--border);aspect-ratio:16/9;display:block}
+.banner-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.banner-dots{display:flex;justify-content:center;gap:5px;padding:8px 0 2px}
+.banner-dots .dot{width:5px;height:5px;border-radius:50%;background:var(--border)}
+.banner-dots .dot.active{background:var(--accent)}
 
 .cats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
@@ -128,15 +130,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <div id="mainPage">
-  <div class="hero">
-    <div class="big-logo" id="heroLogo"></div>
-    <h2>JP Shoppew</h2>
-    <p>Os melhores produtos do Brasil com o melhor preço 🇧🇷</p>
-    <div class="stats">
-      <div class="stat"><b>Milhares</b><br><span>Clientes Satisfeitos</span></div>
-      <div class="stat"><b>4.9/5</b><br><span>Avaliação</span></div>
-      <div class="stat"><b>100%</b><br><span>Seguro</span></div>
-    </div>
+  <div class="banner-section" id="bannerSection" style="display:none">
+    <div class="banner-carousel" id="bannerCarousel"></div>
+    <div class="banner-dots" id="bannerDots"></div>
   </div>
 
   <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;padding:0 16px 12px;font-size:11px;color:var(--muted)">
@@ -148,9 +144,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   <div class="cats" id="cats">
     <button class="active" onclick="setCat('todos',this)">Todos</button>
-    <button onclick="setCat('mercado-livre',this)">Mercado Livre</button>
-    <button onclick="setCat('shopee',this)">Shopee</button>
-    <button onclick="setCat('shein',this)">Shein</button>
     <button onclick="setCat('fav',this)">❤️ Favoritos</button>
   </div>
 
@@ -271,13 +264,14 @@ async function loadProducts() {
                   loja.includes('shein') ? 'shein' : 'outro',
         bestseller: p.destaque === true || p.destaque === 'true' || p.destaque === 1,
         link: p.link_afiliado || p.link || '#',
-        categoria: p.categoria || '',
+        categoria: (p.categoria || '').trim(),
         tipo: p.tipo || 'afiliado',
         paymentLink: p.link_pagamento || '',
         tamanhos: p.tamanhos || ''
       };
     });
 
+    renderCats();
     render();
     updateCartBadge();
   } catch (e) {
@@ -349,10 +343,8 @@ function getSortedList(list) {
 function render() {
   let list = products;
 
-  if (cat === 'mercado-livre') list = list.filter(p => p.platform === 'mercado-livre');
-  else if (cat === 'shopee') list = list.filter(p => p.platform === 'shopee');
-  else if (cat === 'shein') list = list.filter(p => p.platform === 'shein');
-  else if (cat === 'fav') list = list.filter(p => favorites.includes(p.id));
+  if (cat === 'fav') list = list.filter(p => favorites.includes(p.id));
+  else if (cat !== 'todos') list = list.filter(p => p.categoria.toLowerCase() === cat.toLowerCase());
 
   const q = document.getElementById('search').value.toLowerCase().trim();
   if (q) list = list.filter(p => p.name.toLowerCase().includes(q));
@@ -493,6 +485,20 @@ function shareSite() {
   toast('Link do site copiado! 📋');
 }
 
+function renderCats() {
+  const box = document.getElementById('cats');
+  const cats = [...new Set(products.map(p => p.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  let html = `<button class="${cat === 'todos' ? 'active' : ''}" onclick="setCat('todos',this)">Todos</button>`;
+  cats.forEach(c => {
+    const isActive = cat.toLowerCase() === c.toLowerCase();
+    html += `<button class="${isActive ? 'active' : ''}" onclick="setCat('${c.replace(/'/g, "\\'")}',this)">${escapeHtml(c)}</button>`;
+  });
+  html += `<button class="${cat === 'fav' ? 'active' : ''}" onclick="setCat('fav',this)">❤️ Favoritos</button>`;
+
+  box.innerHTML = html;
+}
+
 function setCat(c, btn) {
   cat = c;
   document.querySelectorAll('.cats button').forEach(b => b.classList.remove('active'));
@@ -541,7 +547,6 @@ function setupLP(el) {
   el.addEventListener('touchend', end);
 }
 setupLP(document.getElementById('adminTrigger'));
-setupLP(document.getElementById('heroLogo'));
 
 // Tema
 let dark = localStorage.getItem('jp_theme') !== 'light';
@@ -606,8 +611,57 @@ function addToCart(id) {
   toast('Adicionado ao carrinho 🛒');
 }
 
+// Anúncios (carrossel)
+let banners = [];
+
+async function loadBanners() {
+  try {
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Accept': 'application/json'
+    };
+    const res = await fetch(SUPABASE_URL + '/rest/v1/banners?ativo=eq.true&select=*&order=ordem.asc', { method: 'GET', headers });
+    if (!res.ok) return; // tabela ainda não existe ou sem anúncios ativos
+    banners = await res.json();
+    renderBanners();
+  } catch (e) {
+    console.error('Erro ao carregar anúncios:', e);
+  }
+}
+
+function renderBanners() {
+  const section = document.getElementById('bannerSection');
+  const wrap = document.getElementById('bannerCarousel');
+  const dotsWrap = document.getElementById('bannerDots');
+
+  if (!Array.isArray(banners) || !banners.length) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  wrap.innerHTML = banners.map(b => {
+    const link = b.link || '#';
+    const external = /^https?:\/\//i.test(link);
+    return `<a class="banner-slide" href="${escapeHtml(link)}" ${external ? 'target="_blank"' : ''}>
+      <img src="${escapeHtml(b.imagem_url)}" alt="Anúncio" loading="lazy">
+    </a>`;
+  }).join('');
+
+  dotsWrap.innerHTML = banners.length > 1
+    ? banners.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}"></span>`).join('')
+    : '';
+
+  wrap.onscroll = () => {
+    const idx = Math.round(wrap.scrollLeft / wrap.clientWidth);
+    dotsWrap.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  };
+}
+
 // Inicia
 loadProducts();
+loadBanners();
 updateCartBadge();
 </script>
 </body>
