@@ -5,71 +5,747 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0a">
 <title>Pedido - JP Shoppew</title>
+
 <style>
-:root{--bg:#0a0a0a;--card:#141414;--border:#252525;--text:#fff;--muted:#999;--accent:#00e676;--accent-dark:#00c853;--danger:#ff5252;--warning:#ffc107}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-#loadingScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
-#loadingScreen.hide{opacity:0;pointer-events:none}
-.spinner{width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
-.voltar{color:var(--text);text-decoration:none;font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--border)}
-.logo{font-weight:800;font-size:16px}
-.container{max-width:600px;margin:auto;padding:16px 16px 50px}
-.status-box{text-align:center;padding:28px 16px 20px;margin-bottom:16px}
-.status-icon{font-size:56px;margin-bottom:12px}
-.status-title{font-size:22px;font-weight:800;margin-bottom:6px}
-.status-text{font-size:14px;color:var(--muted);line-height:1.5;max-width:340px;margin:0 auto}
-.aprovado .status-icon{color:var(--accent)}
-.aprovado .status-title{color:var(--accent)}
-.pendente .status-icon{color:var(--warning)}
-.pendente .status-title{color:var(--warning)}
-.erro .status-icon{color:var(--danger)}
-.erro .status-title{color:var(--danger)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
-.card h3{font-size:14px;margin-bottom:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.produto{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
-.produto:last-child{border-bottom:none}
-.produto img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:var(--border)}
-.produto .nome{font-size:14px;font-weight:700;line-height:1.35}
-.produto .preco{color:var(--accent);font-size:16px;font-weight:800;margin-top:4px}
-.produto .qty{font-size:12px;color:var(--muted)}
-.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
-.info-row:last-child{border-bottom:none}
-.info-row span:first-child{color:var(--muted)}
-.info-row span:last-child{font-weight:600;max-width:60%;text-align:right}
-.tracking-steps{display:flex;flex-direction:column;gap:0;position:relative;padding-left:28px}
-.tracking-steps::before{content:'';position:absolute;left:10px;top:8px;bottom:8px;width:2px;background:var(--border)}
-.step{position:relative;padding-bottom:20px}
-.step:last-child{padding-bottom:0}
-.step-dot{position:absolute;left:-28px;top:2px;width:20px;height:20px;border-radius:50%;background:var(--border);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px}
-.step.active .step-dot{background:var(--accent);border-color:var(--accent);color:#000}
-.step.done .step-dot{background:var(--accent-dark);border-color:var(--accent-dark);color:#000}
-.step-title{font-size:13px;font-weight:700}
-.step-desc{font-size:12px;color:var(--muted);margin-top:2px}
-.btn{width:100%;border:0;border-radius:12px;padding:15px;background:var(--accent);color:#000;font-size:15px;font-weight:800;cursor:pointer;margin-top:6px;text-align:center;text-decoration:none;display:inline-block}
-.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);margin-top:10px}
-.whats-btn{width:100%;border:0;border-radius:12px;padding:15px;background:#25d366;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.empty-state{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+:root{
+  --bg:#0a0a0a;
+  --card:#141414;
+  --border:#252525;
+  --text:#fff;
+  --muted:#999;
+  --accent:#00e676;
+  --accent-dark:#00c853;
+  --danger:#ff5252;
+  --warning:#ffc107;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* =========================
+   CARREGAMENTO
+========================= */
+
+#loadingScreen{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  transition:opacity .4s;
+}
+
+#loadingScreen.hide{
+  opacity:0;
+  pointer-events:none;
+}
+
+.spinner{
+  width:48px;
+  height:48px;
+  border:4px solid var(--border);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+/* =========================
+   ANIMAÇÃO DO PAGAMENTO
+========================= */
+
+#paymentAnimation{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  background:#0a0a0a;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  overflow:hidden;
+}
+
+#paymentAnimation.show{
+  display:flex;
+}
+
+.payment-stage{
+  width:100%;
+  max-width:380px;
+  text-align:center;
+  position:relative;
+}
+
+/* brilho de fundo */
+
+.payment-glow{
+  position:absolute;
+  width:300px;
+  height:300px;
+  left:50%;
+  top:45%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,230,118,.10);
+  filter:blur(70px);
+  border-radius:50%;
+  animation:glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse{
+  0%,100%{transform:translate(-50%,-50%) scale(.8);opacity:.5}
+  50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
+}
+
+/* recibo */
+
+.receipt{
+  width:235px;
+  min-height:300px;
+  background:#fff;
+  color:#111;
+  margin:0 auto;
+  border-radius:7px;
+  position:relative;
+  padding:24px 20px;
+  box-shadow:
+    0 30px 70px rgba(0,0,0,.55),
+    0 0 40px rgba(0,230,118,.12);
+
+  transform:translateY(120vh) rotate(5deg);
+  opacity:0;
+}
+
+#paymentAnimation.show .receipt{
+  animation:receiptEnter 1.2s cubic-bezier(.16,1,.3,1) forwards;
+}
+
+@keyframes receiptEnter{
+  0%{
+    transform:translateY(120vh) rotate(8deg);
+    opacity:0;
+  }
+
+  65%{
+    transform:translateY(-18px) rotate(-2deg);
+    opacity:1;
+  }
+
+  100%{
+    transform:translateY(0) rotate(0);
+    opacity:1;
+  }
+}
+
+/* serrilhado do recibo */
+
+.receipt:before,
+.receipt:after{
+  content:"";
+  position:absolute;
+  left:0;
+  width:100%;
+  height:8px;
+  background:
+    linear-gradient(
+      135deg,
+      transparent 5px,
+      #fff 0
+    ) 0 0/10px 10px repeat-x;
+}
+
+.receipt:before{
+  top:-7px;
+}
+
+.receipt:after{
+  bottom:-7px;
+  transform:rotate(180deg);
+}
+
+.receipt-logo{
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:-.5px;
+  margin-bottom:20px;
+}
+
+.receipt-line{
+  height:1px;
+  background:#ddd;
+  margin:12px 0;
+}
+
+.receipt-small{
+  font-size:11px;
+  color:#777;
+}
+
+.receipt-total{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:18px;
+  font-size:13px;
+  font-weight:700;
+}
+
+.receipt-price{
+  font-size:19px;
+  font-weight:900;
+}
+
+/* check */
+
+.success-circle{
+  width:76px;
+  height:76px;
+  border-radius:50%;
+  background:#00e676;
+  margin:18px auto 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform:scale(0);
+  box-shadow:0 0 0 0 rgba(0,230,118,.4);
+}
+
+#paymentAnimation.show .success-circle{
+  animation:
+    checkPop .55s .9s cubic-bezier(.175,.885,.32,1.275) forwards,
+    checkGlow 1.8s 1.4s ease-out infinite;
+}
+
+@keyframes checkPop{
+  0%{transform:scale(0)}
+  70%{transform:scale(1.15)}
+  100%{transform:scale(1)}
+}
+
+@keyframes checkGlow{
+  0%{
+    box-shadow:0 0 0 0 rgba(0,230,118,.45);
+  }
+  70%{
+    box-shadow:0 0 0 25px rgba(0,230,118,0);
+  }
+  100%{
+    box-shadow:0 0 0 0 rgba(0,230,118,0);
+  }
+}
+
+.check{
+  width:34px;
+  height:20px;
+  border-left:5px solid #000;
+  border-bottom:5px solid #000;
+  transform:rotate(-45deg) scale(0);
+}
+
+#paymentAnimation.show .check{
+  animation:drawCheck .45s 1.18s ease forwards;
+}
+
+@keyframes drawCheck{
+  from{
+    transform:rotate(-45deg) scale(0);
+  }
+  to{
+    transform:rotate(-45deg) scale(1);
+  }
+}
+
+/* textos */
+
+.payment-title{
+  margin-top:25px;
+  font-size:27px;
+  font-weight:900;
+  opacity:0;
+  transform:translateY(15px);
+}
+
+#paymentAnimation.show .payment-title{
+  animation:textIn .6s 1.35s ease forwards;
+}
+
+.payment-subtitle{
+  color:#999;
+  font-size:14px;
+  margin-top:7px;
+  line-height:1.5;
+  opacity:0;
+  transform:translateY(15px);
+}
+
+#paymentAnimation.show .payment-subtitle{
+  animation:textIn .6s 1.5s ease forwards;
+}
+
+@keyframes textIn{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* partículas */
+
+.particle{
+  position:absolute;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--accent);
+  opacity:0;
+}
+
+#paymentAnimation.show .particle{
+  animation:particleFly 1.4s ease-out forwards;
+}
+
+.p1{left:15%;top:45%;animation-delay:1.1s!important}
+.p2{left:25%;top:30%;animation-delay:1.2s!important}
+.p3{left:75%;top:30%;animation-delay:1.25s!important}
+.p4{left:85%;top:48%;animation-delay:1.15s!important}
+.p5{left:35%;top:70%;animation-delay:1.3s!important}
+.p6{left:65%;top:70%;animation-delay:1.22s!important}
+
+@keyframes particleFly{
+  0%{
+    opacity:0;
+    transform:translate(0,0) scale(.2);
+  }
+  30%{
+    opacity:1;
+  }
+  100%{
+    opacity:0;
+    transform:translate(
+      calc((var(--x, 0) * 1px)),
+      calc((var(--y, 0) * 1px))
+    ) scale(1);
+  }
+}
+
+/* =========================
+   SITE
+========================= */
+
+.header{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.voltar{
+  color:var(--text);
+  text-decoration:none;
+  font-size:22px;
+  width:36px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:var(--border);
+}
+
+.logo{
+  font-weight:800;
+  font-size:16px;
+}
+
+.container{
+  max-width:600px;
+  margin:auto;
+  padding:16px 16px 50px;
+}
+
+.status-box{
+  text-align:center;
+  padding:28px 16px 20px;
+  margin-bottom:16px;
+}
+
+.status-icon{
+  font-size:56px;
+  margin-bottom:12px;
+}
+
+.status-title{
+  font-size:22px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+.status-text{
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.5;
+  max-width:340px;
+  margin:0 auto;
+}
+
+.aprovado .status-icon{
+  color:var(--accent);
+}
+
+.aprovado .status-title{
+  color:var(--accent);
+}
+
+.pendente .status-icon{
+  color:var(--warning);
+}
+
+.pendente .status-title{
+  color:var(--warning);
+}
+
+.erro .status-icon{
+  color:var(--danger);
+}
+
+.erro .status-title{
+  color:var(--danger);
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:14px;
+}
+
+.card h3{
+  font-size:14px;
+  margin-bottom:12px;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.produto{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.produto:last-child{
+  border-bottom:none;
+}
+
+.produto img{
+  width:64px;
+  height:64px;
+  border-radius:10px;
+  object-fit:cover;
+  background:var(--border);
+}
+
+.produto .nome{
+  font-size:14px;
+  font-weight:700;
+  line-height:1.35;
+}
+
+.produto .preco{
+  color:var(--accent);
+  font-size:16px;
+  font-weight:800;
+  margin-top:4px;
+}
+
+.produto .qty{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.info-row{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+
+.info-row:last-child{
+  border-bottom:none;
+}
+
+.info-row span:first-child{
+  color:var(--muted);
+}
+
+.info-row span:last-child{
+  font-weight:600;
+  max-width:60%;
+  text-align:right;
+}
+
+.tracking-steps{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  position:relative;
+  padding-left:28px;
+}
+
+.tracking-steps::before{
+  content:'';
+  position:absolute;
+  left:10px;
+  top:8px;
+  bottom:8px;
+  width:2px;
+  background:var(--border);
+}
+
+.step{
+  position:relative;
+  padding-bottom:20px;
+}
+
+.step:last-child{
+  padding-bottom:0;
+}
+
+.step-dot{
+  position:absolute;
+  left:-28px;
+  top:2px;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:var(--border);
+  border:2px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+}
+
+.step.active .step-dot{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#000;
+}
+
+.step.done .step-dot{
+  background:var(--accent-dark);
+  border-color:var(--accent-dark);
+  color:#000;
+}
+
+.step-title{
+  font-size:13px;
+  font-weight:700;
+}
+
+.step-desc{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+.btn{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:15px;
+  background:var(--accent);
+  color:#000;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  margin-top:6px;
+  text-align:center;
+  text-decoration:none;
+  display:inline-block;
+}
+
+.btn-outline{
+  background:transparent;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  margin-top:10px;
+}
+
+.whats-btn{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:15px;
+  background:#25d366;
+  color:#fff;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  margin-top:10px;
+  text-align:center;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.empty-state{
+  text-align:center;
+  padding:40px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* botão depois da animação */
+
+#continuarBtn{
+  margin-top:20px;
+  opacity:0;
+  transform:translateY(15px);
+  pointer-events:none;
+}
+
+#continuarBtn.show{
+  animation:textIn .6s ease forwards;
+  pointer-events:auto;
+}
 </style>
 </head>
+
 <body>
+
+<!-- =========================
+     ANIMAÇÃO
+========================= -->
+
+<div id="paymentAnimation">
+
+  <div class="payment-glow"></div>
+
+  <div class="payment-stage">
+
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+    <div class="particle p4"></div>
+    <div class="particle p5"></div>
+    <div class="particle p6"></div>
+
+    <div class="receipt">
+
+      <div class="receipt-logo">
+        JP Shoppew ✓
+      </div>
+
+      <div class="receipt-small">
+        COMPROVANTE DE PAGAMENTO
+      </div>
+
+      <div class="receipt-line"></div>
+
+      <div class="receipt-small">
+        PAGAMENTO
+      </div>
+
+      <div style="font-size:13px;font-weight:700;margin-top:5px;">
+        Mercado Pago
+      </div>
+
+      <div class="success-circle">
+        <div class="check"></div>
+      </div>
+
+      <div style="font-size:11px;color:#777;">
+        PAGAMENTO APROVADO
+      </div>
+
+      <div class="receipt-line"></div>
+
+      <div class="receipt-total">
+        <span>STATUS</span>
+        <span style="color:#00a844;">APROVADO</span>
+      </div>
+
+      <div class="receipt-total">
+        <span>TOTAL</span>
+        <span class="receipt-price" id="animationTotal">
+          R$ 0,00
+        </span>
+      </div>
+
+    </div>
+
+    <div class="payment-title">
+      Pagamento aprovado! 🎉
+    </div>
+
+    <div class="payment-subtitle">
+      Seu pedido foi confirmado.<br>
+      Estamos preparando tudo para você.
+    </div>
+
+    <a href="#pedido" id="continuarBtn" class="btn">
+      Ver meu pedido
+    </a>
+
+  </div>
+</div>
+
+<!-- =========================
+     LOADING
+========================= -->
 
 <div id="loadingScreen">
   <div class="spinner"></div>
-  <div style="color:var(--muted);font-size:14px">Carregando pedido...</div>
+  <div style="color:var(--muted);font-size:14px">
+    Carregando pedido...
+  </div>
 </div>
+
+<!-- =========================
+     HEADER
+========================= -->
 
 <div class="header">
   <a href="meus-pedidos.html" class="voltar">←</a>
   <div class="logo">JP Shoppew ✓</div>
 </div>
 
-<div class="container">
+<div class="container" id="pedido">
 
   <div id="statusBox" class="status-box">
-    <div class="empty-state">Carregando pedido...</div>
+    <div class="empty-state">
+      Carregando pedido...
+    </div>
   </div>
 
   <div id="conteudoPedido" style="display:none">
@@ -94,151 +770,513 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div id="pagamentoInfo"></div>
     </div>
 
-    <a href="meus-pedidos.html" class="btn">📦 Ver todos os meus pedidos</a>
-    <a href="index.html" class="btn btn-outline">🏠 Voltar à loja</a>
-    <a href="https://chat.whatsapp.com/HecxNkSIR464oTBVHkMIVf?s=cl&p=a&ilr=0" target="_blank" class="whats-btn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    <a href="meus-pedidos.html" class="btn">
+      📦 Ver todos os meus pedidos
+    </a>
+
+    <a href="index.html" class="btn btn-outline">
+      🏠 Voltar à loja
+    </a>
+
+    <a href="https://chat.whatsapp.com/HecxNkSIR464oTBVHkMIVf?s=cl&p=a&ilr=0"
+       target="_blank"
+       class="whats-btn">
+
+      <svg width="20"
+           height="20"
+           viewBox="0 0 24 24"
+           fill="currentColor">
+
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371.074-.57.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+
+      </svg>
+
       Falar no grupo do WhatsApp
     </a>
-  </div>
 
+  </div>
 </div>
 
 <script>
-const SUPABASE_URL='https://ocheynyjboagfybazcsi.supabase.co';
-const SUPABASE_KEY='sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
 
-function getParam(n){return new URLSearchParams(location.search).get(n)}
-function fmt(p){return'R$ '+Number(p).toFixed(2).replace('.',',')}
+const SUPABASE_URL =
+'https://ocheynyjboagfybazcsi.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_kL_nA7Fv-uHbC5mx8Hqm6A_XluBgT29';
+
+
+/* =========================
+   FUNÇÕES
+========================= */
+
+function getParam(n){
+  return new URLSearchParams(location.search).get(n);
+}
+
+function fmt(p){
+  return 'R$ ' +
+    Number(p || 0)
+      .toFixed(2)
+      .replace('.',',');
+}
+
+
+/* =========================
+   STATUS
+========================= */
 
 function showStatus(tipo,titulo,texto){
-  const box=document.getElementById('statusBox');
-  box.className='status-box '+tipo;
+
+  const box =
+    document.getElementById('statusBox');
+
+  box.className =
+    'status-box ' + tipo;
+
   let icone='';
-  if(tipo==='aprovado') icone='✅';
-  else if(tipo==='pendente') icone='⏳';
-  else if(tipo==='erro') icone='❌';
-  else if(tipo==='enviado') icone='🚚';
-  else if(tipo==='entregue') icone='🎉';
-  else icone='📋';
-  box.innerHTML=`<div class="status-icon">${icone}</div><div class="status-title">${titulo}</div><div class="status-text">${texto}</div>`;
+
+  if(tipo==='aprovado')
+    icone='✅';
+
+  else if(tipo==='pendente')
+    icone='⏳';
+
+  else if(tipo==='erro')
+    icone='❌';
+
+  else if(tipo==='enviado')
+    icone='🚚';
+
+  else if(tipo==='entregue')
+    icone='🎉';
+
+  else
+    icone='📋';
+
+  box.innerHTML =
+  `
+    <div class="status-icon">${icone}</div>
+
+    <div class="status-title">
+      ${titulo}
+    </div>
+
+    <div class="status-text">
+      ${texto}
+    </div>
+  `;
 }
+
+
+/* =========================
+   ANIMAÇÃO
+========================= */
+
+function iniciarAnimacaoPagamento(valor){
+
+  const animation =
+    document.getElementById('paymentAnimation');
+
+  const total =
+    document.getElementById('animationTotal');
+
+  total.textContent =
+    fmt(valor);
+
+  animation.classList.add('show');
+
+  /*
+    Depois da animação,
+    libera o botão para visualizar
+    o pedido.
+  */
+
+  setTimeout(function(){
+
+    document
+      .getElementById('continuarBtn')
+      .classList.add('show');
+
+  },2300);
+
+  /*
+    A animação fica alguns segundos
+    e depois fecha automaticamente.
+  */
+
+  setTimeout(function(){
+
+    fecharAnimacao();
+
+  },5200);
+}
+
+
+function fecharAnimacao(){
+
+  const animation =
+    document.getElementById('paymentAnimation');
+
+  animation.style.opacity='0';
+
+  animation.style.transition=
+    'opacity .5s ease';
+
+  setTimeout(function(){
+
+    animation.style.display='none';
+
+  },500);
+
+}
+
+
+/* =========================
+   RASTREAMENTO
+========================= */
 
 function renderTracking(statusPedido,codigoRastreio){
-  const steps=[
-    {key:'pago',title:'Pagamento confirmado',desc:'Seu pagamento foi aprovado.'},
-    {key:'preparando',title:'Pedido em preparação',desc:'Estamos separando seus produtos.'},
-    {key:'enviado',title:'Pedido enviado',desc:'Seu pedido saiu para entrega.'},
-    {key:'entregue',title:'Entregue',desc:'Pedido entregue com sucesso!'}
-  ];
-  const statusMap={aguardando_pagamento:-1,pago:0,preparando:1,enviado:2,entregue:3,cancelado:-1,reembolsado:-1};
-  const idx=statusMap[statusPedido]!==undefined?statusMap[statusPedido]:-1;
 
-  let html='<div class="tracking-steps">';
-  steps.forEach((s,i)=>{
-    let cls='';
-    if(i<idx) cls='done';
-    else if(i===idx) cls='active';
-    let check=i<idx?'✓':(i===idx?'●':'');
-    let extra='';
-    if(s.key==='enviado' && codigoRastreio){
-      extra=`<div style="margin-top:6px;color:var(--accent);font-size:12px;font-weight:700">📮 Código: ${codigoRastreio}</div>`;
+  const steps=[
+
+    {
+      key:'pago',
+      title:'Pagamento confirmado',
+      desc:'Seu pagamento foi aprovado.'
+    },
+
+    {
+      key:'preparando',
+      title:'Pedido em preparação',
+      desc:'Estamos separando seus produtos.'
+    },
+
+    {
+      key:'enviado',
+      title:'Pedido enviado',
+      desc:'Seu pedido saiu para entrega.'
+    },
+
+    {
+      key:'entregue',
+      title:'Entregue',
+      desc:'Pedido entregue com sucesso!'
     }
-    html+=`<div class="step ${cls}"><div class="step-dot">${check}</div><div class="step-title">${s.title}</div><div class="step-desc">${s.desc}</div>${extra}</div>`;
+
+  ];
+
+  const statusMap={
+    aguardando_pagamento:-1,
+    pago:0,
+    preparando:1,
+    enviado:2,
+    entregue:3,
+    cancelado:-1,
+    reembolsado:-1
+  };
+
+  const idx =
+    statusMap[statusPedido] !== undefined
+      ? statusMap[statusPedido]
+      : -1;
+
+  let html =
+    '<div class="tracking-steps">';
+
+  steps.forEach(function(s,i){
+
+    let cls='';
+
+    if(i<idx)
+      cls='done';
+
+    else if(i===idx)
+      cls='active';
+
+    let check =
+      i<idx
+        ? '✓'
+        : (i===idx ? '●' : '');
+
+    let extra='';
+
+    if(
+      s.key==='enviado' &&
+      codigoRastreio
+    ){
+
+      extra =
+      `
+      <div style="
+        margin-top:6px;
+        color:var(--accent);
+        font-size:12px;
+        font-weight:700
+      ">
+        📮 Código: ${codigoRastreio}
+      </div>
+      `;
+    }
+
+    html +=
+    `
+      <div class="step ${cls}">
+
+        <div class="step-dot">
+          ${check}
+        </div>
+
+        <div class="step-title">
+          ${s.title}
+        </div>
+
+        <div class="step-desc">
+          ${s.desc}
+        </div>
+
+        ${extra}
+
+      </div>
+    `;
+
   });
-  html+='</div>';
-  document.getElementById('trackingInfo').innerHTML=html;
+
+  html +=
+    '</div>';
+
+  document
+    .getElementById('trackingInfo')
+    .innerHTML=html;
 }
 
+
+/* =========================
+   CARREGAR PEDIDO
+========================= */
+
 async function carregarPedido(){
-  const status=getParam('status')||getParam('collection_status')||'';
-  const extRef=getParam('external_reference')||'';
-  const paymentId=getParam('payment_id')||getParam('collection_id')||'';
+
+  const status =
+    getParam('status') ||
+    getParam('collection_status') ||
+    '';
+
+  const extRef =
+    getParam('external_reference') || '';
+
+  const paymentId =
+    getParam('payment_id') ||
+    getParam('collection_id') ||
+    '';
 
   let itensPedido=[];
+
   try{
-    let url=SUPABASE_URL+'/rest/v1/pedidos?referencia=eq.'+encodeURIComponent(extRef)+'&order=id.asc';
-    let res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-    let dados=await res.json();
-    if(dados && dados.length){itensPedido=dados;}
-    else if(paymentId){
-      url=SUPABASE_URL+'/rest/v1/pedidos?mercado_pago_id=eq.'+encodeURIComponent(paymentId)+'&order=id.asc';
-      res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-      dados=await res.json();
-      if(dados && dados.length) itensPedido=dados;
+
+    /*
+      Primeiro tenta pela referência
+      enviada pelo Mercado Pago.
+    */
+
+    if(extRef){
+
+      let url =
+        SUPABASE_URL +
+        '/rest/v1/pedidos?referencia=eq.' +
+        encodeURIComponent(extRef) +
+        '&order=id.asc';
+
+      let res =
+        await fetch(url,{
+          headers:{
+            'apikey':SUPABASE_KEY,
+            'Authorization':
+              'Bearer '+SUPABASE_KEY
+          }
+        });
+
+      let dados =
+        await res.json();
+
+      if(
+        Array.isArray(dados) &&
+        dados.length
+      ){
+
+        itensPedido=dados;
+
+      }
+
     }
+
+    /*
+      Caso não encontre pela referência,
+      tenta pelo ID do Mercado Pago.
+    */
+
+    if(
+      !itensPedido.length &&
+      paymentId
+    ){
+
+      const url =
+        SUPABASE_URL +
+        '/rest/v1/pedidos?mercado_pago_id=eq.' +
+        encodeURIComponent(paymentId) +
+        '&order=id.asc';
+
+      const res =
+        await fetch(url,{
+          headers:{
+            'apikey':SUPABASE_KEY,
+            'Authorization':
+              'Bearer '+SUPABASE_KEY
+          }
+        });
+
+      const dados =
+        await res.json();
+
+      if(
+        Array.isArray(dados) &&
+        dados.length
+      ){
+
+        itensPedido=dados;
+
+      }
+    }
+
+  }catch(e){
+
+    console.error(
+      'Erro ao carregar pedido:',
+      e
+    );
+
+  }
+
+
+  const pedido =
+    itensPedido.length
+      ? itensPedido[0]
+      : null;
+
+
+  const valorTotal =
+    itensPedido.reduce(
+      function(a,i){
+       if(dados && dados.length) itensPedido=dados;
   }catch(e){}
 
   const pedido=itensPedido.length?itensPedido[0]:null;
-  const valorTotal=itensPedido.reduce(function(a,i){return a+Number(i.valor||0)},0);
+  const valorTotal=itensPedido.reduce(function(a,i){
+    return a+Number(i.valor||0);
+  },0);
 
   let st=status;
+
   if(pedido && pedido.status_pedido){
-    const map={pago:'approved',aguardando_pagamento:'pending',em_analise:'pending',enviado:'enviado',entregue:'entregue',cancelado:'failure',reembolsado:'failure'};
+    const map={
+      pago:'approved',
+      aguardando_pagamento:'pending',
+      em_analise:'pending',
+      enviado:'enviado',
+      entregue:'entregue',
+      cancelado:'failure',
+      reembolsado:'failure'
+    };
+
     st=map[pedido.status_pedido]||'other';
   }
 
   if(st==='approved'||st==='sucesso'||st==='pago'){
-    showStatus('aprovado','Pagamento aprovado!','Seu pedido foi confirmado e está sendo preparado para envio. Você receberá atualizações por e-mail e pode acompanhar aqui.');
-  }else if(st==='pending'||st==='in_process'||st==='aguardando_pagamento'){
-    showStatus('pendente','Aguardando pagamento','Seu pedido foi reservado. Assim que o pagamento for confirmado, preparamos o envio. O Pix pode levar alguns minutos.');
-  }else if(st==='failure'||st==='rejected'||st==='cancelado'){
-    showStatus('erro','Pagamento não aprovado','Não se preocupe! Você pode tentar novamente ou escolher outra forma de pagamento.');
+    showStatus(
+      'aprovado',
+      'Pagamento aprovado!',
+      'Seu pedido foi confirmado e está sendo preparado para envio.'
+    );
+
+    if(pedido && pedido.status_pedido==='pago'){
+      setTimeout(function(){
+        iniciarAnimacaoPagamento(valorTotal);
+      },500);
+    }
+
+  }else if(st==='pending'||st==='pendente'){
+    showStatus(
+      'pendente',
+      'Aguardando pagamento',
+      'Seu pagamento ainda está sendo processado.'
+    );
+
+  }else if(st==='failure'||st==='erro'){
+    showStatus(
+      'erro',
+      'Pagamento não aprovado',
+      'O pagamento não foi confirmado. Tente novamente.'
+    );
+
   }else if(st==='enviado'){
-    showStatus('enviado','Pedido enviado!','Seu pedido já saiu para entrega. Use o código de rastreamento abaixo para acompanhar.');
+    showStatus(
+      'enviado',
+      'Pedido enviado! 🚚',
+      'Seu pedido já foi enviado e está a caminho.'
+    );
+
   }else if(st==='entregue'){
-    showStatus('entregue','Pedido entregue!','Obrigado por comprar na JP Shoppew. Esperamos que goste!');
+    showStatus(
+      'entregue',
+      'Pedido entregue! 🎉',
+      'Seu pedido foi entregue.'
+    );
+
   }else{
-    showStatus('','Obrigado pela compra!','Seu pedido foi registrado. Em breve você receberá atualizações sobre o status.');
+    showStatus(
+      'outro',
+      'Pedido recebido',
+      'Estamos verificando as informações do seu pedido.'
+    );
   }
 
-  document.getElementById('conteudoPedido').style.display='block';
-
-  const prodContainer=document.getElementById('produtosList');
-  if(itensPedido.length){
-    prodContainer.innerHTML=itensPedido.map(function(it){
-      return `<div class="produto"><img src="https://via.placeholder.com/64" onerror="this.src='https://via.placeholder.com/64'"><div><div class="nome">${it.produto_nome||'Produto'}${it.tamanho?(' — '+it.tamanho):''}</div><div class="preco">${fmt(Number(it.valor||0))} <span class="qty">x ${it.quantidade||1}</span></div></div></div>`;
-    }).join('');
-  }else{
-    prodContainer.innerHTML='<div style="color:var(--muted);font-size:13px">Detalhes do produto não disponíveis.</div>';
-  }
-
-  const endContainer=document.getElementById('enderecoInfo');
   if(pedido){
-    const end=[pedido.cliente_endereco,pedido.cliente_numero,pedido.cliente_complemento].filter(Boolean).join(', ');
-    const cid=[pedido.cliente_cidade,pedido.cliente_estado].filter(Boolean).join(' / ');
-    endContainer.innerHTML=`
-      <div class="info-row"><span>Nome</span><span>${pedido.cliente_nome||'-'}</span></div>
-      <div class="info-row"><span>Telefone</span><span>${pedido.cliente_telefone||'-'}</span></div>
-      <div class="info-row"><span>Endereço</span><span>${end||'-'}</span></div>
-      <div class="info-row"><span>Bairro</span><span>${pedido.cliente_bairro||'-'}</span></div>
-      <div class="info-row"><span>Cidade/UF</span><span>${cid||'-'}</span></div>
-      <div class="info-row"><span>CEP</span><span>${pedido.cliente_cep||'-'}</span></div>
-    `;
-  }else{
-    endContainer.innerHTML='<div style="color:var(--muted);font-size:13px">Endereço não disponível.</div>';
+    document.getElementById('produtoNome').textContent =
+      pedido.produto_nome || pedido.nome || 'Produto';
+
+    document.getElementById('produtoPreco').textContent =
+      fmt(pedido.valor || 0);
+
+    if(pedido.imagem_url){
+      document.getElementById('produtoImagem').src =
+        pedido.imagem_url;
+    }
+
+    if(pedido.endereco){
+      document.getElementById('endereco').textContent =
+        pedido.endereco;
+    }
+
+    if(pedido.rastreamento){
+      document.getElementById('rastreamento').textContent =
+        pedido.rastreamento;
+    }
+
+    if(pedido.metodo_pagamento){
+      document.getElementById('pagamento').textContent =
+        pedido.metodo_pagamento;
+    }
+
+    document.getElementById('totalPedido').textContent =
+      fmt(valorTotal);
   }
 
-  const statusPedido=pedido?pedido.status_pedido:'aguardando_pagamento';
-  const codigoRastreio=pedido?pedido.codigo_rastreio:'';
-  renderTracking(statusPedido,codigoRastreio);
-
-  const pagContainer=document.getElementById('pagamentoInfo');
-  const statusColor=st==='approved'||st==='pago'||st==='enviado'||st==='entregue'?'var(--accent)':(st==='pending'?'var(--warning)':'var(--danger)');
-  const statusLabel=st==='approved'||st==='pago'?'Pago ✅':(st==='pending'?'Aguardando ⏳':(st==='enviado'?'Enviado 🚚':(st==='entregue'?'Entregue 🎉':'Processando')));
-  pagContainer.innerHTML=`
-    <div class="info-row"><span>Forma de pagamento</span><span>Pix / Mercado Pago</span></div>
-    <div class="info-row"><span>ID do pagamento</span><span style="font-size:11px">${paymentId||pedido?.mercado_pago_id||'---'}</span></div>
-    <div class="info-row"><span>Código do pedido</span><span style="font-size:11px">${extRef||pedido?.referencia||'---'}</span></div>
-    <div class="info-row"><span>Total</span><span>${fmt(valorTotal)}</span></div>
-    <div class="info-row"><span>Data</span><span>${new Date().toLocaleDateString('pt-BR')}</span></div>
-    <div class="info-row"><span>Status</span><span style="color:${statusColor}">${statusLabel}</span></div>
-  `;
-
-  document.getElementById('loadingScreen').classList.add('hide');
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('conteudo').style.display='block';
 }
 
 carregarPedido();
 </script>
+
 </body>
 </html>
