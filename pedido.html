@@ -1164,16 +1164,12 @@ async function carregarPedido(){
       : null;
 
 
-  const valorTotal =
+    const valorTotal =
     itensPedido.reduce(
       function(a,i){
-       if(dados && dados.length) itensPedido=dados;
-  }catch(e){}
-
-  const pedido=itensPedido.length?itensPedido[0]:null;
-  const valorTotal=itensPedido.reduce(function(a,i){
-    return a+Number(i.valor||0);
-  },0);
+        return a + Number(i.valor || 0);
+      },0
+    );
 
   let st=status;
 
@@ -1192,6 +1188,7 @@ async function carregarPedido(){
   }
 
   if(st==='approved'||st==='sucesso'||st==='pago'){
+
     showStatus(
       'aprovado',
       'Pagamento aprovado!',
@@ -1205,6 +1202,7 @@ async function carregarPedido(){
     }
 
   }else if(st==='pending'||st==='pendente'){
+
     showStatus(
       'pendente',
       'Aguardando pagamento',
@@ -1212,6 +1210,7 @@ async function carregarPedido(){
     );
 
   }else if(st==='failure'||st==='erro'){
+
     showStatus(
       'erro',
       'Pagamento não aprovado',
@@ -1219,6 +1218,7 @@ async function carregarPedido(){
     );
 
   }else if(st==='enviado'){
+
     showStatus(
       'enviado',
       'Pedido enviado! 🚚',
@@ -1226,6 +1226,7 @@ async function carregarPedido(){
     );
 
   }else if(st==='entregue'){
+
     showStatus(
       'entregue',
       'Pedido entregue! 🎉',
@@ -1233,50 +1234,250 @@ async function carregarPedido(){
     );
 
   }else{
+
     showStatus(
-      'outro',
+      '',
       'Pedido recebido',
       'Estamos verificando as informações do seu pedido.'
     );
   }
 
-  if(pedido){
-    document.getElementById('produtoNome').textContent =
-      pedido.produto_nome || pedido.nome || 'Produto';
 
-    document.getElementById('produtoPreco').textContent =
-      fmt(pedido.valor || 0);
+  /* =========================
+     PRODUTOS
+  ========================= */
 
-    if(pedido.imagem_url){
-      document.getElementById('produtoImagem').src =
-        pedido.imagem_url;
-    }
+  const prodContainer =
+    document.getElementById('produtosList');
 
-    if(pedido.endereco){
-      document.getElementById('endereco').textContent =
-        pedido.endereco;
-    }
+  if(itensPedido.length){
 
-    if(pedido.rastreamento){
-      document.getElementById('rastreamento').textContent =
-        pedido.rastreamento;
-    }
+    prodContainer.innerHTML =
+      itensPedido.map(function(it){
 
-    if(pedido.metodo_pagamento){
-      document.getElementById('pagamento').textContent =
-        pedido.metodo_pagamento;
-    }
+        const imagem =
+          it.imagem_url ||
+          it.produto_imagem ||
+          'https://via.placeholder.com/64';
 
-    document.getElementById('totalPedido').textContent =
-      fmt(valorTotal);
+        return `
+          <div class="produto">
+
+            <img
+              src="${imagem}"
+              onerror="this.src='https://via.placeholder.com/64'"
+            >
+
+            <div>
+
+              <div class="nome">
+                ${it.produto_nome || 'Produto'}
+                ${it.tamanho ? ' — ' + it.tamanho : ''}
+              </div>
+
+              <div class="preco">
+                ${fmt(Number(it.valor || 0))}
+                <span class="qty">
+                  x ${it.quantidade || 1}
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join('');
+
+  }else{
+
+    prodContainer.innerHTML =
+      '<div style="color:var(--muted);font-size:13px">Detalhes do produto não disponíveis.</div>';
+
   }
 
-  document.getElementById('loadingScreen').style.display='none';
-  document.getElementById('conteudo').style.display='block';
+
+  /* =========================
+     ENDEREÇO
+  ========================= */
+
+  const endContainer =
+    document.getElementById('enderecoInfo');
+
+  if(pedido){
+
+    const end=[
+      pedido.cliente_endereco,
+      pedido.cliente_numero,
+      pedido.cliente_complemento
+    ].filter(Boolean).join(', ');
+
+    const cid=[
+      pedido.cliente_cidade,
+      pedido.cliente_estado
+    ].filter(Boolean).join(' / ');
+
+    endContainer.innerHTML=`
+
+      <div class="info-row">
+        <span>Nome</span>
+        <span>${pedido.cliente_nome || '-'}</span>
+      </div>
+
+      <div class="info-row">
+        <span>Telefone</span>
+        <span>${pedido.cliente_telefone || '-'}</span>
+      </div>
+
+      <div class="info-row">
+        <span>Endereço</span>
+        <span>${end || '-'}</span>
+      </div>
+
+      <div class="info-row">
+        <span>Bairro</span>
+        <span>${pedido.cliente_bairro || '-'}</span>
+      </div>
+
+      <div class="info-row">
+        <span>Cidade/UF</span>
+        <span>${cid || '-'}</span>
+      </div>
+
+      <div class="info-row">
+        <span>CEP</span>
+        <span>${pedido.cliente_cep || '-'}</span>
+      </div>
+
+    `;
+
+  }else{
+
+    endContainer.innerHTML=
+      '<div style="color:var(--muted);font-size:13px">Endereço não disponível.</div>';
+
+  }
+
+
+  /* =========================
+     RASTREAMENTO
+  ========================= */
+
+  const statusPedido =
+    pedido
+      ? pedido.status_pedido
+      : 'aguardando_pagamento';
+
+  const codigoRastreio =
+    pedido
+      ? pedido.codigo_rastreio
+      : '';
+
+  renderTracking(
+    statusPedido,
+    codigoRastreio
+  );
+
+
+  /* =========================
+     PAGAMENTO
+  ========================= */
+
+  const pagContainer =
+    document.getElementById('pagamentoInfo');
+
+  const statusColor =
+    st==='approved' ||
+    st==='pago' ||
+    st==='enviado' ||
+    st==='entregue'
+      ? 'var(--accent)'
+      : (
+          st==='pending'
+            ? 'var(--warning)'
+            : 'var(--danger)'
+        );
+
+  const statusLabel =
+    st==='approved' ||
+    st==='pago'
+      ? 'Pago ✅'
+      : (
+          st==='pending'
+            ? 'Aguardando ⏳'
+            : (
+                st==='enviado'
+                  ? 'Enviado 🚚'
+                  : (
+                      st==='entregue'
+                        ? 'Entregue 🎉'
+                        : 'Processando'
+                    )
+              )
+        );
+
+  pagContainer.innerHTML=`
+
+    <div class="info-row">
+      <span>Forma de pagamento</span>
+      <span>Pix / Mercado Pago</span>
+    </div>
+
+    <div class="info-row">
+      <span>ID do pagamento</span>
+      <span style="font-size:11px">
+        ${paymentId || pedido?.mercado_pago_id || '---'}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span>Código do pedido</span>
+      <span style="font-size:11px">
+        ${extRef || pedido?.referencia || '---'}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span>Total</span>
+      <span>${fmt(valorTotal)}</span>
+    </div>
+
+    <div class="info-row">
+      <span>Data</span>
+      <span>
+        ${new Date().toLocaleDateString('pt-BR')}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span>Status</span>
+      <span style="color:${statusColor}">
+        ${statusLabel}
+      </span>
+    </div>
+
+  `;
+
+
+  /* =========================
+     FINALIZA CARREGAMENTO
+  ========================= */
+
+  document
+    .getElementById('loadingScreen')
+    .classList.add('hide');
+
+  document
+    .getElementById('conteudoPedido')
+    .style.display='block';
+
 }
 
+
 carregarPedido();
+
 </script>
 
 </body>
 </html>
+   
