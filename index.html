@@ -100,6 +100,204 @@ body.light{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .hint.show{display:block}
 
 #cartBadge{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#000;font-size:10px;font-weight:800;border-radius:50%;min-width:16px;height:16px;display:none;align-items:center;justify-content:center;padding:0 3px}
+
+/* JP Variedades — refinamento visual, sem alterar as funções da loja */
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.banner {
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+}
+
+.header {
+  padding: 13px 18px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+.logo h1 {
+  letter-spacing: -0.4px;
+}
+
+.search {
+  padding: 16px;
+}
+
+.search input {
+  border-radius: 14px;
+  padding: 14px 18px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.12);
+}
+
+.cats {
+  gap: 9px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.cats button {
+  padding: 10px 16px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.cats button:active {
+  transform: scale(0.97);
+}
+
+.sort-bar select {
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.sec-title {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  letter-spacing: -0.2px;
+}
+
+.grid {
+  gap: 14px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.card {
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+  border-color: var(--accent);
+}
+
+.card-img {
+  overflow: hidden;
+}
+
+.card-img img {
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img img {
+  transform: scale(1.035);
+}
+
+.badge {
+  padding: 5px 9px;
+  font-size: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.fav {
+  width: 32px;
+  height: 32px;
+}
+
+.card-info {
+  padding: 12px;
+}
+
+.card-title {
+  line-height: 1.5;
+  min-height: 34px;
+}
+
+.card-price {
+  font-size: 17px;
+  letter-spacing: -0.4px;
+}
+
+.ver {
+  padding: 10px 8px;
+  transition: filter 0.2s, transform 0.2s;
+}
+
+.ver:hover {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-icon:active {
+  transform: scale(0.94);
+}
+
+.suggestions {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+}
+
+.whatsapp-float {
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+  transition: transform 0.2s;
+}
+
+.whatsapp-float:active {
+  transform: scale(0.96);
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-info {
+    padding: 14px;
+  }
+
+  .card-price {
+    font-size: 19px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .banner-section {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-top: 22px;
+  }
+
+  .banner-carousel {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .banner-slide {
+    flex-basis: calc(50% - 10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 </style>
 </head>
 <body>
